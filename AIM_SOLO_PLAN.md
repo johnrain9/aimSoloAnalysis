@@ -48,8 +48,8 @@ CHS channel metadata observed
 
 Ingestion plan (P0)
 - Dual path
-  1) CSV export workflow from AiM RaceStudio (fastest to deliver value)
-  2) Parallel native .xrk parser (block scanner + channel registry + decoder)
+  1) CSV export workflow from AiM RaceStudio (MVP ships with CSV ingest first; unblocks trackside features)
+  2) Parallel native .xrk parser (block scanner + channel registry + decoder; R&D track, not blocking MVP)
 - Parser steps
   - Scan and index <hTAG blocks; validate lengths
   - Parse CHS blocks -> channel registry (code, name, units, rate)
@@ -57,10 +57,18 @@ Ingestion plan (P0)
   - Confirm timebase (likely Master Clk) and resample channels to time or distance grid
   - Add tag logging for unknown blocks
 
+Implementation status (as of 2026-02-05)
+- CSV ingestion: parser + RunData + lap inference + DB persistence + sample_points done (CSV path working)
+- Analytics pipeline + segment metrics implemented; API endpoints wired to DB data
+- Trackside insight rules + ranking + tests implemented
+- Current run check: CSV import works but sample 87.csv stored track as UNKNOWN and produced 0 insights
+- Remaining MVP work: fix metadata mapping for track + direction, tune insight thresholds, add derived_metrics persistence, raw array blobs, ingestion benchmark
+- XRK R&D: continue in parallel, non-blocking
+
 Data model (web app)
 - riders(id, name, notes, created_at)
 - bikes(id, rider_id, make, model, year, notes)
-- tracks(id, name, layout, gps_bounds, notes)
+- tracks(id, name, direction, layout, gps_bounds, notes)
 - sessions(id, rider_id, bike_id, track_id, date, conditions, source_file)
 - runs(id, session_id, start_time, duration, file_hash)
 - laps(id, run_id, lap_index, lap_time, valid, start_ts, end_ts)
@@ -118,5 +126,7 @@ At-home deep analysis
 - Trends tab: across sessions and tracks
 
 Notes
+- CSV exports include GPS quality + IMU fields (Nsat, PosAccuracy/SpdAccuracy, accel/gyro) that can improve confidence scoring.
+- Track identity is per track, per direction (CW/CCW).
 - No throttle/brake/RPM files currently; aim to infer via acceleration where possible.
 - Laptop local app is acceptable for now (trackside).

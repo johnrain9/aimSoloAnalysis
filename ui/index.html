@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aim Solo Trackside</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-orbit"></div>
+  <div class="bg-grid"></div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">AS</div>
+        <div class="brand-text">
+          <div class="brand-title">Aim Solo Trackside</div>
+          <div class="brand-sub">Quick coaching insights, offline</div>
+        </div>
+      </div>
+
+      <div class="selectors">
+        <label>
+          Track
+          <select id="track-select">
+            <option>HPR Full</option>
+            <option>PPIR North</option>
+            <option>Thunderhill East</option>
+          </select>
+        </label>
+        <label>
+          Direction
+          <select id="direction-select">
+            <option>CW</option>
+            <option>CCW</option>
+          </select>
+        </label>
+        <label>
+          Rider
+          <select id="rider-select">
+            <option>Maddie</option>
+            <option>Alex</option>
+            <option>Guest</option>
+          </select>
+        </label>
+        <label>
+          Bike
+          <select id="bike-select">
+            <option>Ninja 400</option>
+            <option>R3</option>
+            <option>RS 660</option>
+          </select>
+        </label>
+        <label>
+          Session
+          <select id="session-select">
+            <option>Feb 4 ? Session 3</option>
+            <option>Feb 4 ? Session 2</option>
+            <option>Feb 4 ? Session 1</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="status">
+        <span class="badge offline">Offline</span>
+        <button class="ghost" data-route="import">Import</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="screen-import" class="screen">
+        <div class="screen-head">
+          <h1>Import & Analyze</h1>
+          <p>Drop a RaceStudio CSV export to generate trackside insights in under a minute.</p>
+        </div>
+        <div class="import-grid">
+          <div class="dropzone">
+            <div class="dropzone-inner">
+              <div class="dropzone-icon">?</div>
+              <div class="dropzone-title">Drop CSV here</div>
+              <div class="dropzone-sub">or click to browse</div>
+              <button class="primary" id="analyze-now">Analyze now</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Recent Imports</h3>
+            <ul class="list">
+              <li>
+                <div>
+                  <div class="list-title">Maddie_Ninja 400_HPR Full</div>
+                  <div class="list-sub">Feb 4, 6:02 PM ? 12 laps</div>
+                </div>
+                <button class="ghost" data-route="summary">Open</button>
+              </li>
+              <li>
+                <div>
+                  <div class="list-title">Alex_R3_PPIR North</div>
+                  <div class="list-sub">Feb 4, 4:41 PM ? 9 laps</div>
+                </div>
+                <button class="ghost" data-route="summary">Open</button>
+              </li>
+              <li>
+                <div>
+                  <div class="list-title">Guest_RS660_Thunderhill East</div>
+                  <div class="list-sub">Feb 3, 2:18 PM ? 14 laps</div>
+                </div>
+                <button class="ghost" data-route="summary">Open</button>
+              </li>
+            </ul>
+            <div class="panel-foot">
+              <div class="chip">Auto-detects track direction</div>
+              <div class="chip">Manual override ready</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-summary" class="screen">
+        <div class="screen-head">
+          <h1>Run Summary</h1>
+          <p>Fast overview before diving into corner-level coaching.</p>
+        </div>
+        <div class="summary-grid">
+          <div class="card best-lap">
+            <div class="card-title">Best Lap</div>
+            <div class="big-time">1:56.42</div>
+            <div class="meta">Lap 7 ? Valid ? 0.18s gain vs median</div>
+          </div>
+          <div class="card consistency">
+            <div class="card-title">Consistency</div>
+            <div class="sparkline"></div>
+            <div class="meta">Std dev 0.42s ? 9/12 valid laps</div>
+          </div>
+          <div class="card alerts">
+            <div class="card-title">Quick Alerts</div>
+            <ul>
+              <li>Turn 1 braking early</li>
+              <li>Turn 2 line variance high</li>
+              <li>Coasting between T7?T8</li>
+            </ul>
+          </div>
+        </div>
+        <div class="lap-table">
+          <div class="lap-table-head">
+            <div>Lap</div>
+            <div>Time</div>
+            <div>Delta</div>
+            <div>Valid</div>
+            <div></div>
+          </div>
+          <div class="lap-row">
+            <div>11</div>
+            <div>1:56.92</div>
+            <div>+0.50</div>
+            <div class="valid">Yes</div>
+            <button class="ghost" data-route="compare">Compare</button>
+          </div>
+          <div class="lap-row">
+            <div>10</div>
+            <div>1:57.81</div>
+            <div>+1.39</div>
+            <div class="valid">Yes</div>
+            <button class="ghost" data-route="compare">Compare</button>
+          </div>
+          <div class="lap-row">
+            <div>9</div>
+            <div>2:01.20</div>
+            <div>+4.78</div>
+            <div class="invalid">No</div>
+            <button class="ghost" data-route="compare">Compare</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-insights" class="screen">
+        <div class="screen-head">
+          <h1>Coaching Insights</h1>
+          <p>Top fixes ranked by estimated time gain and confidence.</p>
+        </div>
+        <div class="insights-grid">
+          <div class="insight-list">
+            <article class="card insight" style="--delay: 0ms;">
+              <div class="card-head">
+                <h3>Brake 10?15m later into T1</h3>
+                <span class="badge high">High</span>
+              </div>
+              <p>Entry speed ?6 km/h vs best lap. Brake point 12m early.</p>
+              <div class="card-foot">
+                <span class="gain">+0.18s</span>
+                <button class="ghost">Why?</button>
+              </div>
+            </article>
+            <article class="card insight" style="--delay: 80ms;">
+              <div class="card-head">
+                <h3>Line inconsistent in T2</h3>
+                <span class="badge med">Med</span>
+              </div>
+              <p>Cross?track variance 1.6m vs 0.7m reference.</p>
+              <div class="card-foot">
+                <span class="gain">+0.14s</span>
+                <button class="ghost">Why?</button>
+              </div>
+            </article>
+            <article class="card insight" style="--delay: 160ms;">
+              <div class="card-head">
+                <h3>Accelerate harder between T7?T8</h3>
+                <span class="badge med">Med</span>
+              </div>
+              <p>Neutral accel for 0.9s while speed flatlines.</p>
+              <div class="card-foot">
+                <span class="gain">+0.11s</span>
+                <button class="ghost">Why?</button>
+              </div>
+            </article>
+          </div>
+          <div class="map-panel">
+            <div class="map-card">
+              <div class="map-title">Track Map</div>
+              <div class="map-canvas">
+                <div class="map-line"></div>
+                <div class="map-highlight"></div>
+              </div>
+              <div class="map-meta">Selected: Turn 1 ? HPR Full ? CW</div>
+            </div>
+            <div class="delta-panel">
+              <div class="delta-title">Delta by Distance</div>
+              <div class="delta-chart"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-compare" class="screen">
+        <div class="screen-head">
+          <h1>Lap Compare</h1>
+          <p>Overlay two laps to see time loss and corner deltas.</p>
+        </div>
+        <div class="compare-grid">
+          <div class="compare-controls">
+            <label>
+              Lap A
+              <select>
+                <option>Lap 11 ? 1:56.92</option>
+                <option>Lap 7 ? 1:56.42 (Best)</option>
+                <option>Lap 10 ? 1:57.81</option>
+              </select>
+            </label>
+            <label>
+              Lap B
+              <select>
+                <option>Lap 7 ? 1:56.42 (Best)</option>
+                <option>Lap 11 ? 1:56.92</option>
+                <option>Lap 10 ? 1:57.81</option>
+              </select>
+            </label>
+            <div class="chip">Alignment: Start/Finish</div>
+          </div>
+          <div class="compare-map">
+            <div class="map-canvas big">
+              <div class="map-line"></div>
+              <div class="map-line alt"></div>
+            </div>
+            <div class="legend">
+              <span class="dot a"></span> Lap A
+              <span class="dot b"></span> Lap B
+            </div>
+          </div>
+          <div class="compare-plots">
+            <div class="plot">
+              <div class="plot-title">Speed vs Distance</div>
+              <div class="plot-canvas"></div>
+            </div>
+            <div class="plot">
+              <div class="plot-title">Delta Time</div>
+              <div class="plot-canvas"></div>
+            </div>
+          </div>
+          <div class="compare-table">
+            <div class="table-head">
+              <div>Corner</div>
+              <div>Entry</div>
+              <div>Min</div>
+              <div>Exit</div>
+              <div>Delta</div>
+            </div>
+            <div class="table-row">
+              <div>T1</div>
+              <div>102</div>
+              <div>61</div>
+              <div>98</div>
+              <div class="delta">+0.18s</div>
+            </div>
+            <div class="table-row">
+              <div>T2</div>
+              <div>94</div>
+              <div>58</div>
+              <div>90</div>
+              <div class="delta">+0.14s</div>
+            </div>
+            <div class="table-row">
+              <div>T7</div>
+              <div>110</div>
+              <div>72</div>
+              <div>108</div>
+              <div class="delta">+0.11s</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>Trackside mode ? CSV ingest MVP</div>
+      <div class="footer-actions">
+        <button class="ghost" data-route="summary">Summary</button>
+        <button class="ghost" data-route="insights">Insights</button>
+        <button class="ghost" data-route="compare">Compare</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+Progress summary for AiM Solo 2 .xrk parsing (Feb 5, 2026)
+
+Context
+- Task: propose reliable parsing approach, identify likely tag meanings, map channels/timebases. Sample file: C:\Users\Paul\OneDrive\aimSolo\Maddie_Ninja 400_HPR Full_Generic testing_a_0151.xrk (size 2,163,590 bytes).
+- User provided: block header 12 bytes: 5-byte tag, 1-byte flags, 4-byte length LE, 1-byte version, 1-byte '>'. Trailer: "<TAG" + 2-byte length (user claim). Likely repeated tags <hCNF, <hCHS, <hCDE, <hGPS, <hLAP, <hTRK.
+
+Commands run (with user approval; outside sandbox because file is outside workspace)
+1) Scanned file for printable tags starting with '<'. Found many tags; first few at offsets: <hCNF 0, <hCHS 12, <hCDE 144, <hRCR 3338, <hVEH 3359, <hCMP 3380, <hVTY 3401, <hNDV 3422, <hRAC 3443, <RACM 3456, <hVET 3464, <hSRC 3485, <hHWN 3633, <HWNF 3674, <hTRK 3708, <TRK 3816, <hPDL 3824, <PDLT 3854, <hTMD 3862, <hTMT 3893, <hODO 3922, <hGPS 4387, etc. Later random-looking tags appear in sample scan (likely in data).
+2) Implemented sequential block parser using assumed header (5 tag + flags + len + ver + '>') and trailer guess. Results:
+- Parsed 12,456 blocks; 1 parse fail. First blocks:
+  (0, <hCNF, flags 0, len 3318, ver 1)
+  (3338, <hRCR, flags 0, len 1, ver 1)
+  (3359, <hVEH, flags 0, len 1, ver 1)
+  (3380, <hCMP, flags 0, len 1, ver 1)
+  (3401, <hVTY, flags 0, len 1, ver 1)
+  (3422, <hNDV, flags 0, len 1, ver 1)
+  (3443, <hRAC, flags 77, len 1, ver 1)
+  (3464, <hVET, flags 0, len 1, ver 1)
+  (3485, <hSRC, flags 0, len 128, ver 1)
+  (3633, <hHWN, flags 70, len 29, ver 1)
+  (3682, <hRAC, flags 77, len 6, ver 1)
+  (3708, <hTRK, flags 32, len 96, ver 2)
+  (3824, <hPDL, flags 84, len 18, ver 1)
+  (3862, <hTMD, flags 0, len 11, ver 1)
+  (3893, <hTMT, flags 0, len 9, ver 1)
+- Tag counts: <hGPS appears 12,427 times (dominant). <hLAP 4 times. <hCNF 2, <hRCR 2, <hVEH 2, <hCMP 2, <hVTY 2, <hRAC 2, <hTRK 2, <hPDL 2, <hODO 2, others singletons.
+
+Trailer structure observation
+- Trailer is 8 bytes: 1 byte '<', 3-4 bytes tag fragment, 2 bytes, 1 byte '>'. Observed examples:
+  For <hCNF len 3318: trailer bytes b'<CNF\x00C\xce>' hex 3c 43 4e 46 00 43 ce 3e.
+  For <hRCR len 1: trailer bytes b'<RCR\x00\x00\x00>' hex 3c 52 43 52 00 00 00 3e.
+  For <hRAC len 1: trailer bytes b'<RACM\x00\x00>' hex 3c 52 41 43 4d 00 00 3e.
+- This suggests trailer is: '<' + 3 or 4 tag chars (no leading 'h') + 2-byte CRC? + '>'
+  For CNF trailer: after '<CNF' comes 0x00 then 0xCE43 little-endian. So 5th byte might be flags or type (often 0x00 or other). Last two bytes look like CRC16. For RCR: bytes 00 00 00 => 5th byte 0, CRC 0. For RAC: '<RACM' then CRC=0.
+- So trailer likely 8 bytes: 1 '<', 3 or 4 tag chars (no 'h' prefix), 1 byte maybe flags, 2-byte CRC16 (little-endian), final '>'. The earlier assumption "2-byte length" seems incorrect based on these samples.
+- Many CRC values nonzero: scanned trailers, CRC field (bytes 5-6) nonzero in 12,448 blocks. CRC likely computed over header+payload (unknown polynomial).
+
+Nested structure in hCNF
+- hCNF payload (length 3318) appears to contain nested blocks using the same header/trailer format.
+- Sequential parse inside hCNF found 42 blocks: 21 x <hCHS (length 112) and 21 x <hCDE (length 6), alternating. So each channel has a CHS (channel spec) and CDE (channel descriptor entry) block.
+- The nested parse for hCNF worked cleanly, implying hCNF is a container for channel definitions.
+
+Pending investigation (user interrupted)
+- Attempted to inspect payload of first hCHS and hCDE to infer field meanings, but user aborted before command executed. Need to re-run to parse strings in hCHS payload and interpret hCDE payload length 6 bytes.
+
+Likely tag meanings (hypotheses to refine with payload inspection)
+- hCNF: container of channel configuration blocks (hCHS/hCDE).
+- hCHS: channel specification (name, unit, sample rate, scaling, offset, data type, source id). 112 bytes.
+- hCDE: channel descriptor entry (id mapping, timebase index, bit width, source association). 6 bytes.
+- hGPS: high-frequency sample blocks (GPS data points) – counts match 12k blocks.
+- hLAP: lap summary/markers; 4 blocks suggests laps.
+- hTRK/<TRK: track info (track name/coords). hTRK length 96, version 2.
+- hPDL/<PDLT: pedal? or profile? hPDL length 18. PDLT maybe sub-block.
+- hTMD/hTMT: time metadata, date/time stamp (len 11 and 9).
+- hODO: odometer or distance summary (len  ? from blocks).
+- hRCR/hVEH/hCMP/hVTY/hNDV/hVET/hSRC/hHWN: recorder, vehicle, computer, vehicle type, device? vendor? source? hardware name? to verify by payload strings.
+
+Recommended next steps for new AI
+1) Re-run payload inspection for hCHS and hCDE (first blocks in hCNF). Look for ASCII strings (channel names, units) and integer fields. Use python to dump hex and printable strings.
+2) Identify data types in hCHS: look for sample rate (maybe float or int), scaling, offset. Check for little-endian float patterns.
+3) Identify mapping between hCDE and later data blocks (hGPS, hLAP). Possibly CDE includes channel id index that the data blocks reference.
+4) Inspect a few hGPS blocks to find payload size and content. Determine record schema: maybe multiple channel samples packed. Use hCDE to map bytes to channels.
+5) Investigate CRC16: compute CRC16 (common polynomials: CRC-16/IBM, CCITT-FALSE) over header+payload and compare with trailer to confirm.
+6) Build parsing plan: stream parse top-level blocks; for hCNF parse nested CHS/CDE; store channel table; then parse hGPS/hLAP/hTRK data blocks using channel table; map timebase from channel definitions (e.g., sample period, start time from hTMD/hTMT).
+
+Notes on safe parsing
+- Use scan for '<' headers and validate with trailing '>' and plausible length to resync.
+- Treat trailers as 8 bytes and verify CRC if possible; if CRC fails, resync by scanning next '<'.
+
+File locations referenced
+- Sample file: C:\Users\Paul\OneDrive\aimSolo\Maddie_Ninja 400_HPR Full_Generic testing_a_0151.xrk (outside workspace).
+
+Update (Feb 5, 2026)
+
+Context change
+- The sample file used for resumed analysis is now at:
+  C:\Users\Paul\ai\Maddie_Ninja 400_HPR Full_Generic testing_a_0151.xrk
+
+Parsing status (this file)
+- Top-level blocks parsed: 302.
+- Tag counts: <hGPS 285, <hCNF 2, <hRAC 2, and singletons of <hRCR, <hVEH, <hCMP, <hVTY, <hNDV, <hVET, <hSRC, <hHWN, <hTRK, <hPDL, <hTMD, <hTMT.
+- This differs from the earlier block count in this report; the earlier scan appears to have been from a different run or file.
+
+hCNF nested blocks (this file)
+- hCNF contains 21 pairs of <hCHS (len 112) and <hCDE (len 6), alternating.
+- The pairing is consistent: CHS then CDE for each channel.
+
+Observed hCHS layout (112 bytes, inferred from multiple channels)
+- 0x00 u32 channel_id
+- 0x04 u32 timebase/index (often 0x00010000, 0x00020000, etc.)
+- 0x08 u32 often 0
+- 0x0C u32 unknown (varies; not a float)
+- 0x10 u32 data_size? (often 4, sometimes 1)
+- 0x14 u32 type/unit id? (values like 3, 12, 20, 24, 31...)
+- 0x18 char[8] short name (null-terminated)
+- 0x20 char[32] long name (null-terminated)
+- 0x40 u32 possible sample rate (MClk has 100000)
+- 0x44 u32 unknown (often 0)
+- 0x48 u32 unknown (often 4)
+- 0x4C char[4] unit string (often "@AIM")
+- 0x50 u32 unit code? (varies)
+- 0x54 u32 flag? (often 1)
+- 0x58 u32 flag? (often 0 or 2)
+- 0x5C u32 flag? (often 2)
+- 0x60 u32 flag? (often 0)
+- 0x64 f32 scale (1.0 across inspected channels)
+- 0x68 f32 offset (0.0 across inspected channels)
+- 0x6C f32 invalid marker (1e30 across inspected channels)
+
+Observed hCDE layout (6 bytes)
+- 0x00 u16 channel_id
+- 0x02 u32 unknown (likely mapping token or checksum)
+
+hGPS payloads (this file)
+- Two payload lengths seen: 56 bytes and 36 bytes.
+- 56-byte records look like 14 x i32 fields with a first field incrementing by ~40 between records (suggesting 25 Hz ticks).
+- 36-byte records contain ASCII "iGPS" at offset 4, likely a metadata/marker record.
+
+Open questions / next steps
+1) Decode hGPS 56-byte record fields (lat/lon/time/speed/heading candidates).
+2) Map hCHS timebase/index (offset 0x04) to actual timebase and confirm sample rate interpretation.
+3) Verify trailer CRC16 by testing common polynomials on header+payload.
