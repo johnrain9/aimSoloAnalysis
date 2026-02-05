@@ -33,6 +33,10 @@ def infer_laps(parse: CsvParseResult) -> List[LapBoundary]:
     if beacon_idx is not None:
         return _laps_from_beacons(parse, time_idx, beacon_idx)
 
+    metadata_laps = _laps_from_metadata_beacons(parse)
+    if metadata_laps:
+        return metadata_laps
+
     distance_idx = _find_column(parse, "Distance on GPS Speed")
     if distance_idx is not None:
         laps = _laps_from_distance_resets(parse, time_idx, distance_idx)
@@ -103,11 +107,44 @@ def _boundaries_to_laps(boundaries: List[float]) -> List[LapBoundary]:
     return laps
 
 
+def _laps_from_metadata_beacons(parse: CsvParseResult) -> List[LapBoundary]:
+    value = _metadata_value(parse, "Beacon Markers")
+    if not value:
+        return []
+    boundaries = _parse_float_list(value)
+    if not boundaries:
+        return []
+    return _boundaries_to_laps(boundaries)
+
+
 def _find_column(parse: CsvParseResult, name: str) -> Optional[int]:
     if name in parse.column_index:
         return parse.column_index[name]
     lowered = {key.lower(): idx for key, idx in parse.column_index.items()}
     return lowered.get(name.lower())
+
+
+def _metadata_value(parse: CsvParseResult, key: str) -> Optional[str]:
+    if key in parse.metadata:
+        return parse.metadata.get(key)
+    lowered = {k.lower(): k for k in parse.metadata}
+    match = lowered.get(key.lower())
+    if match:
+        return parse.metadata.get(match)
+    return None
+
+
+def _parse_float_list(value: str) -> List[float]:
+    if value is None:
+        return []
+    parts = [part.strip() for part in value.split(",") if part.strip()]
+    numbers: List[float] = []
+    for part in parts:
+        try:
+            numbers.append(float(part))
+        except ValueError:
+            continue
+    return numbers
 
 
 def _laps_from_gps_crossing(

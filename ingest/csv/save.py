@@ -38,7 +38,6 @@ def save_to_db(
     db_path: str,
     source_file: Optional[str] = None,
     run_index: int = 1,
-    store_channel_series: bool = True,
 ) -> SaveResult:
     """Persist a CsvParseResult or RunData into SQLite."""
     if isinstance(data, CsvParseResult):
@@ -48,6 +47,11 @@ def save_to_db(
         channel_units = _channel_units_from_parse(parse)
         heading = _column_values(parse, "GPS Heading")
         accuracy = _column_values(parse, "GPS Accuracy")
+        accuracy_unit = _column_unit(parse, "GPS Accuracy")
+        if accuracy is None:
+            accuracy = _column_values(parse, "GPS PosAccuracy")
+            accuracy_unit = _column_unit(parse, "GPS PosAccuracy")
+        accuracy = _normalize_gps_accuracy(accuracy, accuracy_unit)
     elif isinstance(data, RunData):
         parse = None
         run_data = data
@@ -66,6 +70,10 @@ def save_to_db(
         track_name = "UNKNOWN TRACK"
 
     track_direction = _infer_track_direction(metadata, track_name)
+    if track_direction == "UNKNOWN":
+        inferred = _infer_direction_from_run_data(run_data)
+        if inferred:
+            track_direction = inferred
     session_fields = _session_fields(metadata, source_file, track_direction)
     rider_name = _first_metadata_value(metadata, ["Racer", "Driver", "Rider"])
     bike_name = _first_metadata_value(metadata, ["Vehicle", "Bike"])
@@ -108,8 +116,7 @@ def save_to_db(
         )
         lap_count = _persist_laps(conn, run_id, laps)
 
-        if store_channel_series:
-            _persist_channel_series(conn, run_id, run_data, channel_units)
+        _persist_channel_blobs_stub(run_id, run_data, channel_units)
 
     return SaveResult(
         session_id=session_id,
@@ -223,22 +230,26 @@ def _column_values(
     return [row[idx] for row in parse.rows]
 
 
-def _persist_channel_series(
-    conn,
+def _column_unit(parse: CsvParseResult, name: str) -> Optional[str]:
+    idx = parse.column_index.get(name)
+    if idx is None:
+        lowered = {key.lower(): idx for key, idx in parse.column_index.items()}
+        idx = lowered.get(name.lower())
+    if idx is None:
+        return None
+    if not parse.units or idx >= len(parse.units):
+        return None
+    unit = parse.units[idx]
+    return unit if unit != "" else None
+
+
+def _persist_channel_blobs_stub(
     run_id: int,
     run_data: RunData,
     channel_units: Dict[str, Optional[str]],
 ) -> None:
-    for name, samples in run_data.channels.items():
-        unit = channel_units.get(name)
-        db.upsert_channel_series(
-            conn,
-            run_id=run_id,
-            name=name,
-            unit=unit,
-            source_name=name,
-            samples=samples,
-        )
+    _ = run_id, run_data, channel_units
+    # Placeholder for future compressed array storage.
 
 
 def _is_core_field(name: str) -> bool:
@@ -247,6 +258,9 @@ def _is_core_field(name: str) -> bool:
 
 def _track_name(metadata: Dict[str, str]) -> Optional[str]:
     track_name = _first_metadata_value(metadata, ["Track", "Track Name", "Circuit"])
+    if track_name:
+        return track_name
+    track_name = _first_metadata_value(metadata, ["Session"])
     if track_name:
         return track_name
     identity = _first_metadata_value(metadata, ["Track Identity"])
@@ -352,3 +366,120 @@ def _mps_to_kmh(value: Optional[float]) -> Optional[float]:
     if value is None:
         return None
     return value * 3.6
+
+
+def _normalize_gps_accuracy(
+    values: Optional[Sequence[Optional[float]]],
+    unit: Optional[str],
+) -> Optional[Sequence[Optional[float]]]:
+    if values is None:
+        return None
+    if unit and unit.strip().lower() == "mm":
+        return [None if v is None else v / 1000.0 for v in values]
+    return values
+
+def _infer_direction_from_run_data(run_data: RunData) -> Optional[str]:
+    lat = run_data.lat
+    lon = run_data.lon
+    distance = run_data.distance_m
+    if not lat or not lon:
+        return None
+    points = _contiguous_points(lat, lon, distance)
+    if len(points) < 3:
+        return None
+    headings, distances = _headings_and_distances(points)
+    if not headings or not distances:
+        return None
+    curvature = _curvature_from_heading(distances, headings)
+    if not curvature:
+        return None
+    mean = sum(curvature) / len(curvature)
+    if mean > 0:
+        return "CCW"
+    if mean < 0:
+        return "CW"
+    return None
+
+
+def _contiguous_points(lat, lon, distance):
+    points = []
+    last_dist = None
+    dist_series = distance if distance is not None else [None] * len(lat)
+    for la, lo, dist in zip(lat, lon, dist_series):
+        if la is None or lo is None:
+            continue
+        if distance is not None:
+            if dist is None:
+                continue
+            if last_dist is not None and dist < last_dist:
+                break
+            last_dist = dist
+        points.append((float(la), float(lo)))
+    return points
+
+
+def _headings_and_distances(points):
+    import math
+
+    headings = []
+    distances = []
+    for idx in range(1, len(points)):
+        lat1, lon1 = points[idx - 1]
+        lat2, lon2 = points[idx]
+        d = _haversine_m(lat1, lon1, lat2, lon2)
+        if d <= 0:
+            continue
+        heading = _bearing_rad(lat1, lon1, lat2, lon2)
+        headings.append(heading)
+        distances.append(d)
+    return headings, distances
+
+
+def _curvature_from_heading(distances, headings):
+    import math
+
+    if len(headings) < 2:
+        return []
+    curvature = []
+    last_heading = headings[0]
+    acc_dist = 0.0
+    for idx in range(1, len(headings)):
+        dh = headings[idx] - last_heading
+        if dh > math.pi:
+            dh -= 2 * math.pi
+        elif dh < -math.pi:
+            dh += 2 * math.pi
+        ds = distances[idx] if idx < len(distances) else distances[-1]
+        if ds > 0:
+            curvature.append(dh / ds)
+        last_heading = headings[idx]
+        acc_dist += ds
+        if acc_dist > 2000.0:
+            break
+    return curvature
+
+
+def _bearing_rad(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    import math
+
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dlon = math.radians(lon2 - lon1)
+    y = math.sin(dlon) * math.cos(phi2)
+    x = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(dlon)
+    return math.atan2(y, x)
+
+
+def _haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    import math
+
+    r = 6371000.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+
+    a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
+    c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
+    return r * c
+

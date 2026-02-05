@@ -47,6 +47,28 @@ LAT_ACC_NAMES = (
     "ay",
 )
 
+GPS_RADIUS_NAMES = (
+    "GPS Radius",
+    "GPSRadius",
+    "gps_radius_m",
+    "gps_radius",
+    "Radius",
+)
+
+ROLL_RATE_NAMES = (
+    "RollRate",
+    "Roll Rate",
+    "roll_rate",
+)
+
+GPS_SPEED_ACCURACY_NAMES = (
+    "GPS SpdAccuracy",
+    "GPS Speed Accuracy",
+    "GPSSpdAccuracy",
+    "gps_speed_accuracy_mps",
+    "gps_spd_accuracy_mps",
+)
+
 BRAKE_NAMES = (
     "Brake",
     "Brake Pressure",
@@ -71,6 +93,8 @@ GPS_ACCURACY_NAMES = (
     "gps_accuracy_m",
     "GPS Accuracy",
     "GPSAccuracy",
+    "GPS PosAccuracy",
+    "GPS Pos Accuracy",
 )
 
 SATELLITES_NAMES = (
@@ -98,9 +122,12 @@ class LapSeries:
     inline_acc_g: List[Optional[float]]
     yaw_rate: List[Optional[float]]
     lat_acc_g: List[Optional[float]]
+    gps_radius_m: List[Optional[float]]
+    roll_rate_dps: List[Optional[float]]
     brake: List[Optional[float]]
     throttle: List[Optional[float]]
     gps_accuracy_m: List[Optional[float]]
+    gps_speed_accuracy_mps: List[Optional[float]]
     satellites: List[Optional[float]]
     line_error_m: List[Optional[float]]
     lat: List[Optional[float]]
@@ -170,6 +197,12 @@ def compute_segment_metrics(
             if apex_time is not None:
                 pickup_time_s = max(0.0, pickup_time - apex_time)
 
+        decel = _entry_decel_metrics(lap, entry_dist_m, apex_dist_m)
+        decel_avg_g = decel.get("decel_avg_g")
+        decel_time_s = decel.get("decel_time_s")
+        decel_dist_m = decel.get("decel_dist_m")
+        decel_g_per_10m = decel.get("decel_g_per_10m")
+
         neutral = _neutral_throttle_window(lap, seg_indices)
         neutral_throttle_s = neutral.get("neutral_throttle_s")
         neutral_throttle_dist_m = neutral.get("neutral_throttle_dist_m")
@@ -181,9 +214,12 @@ def compute_segment_metrics(
         inline_acc_var = _variance(_slice_values(lap.inline_acc_g, seg_indices))
 
         gps_accuracy = _mean(_slice_values(lap.gps_accuracy_m, seg_indices))
+        gps_speed_accuracy = _mean(_slice_values(lap.gps_speed_accuracy_mps, seg_indices))
         satellites = _mean(_slice_values(lap.satellites, seg_indices))
 
         inline_acc_rise = _inline_acc_rise(lap, apex_dist_m, seg_end, seg_start)
+
+        lean_proxy_deg, lean_quality = _lean_proxy(lap, seg_indices)
 
         using_speed_proxy = _using_speed_proxy(lap)
         imu_present = _imu_present(lap)
@@ -208,6 +244,10 @@ def compute_segment_metrics(
             "neutral_throttle_s": neutral_throttle_s,
             "neutral_throttle_dist_m": neutral_throttle_dist_m,
             "neutral_speed_delta_kmh": neutral_speed_delta_kmh,
+            "decel_avg_g": decel_avg_g,
+            "decel_time_s": decel_time_s,
+            "decel_dist_m": decel_dist_m,
+            "decel_g_per_10m": decel_g_per_10m,
             "line_stddev_m": line_stddev,
             "yaw_rms": yaw_rms,
             "inline_acc_rise_g": inline_acc_rise,
@@ -215,11 +255,14 @@ def compute_segment_metrics(
             "using_brake_proxy": using_brake_proxy,
             "using_throttle_proxy": using_throttle_proxy,
             "gps_accuracy_m": gps_accuracy,
+            "gps_speed_accuracy_mps": gps_speed_accuracy,
             "satellites": satellites,
             "imu_present": imu_present,
             "imu_variance_low": imu_variance_low,
             "inline_acc_var": inline_acc_var,
             "speed_noise_sigma_kmh": speed_noise_sigma_kmh,
+            "lean_proxy_deg": lean_proxy_deg,
+            "lean_quality": lean_quality,
         }
         results[seg_id] = metrics
 
@@ -236,9 +279,12 @@ def _lap_series(run_data: RunData, window: LapWindow) -> LapSeries:
             inline_acc_g=[],
             yaw_rate=[],
             lat_acc_g=[],
+            gps_radius_m=[],
+            roll_rate_dps=[],
             brake=[],
             throttle=[],
             gps_accuracy_m=[],
+            gps_speed_accuracy_mps=[],
             satellites=[],
             line_error_m=[],
             lat=[],
@@ -256,9 +302,12 @@ def _lap_series(run_data: RunData, window: LapWindow) -> LapSeries:
             inline_acc_g=[],
             yaw_rate=[],
             lat_acc_g=[],
+            gps_radius_m=[],
+            roll_rate_dps=[],
             brake=[],
             throttle=[],
             gps_accuracy_m=[],
+            gps_speed_accuracy_mps=[],
             satellites=[],
             line_error_m=[],
             lat=[],
@@ -270,9 +319,12 @@ def _lap_series(run_data: RunData, window: LapWindow) -> LapSeries:
     inline_acc_raw = _find_channel(run_data, INLINE_ACC_NAMES)
     yaw_rate = _find_channel(run_data, YAW_RATE_NAMES)
     lat_acc = _find_channel(run_data, LAT_ACC_NAMES)
+    gps_radius = _find_channel(run_data, GPS_RADIUS_NAMES)
+    roll_rate = _find_channel(run_data, ROLL_RATE_NAMES)
     brake = _find_channel(run_data, BRAKE_NAMES)
     throttle = _find_channel(run_data, THROTTLE_NAMES)
     gps_accuracy = _find_channel(run_data, GPS_ACCURACY_NAMES)
+    gps_speed_accuracy = _find_channel(run_data, GPS_SPEED_ACCURACY_NAMES)
     satellites = _find_channel(run_data, SATELLITES_NAMES)
     line_error = _find_channel(run_data, LINE_ERROR_NAMES)
 
@@ -282,9 +334,12 @@ def _lap_series(run_data: RunData, window: LapWindow) -> LapSeries:
     inline_acc_values: List[Optional[float]] = []
     yaw_values: List[Optional[float]] = []
     lat_acc_values: List[Optional[float]] = []
+    gps_radius_values: List[Optional[float]] = []
+    roll_rate_values: List[Optional[float]] = []
     brake_values: List[Optional[float]] = []
     throttle_values: List[Optional[float]] = []
     gps_accuracy_values: List[Optional[float]] = []
+    gps_speed_accuracy_values: List[Optional[float]] = []
     satellites_values: List[Optional[float]] = []
     line_error_values: List[Optional[float]] = []
     lat_values: List[Optional[float]] = []
@@ -312,9 +367,12 @@ def _lap_series(run_data: RunData, window: LapWindow) -> LapSeries:
         inline_acc_values.append(_safe_value(inline_acc_raw, idx))
         yaw_values.append(_safe_value(yaw_rate, idx))
         lat_acc_values.append(_safe_value(lat_acc, idx))
+        gps_radius_values.append(_safe_value(gps_radius, idx))
+        roll_rate_values.append(_safe_value(roll_rate, idx))
         brake_values.append(_safe_value(brake, idx))
         throttle_values.append(_safe_value(throttle, idx))
         gps_accuracy_values.append(_safe_value(gps_accuracy, idx))
+        gps_speed_accuracy_values.append(_safe_value(gps_speed_accuracy, idx))
         satellites_values.append(_safe_value(satellites, idx))
         line_error_values.append(_safe_value(line_error, idx))
         lat_values.append(_safe_value(run_data.lat, idx))
@@ -340,9 +398,12 @@ def _lap_series(run_data: RunData, window: LapWindow) -> LapSeries:
         inline_acc_g=inline_acc_g,
         yaw_rate=yaw_values,
         lat_acc_g=lat_acc_g,
+        gps_radius_m=gps_radius_values,
+        roll_rate_dps=roll_rate_values,
         brake=brake_values,
         throttle=throttle_values,
         gps_accuracy_m=gps_accuracy_values,
+        gps_speed_accuracy_mps=gps_speed_accuracy_values,
         satellites=satellites_values,
         line_error_m=line_error_values,
         lat=lat_values,
@@ -642,6 +703,130 @@ def _inline_acc_rise(lap: LapSeries, apex_m: float, end_m: float, start_m: float
     return after_mean - before_mean
 
 
+def _entry_decel_metrics(
+    lap: LapSeries,
+    entry_dist_m: float,
+    apex_dist_m: float,
+) -> Dict[str, Optional[float]]:
+    if entry_dist_m >= apex_dist_m:
+        return {
+            "decel_avg_g": None,
+            "decel_time_s": None,
+            "decel_dist_m": None,
+            "decel_g_per_10m": None,
+        }
+
+    v_entry = _interp_one(lap.distance_m, lap.speed_mps, entry_dist_m)
+    v_apex = _interp_one(lap.distance_m, lap.speed_mps, apex_dist_m)
+    t_entry = _interp_one(lap.distance_m, lap.time_s, entry_dist_m)
+    t_apex = _interp_one(lap.distance_m, lap.time_s, apex_dist_m)
+    if v_entry is None or v_apex is None or t_entry is None or t_apex is None:
+        return {
+            "decel_avg_g": None,
+            "decel_time_s": None,
+            "decel_dist_m": None,
+            "decel_g_per_10m": None,
+        }
+
+    dt = t_apex - t_entry
+    if dt <= 0:
+        return {
+            "decel_avg_g": None,
+            "decel_time_s": None,
+            "decel_dist_m": None,
+            "decel_g_per_10m": None,
+        }
+
+    dv = v_apex - v_entry
+    decel_avg_g = (dv / dt) / _G_MPS2
+    decel_dist_m = max(0.0, apex_dist_m - entry_dist_m)
+    decel_g_per_10m = abs(decel_avg_g) * (10.0 / max(1.0, decel_dist_m))
+
+    return {
+        "decel_avg_g": decel_avg_g,
+        "decel_time_s": dt,
+        "decel_dist_m": decel_dist_m,
+        "decel_g_per_10m": decel_g_per_10m,
+    }
+
+
+def _lean_proxy(
+    lap: LapSeries,
+    indices: Sequence[int],
+) -> Tuple[Optional[float], Optional[str]]:
+    speed_vals = _slice_values(lap.speed_mps, indices)
+    if not speed_vals:
+        return None, "bad"
+    max_speed = max(speed_vals)
+    if max_speed < 8.0:
+        return None, "bad"
+
+    lat_acc_vals = _slice_values(lap.lat_acc_g, indices)
+    max_lat_acc = max([abs(v) for v in lat_acc_vals], default=0.0)
+
+    imu_lean_vals = [
+        math.degrees(math.atan(abs(v)))
+        for v in lat_acc_vals
+        if v is not None
+    ]
+
+    gps_lean_vals: List[float] = []
+    for idx in indices:
+        if idx >= len(lap.speed_mps) or idx >= len(lap.gps_radius_m):
+            continue
+        v = lap.speed_mps[idx]
+        r = lap.gps_radius_m[idx]
+        if v is None or r is None:
+            continue
+        if v < 8.0:
+            continue
+        r = max(15.0, abs(r))
+        a_lat = (v * v) / r
+        lean = math.degrees(math.atan(a_lat / _G_MPS2))
+        gps_lean_vals.append(lean)
+
+    lean_imu = _median(imu_lean_vals)
+    lean_gps = _median(gps_lean_vals)
+
+    roll_rate_vals = _slice_values(lap.roll_rate_dps, indices)
+    roll_rate_max = max([abs(v) for v in roll_rate_vals], default=0.0)
+    if roll_rate_max > 150.0:
+        return None, "bad"
+
+    gps_accuracy = _mean(_slice_values(lap.gps_accuracy_m, indices))
+    gps_speed_accuracy = _mean(_slice_values(lap.gps_speed_accuracy_mps, indices))
+
+    valid_imu = lean_imu is not None and max_lat_acc >= 0.2
+    valid_gps = lean_gps is not None and (gps_accuracy is None or gps_accuracy <= 2.5)
+
+    if not valid_imu and not valid_gps:
+        return None, "bad"
+
+    if valid_imu and valid_gps:
+        diff = 0.0
+        if lean_imu and lean_gps and max(lean_imu, lean_gps) > 0:
+            diff = abs(lean_imu - lean_gps) / max(lean_imu, lean_gps)
+        if diff > 0.35:
+            return None, "bad"
+        quality = "good"
+        if diff > 0.2:
+            quality = "warn"
+        if gps_accuracy is not None and gps_accuracy > 1.5:
+            quality = "warn"
+        if gps_speed_accuracy is not None and gps_speed_accuracy > 0.7:
+            quality = "warn"
+        lean_proxy = 0.6 * lean_imu + 0.4 * lean_gps
+        return lean_proxy, quality
+
+    if valid_imu:
+        return lean_imu, "warn"
+
+    if valid_gps:
+        return lean_gps, "warn"
+
+    return None, "bad"
+
+
 def _first_sustained(
     lap: LapSeries,
     indices: Sequence[int],
@@ -823,6 +1008,12 @@ def _mean(values: Sequence[float]) -> Optional[float]:
     if not values:
         return None
     return float(statistics.fmean(values))
+
+
+def _median(values: Sequence[float]) -> Optional[float]:
+    if not values:
+        return None
+    return float(statistics.median(values))
 
 
 def _stddev(values: Sequence[float]) -> Optional[float]:

@@ -4,12 +4,18 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from analytics.reference import LapCandidate, select_reference_laps
+from analytics.reference import LapCandidate, select_reference_laps, filter_valid_laps
 from analytics.segments import detect_segments
-from analytics.trackside.pipeline import generate_trackside_insights
+from analytics.trackside.pipeline import (
+    generate_trackside_insights,
+    generate_trackside_map,
+    generate_compare_map,
+)
+from api.units import convert_compare_payload, convert_evidence
 from domain.run_data import RunData
 from ingest.csv.parser import parse_csv
 from ingest.csv.save import save_to_db
@@ -19,6 +25,16 @@ ANALYTICS_VERSION = "0.1.0-local"
 DB_PATH = Path(__file__).resolve().parent.parent / "aimsolo.db"
 
 app = FastAPI(title="AimSolo Local API", version=ANALYTICS_VERSION)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ImportRequest(BaseModel):
@@ -35,6 +51,8 @@ class ImportResponse(BaseModel):
     track_direction: str
     analytics_version: str
     source: str
+    rider_name: Optional[str] = None
+    bike_name: Optional[str] = None
 
 
 def _parse_session_id(session_id: str) -> Optional[int]:
@@ -71,6 +89,8 @@ def _build_error(session_id: str) -> Dict[str, Any]:
         "session_id": session_id,
         "track_direction": "",
         "analytics_version": ANALYTICS_VERSION,
+        "rider_name": None,
+        "bike_name": None,
     }
 
 
@@ -78,6 +98,8 @@ def _build_not_ready(session_id: str, meta: Optional[Dict[str, Any]], detail: st
     track_name = meta.get("track_name", "") if meta else ""
     direction = meta.get("direction", "") if meta else ""
     track_direction = meta.get("track_direction", "") if meta else ""
+    rider_name = meta.get("rider_name") if meta else None
+    bike_name = meta.get("bike_name") if meta else None
     return {
         "error": "not_ready",
         "detail": detail,
@@ -86,6 +108,8 @@ def _build_not_ready(session_id: str, meta: Optional[Dict[str, Any]], detail: st
         "direction": direction,
         "track_direction": track_direction,
         "analytics_version": ANALYTICS_VERSION,
+        "rider_name": rider_name,
+        "bike_name": bike_name,
     }
 
 
@@ -132,6 +156,28 @@ def _load_run_id(conn, session_id: int) -> Optional[int]:
         (session_id,),
     ).fetchone()
     return int(row["run_id"]) if row else None
+
+
+def _load_run_meta(conn, run_id: Optional[int]) -> Dict[str, Optional[str]]:
+    if run_id is None:
+        return {"rider_name": None, "bike_name": None}
+    row = conn.execute(
+        """
+        SELECT riders.name AS rider_name,
+               bikes.name AS bike_name
+        FROM runs
+        LEFT JOIN riders ON riders.rider_id = runs.rider_id
+        LEFT JOIN bikes ON bikes.bike_id = runs.bike_id
+        WHERE runs.run_id = ?
+        """,
+        (run_id,),
+    ).fetchone()
+    if not row:
+        return {"rider_name": None, "bike_name": None}
+    return {
+        "rider_name": row["rider_name"],
+        "bike_name": row["bike_name"],
+    }
 
 
 def _load_laps(conn, run_id: int) -> list[Dict[str, Any]]:
@@ -312,7 +358,11 @@ def _pick_reference_and_target(
         for lap in laps
         if lap["start_time_s"] is not None and lap["end_time_s"] is not None
     ]
-    selections = select_reference_laps(run_data, candidates)
+    stats = filter_valid_laps(run_data, candidates)
+    valid = [stat.lap for stat in stats if stat.is_valid]
+    if not valid:
+        valid = list(candidates)
+    selections = select_reference_laps(run_data, valid)
     reference = None
     if selections:
         key = (track_key, direction)
@@ -328,6 +378,36 @@ def _pick_reference_and_target(
         target = max(non_ref, key=lambda lap: lap["lap_index"])
 
     return reference, target
+
+
+def _filter_valid_lap_rows(
+    run_data: RunData,
+    laps: list[Dict[str, Any]],
+    *,
+    direction: str,
+    track_key: object,
+) -> list[Dict[str, Any]]:
+    candidates = [
+        LapCandidate(
+            lap_index=lap["lap_index"],
+            start_time_s=lap["start_time_s"],
+            end_time_s=lap["end_time_s"],
+            direction=direction,
+            track_id=track_key if isinstance(track_key, int) else None,
+            track_name=str(track_key) if not isinstance(track_key, int) else None,
+            lap_id=lap["lap_id"],
+            run_id=None,
+        )
+        for lap in laps
+        if lap["start_time_s"] is not None and lap["end_time_s"] is not None
+    ]
+    if not candidates:
+        return laps
+    stats = filter_valid_laps(run_data, candidates)
+    valid_ids = {stat.lap.lap_id for stat in stats if stat.is_valid and stat.lap.lap_id is not None}
+    if not valid_ids:
+        return laps
+    return [lap for lap in laps if lap["lap_id"] in valid_ids]
 
 
 def _summarize_laps(laps: list[Dict[str, Any]]) -> tuple[list[Dict[str, Any]], list[float]]:
@@ -437,6 +517,8 @@ def import_session(payload: ImportRequest) -> ImportResponse:
             LIMIT 1
             """
         ).fetchone()
+        run_id = _load_run_id(conn, int(row["session_id"])) if row else None
+        run_meta = _load_run_meta(conn, run_id)
         conn.close()
         if not row:
             raise HTTPException(status_code=404, detail="No sessions available in the database.")
@@ -451,6 +533,8 @@ def import_session(payload: ImportRequest) -> ImportResponse:
             track_direction=track_direction,
             analytics_version=ANALYTICS_VERSION,
             source="db",
+            rider_name=run_meta.get("rider_name"),
+            bike_name=run_meta.get("bike_name"),
         )
 
     path = Path(payload.file_path).expanduser()
@@ -502,6 +586,7 @@ def import_session(payload: ImportRequest) -> ImportResponse:
     track_direction = row["track_direction"] or f"{track_name} {direction}".strip()
     session_id = str(save_result.session_id)
 
+    run_meta = _load_run_meta(conn, save_result.run_id)
     return ImportResponse(
         session_id=session_id,
         track_name=track_name,
@@ -509,6 +594,8 @@ def import_session(payload: ImportRequest) -> ImportResponse:
         track_direction=track_direction,
         analytics_version=ANALYTICS_VERSION,
         source=str(path),
+        rider_name=run_meta.get("rider_name"),
+        bike_name=run_meta.get("bike_name"),
     )
 
 
@@ -527,16 +614,22 @@ def get_summary(session_id: str) -> Dict[str, Any]:
         return _build_error(session_id)
     laps = _load_laps(conn, run_id)
     run_data = _load_run_data(conn, run_id, meta["raw_metadata"])
+    track_key = meta["track_id"] if meta.get("track_id") is not None else meta.get("track_name") or "UNKNOWN_TRACK"
+    laps = _filter_valid_lap_rows(run_data, laps, direction=meta["direction"], track_key=track_key)
+    run_meta = _load_run_meta(conn, run_id)
     conn.close()
 
     if not laps:
+        meta.update(run_meta)
         return _build_not_ready(session_id, meta, "summary requires lap data")
 
     lap_list, durations = _summarize_laps(laps)
     if not durations:
+        meta.update(run_meta)
         return _build_not_ready(session_id, meta, "summary requires lap durations")
     cards = _build_summary_cards(durations)
     if not cards:
+        meta.update(run_meta)
         return _build_not_ready(session_id, meta, "summary cards not ready")
 
     for lap, payload in zip(laps, lap_list):
@@ -547,6 +640,9 @@ def get_summary(session_id: str) -> Dict[str, Any]:
         "direction": meta["direction"],
         "track_direction": meta["track_direction"],
         "analytics_version": ANALYTICS_VERSION,
+        "rider_name": run_meta.get("rider_name"),
+        "bike_name": run_meta.get("bike_name"),
+        "units": "imperial",
         "cards": cards,
         "laps": lap_list,
     }
@@ -566,6 +662,7 @@ def get_insights(session_id: str) -> Dict[str, Any]:
     if not meta or run_id is None:
         conn.close()
         return _build_error(session_id)
+    run_meta = _load_run_meta(conn, run_id)
     conn.close()
     try:
         ranked = generate_trackside_insights(str(DB_PATH), session_int)
@@ -573,19 +670,38 @@ def get_insights(session_id: str) -> Dict[str, Any]:
         ranked = []
 
     if not ranked:
+        meta.update(run_meta)
         return _build_not_ready(session_id, meta, "insights pipeline not ready")
+
+    try:
+        track_map = generate_trackside_map(str(DB_PATH), session_int)
+    except Exception:  # noqa: BLE001
+        track_map = None
 
     items = []
     for insight in ranked:
         items.append(
             {
                 "id": insight.get("rule_id"),
+                "rule_id": insight.get("rule_id"),
                 "title": insight.get("title"),
                 "confidence": insight.get("confidence"),
+                "confidence_label": insight.get("confidence_label"),
                 "gain": _format_delta(insight.get("time_gain_s")) or "",
+                "time_gain_s": insight.get("time_gain_s"),
                 "detail": insight.get("detail"),
+                "actions": insight.get("actions") or [],
+                "options": insight.get("options") or [],
+                "segment_id": insight.get("segment_id"),
+                "corner_id": insight.get("corner_id"),
+                "evidence": convert_evidence(insight.get("evidence") or {}),
+                "comparison": insight.get("comparison"),
             }
         )
+
+    if isinstance(track_map, dict):
+        track_map = dict(track_map)
+        track_map["units"] = "metric"
 
     return {
         "session_id": session_id,
@@ -593,6 +709,10 @@ def get_insights(session_id: str) -> Dict[str, Any]:
         "direction": meta["direction"],
         "track_direction": meta["track_direction"],
         "analytics_version": ANALYTICS_VERSION,
+        "rider_name": run_meta.get("rider_name"),
+        "bike_name": run_meta.get("bike_name"),
+        "units": "imperial",
+        "track_map": track_map,
         "items": items,
     }
 
@@ -612,10 +732,15 @@ def get_compare(session_id: str) -> Dict[str, Any]:
         return _build_error(session_id)
     laps = _load_laps(conn, run_id)
     run_data = _load_run_data(conn, run_id, meta["raw_metadata"])
+    track_key = meta["track_id"] if meta.get("track_id") is not None else meta.get("track_name") or "UNKNOWN_TRACK"
+    laps = _filter_valid_lap_rows(run_data, laps, direction=meta["direction"], track_key=track_key)
+    run_meta = _load_run_meta(conn, run_id)
     conn.close()
     if not laps:
+        meta.update(run_meta)
         return _build_not_ready(session_id, meta, "comparison requires laps")
     if run_data is None:
+        meta.update(run_meta)
         return _build_not_ready(session_id, meta, "comparison requires run data")
 
     reference, target = _pick_reference_and_target(
@@ -661,14 +786,18 @@ def get_compare(session_id: str) -> Dict[str, Any]:
             for _ in range(3):
                 delta_by_sector.append(_format_delta(tgt_sector - ref_sector) or "--")
         else:
+            meta.update(run_meta)
             return _build_not_ready(session_id, meta, "comparison requires segment or sector deltas")
 
-    return {
+    response = {
         "session_id": session_id,
         "track_name": meta["track_name"],
         "direction": meta["direction"],
         "track_direction": meta["track_direction"],
         "analytics_version": ANALYTICS_VERSION,
+        "rider_name": run_meta.get("rider_name"),
+        "bike_name": run_meta.get("bike_name"),
+        "units": "imperial",
         "comparison": {
             "reference_lap": reference["lap_index"],
             "target_lap": target["lap_index"],
@@ -676,3 +805,45 @@ def get_compare(session_id: str) -> Dict[str, Any]:
             "delta_by_sector": delta_by_sector if not delta_by_segment else [],
         },
     }
+    return convert_compare_payload(response)
+
+
+@app.get("/map/{session_id}")
+def get_map(
+    session_id: str,
+    lap_a: Optional[int] = Query(default=None),
+    lap_b: Optional[int] = Query(default=None),
+) -> Dict[str, Any]:
+    session_int = _parse_session_id(session_id)
+    if session_int is None or not DB_PATH.exists():
+        return _build_error(session_id)
+
+    conn = db.connect(str(DB_PATH))
+    db.init_schema(conn)
+    meta = _load_session_meta(conn, session_int)
+    run_id = _load_run_id(conn, session_int)
+    if not meta or run_id is None:
+        conn.close()
+        return _build_error(session_id)
+    laps = _load_laps(conn, run_id)
+    run_data = _load_run_data(conn, run_id, meta["raw_metadata"])
+    track_key = meta["track_id"] if meta.get("track_id") is not None else meta.get("track_name") or "UNKNOWN_TRACK"
+    laps = _filter_valid_lap_rows(run_data, laps, direction=meta["direction"], track_key=track_key)
+    conn.close()
+
+    if not laps:
+        return _build_not_ready(session_id, meta, "map requires valid laps")
+
+    reference, target = _pick_reference_and_target(run_data, laps, meta["direction"], track_key=track_key)
+    if reference is None or target is None:
+        return _build_not_ready(session_id, meta, "map requires reference and target laps")
+
+    lap_a_index = lap_a if lap_a is not None else reference["lap_index"]
+    lap_b_index = lap_b if lap_b is not None else target["lap_index"]
+
+    payload = generate_compare_map(str(DB_PATH), session_int, lap_a_index, lap_b_index)
+    if not payload:
+        return _build_not_ready(session_id, meta, "map data not ready")
+    payload["session_id"] = session_id
+    payload["units"] = "metric"
+    return payload

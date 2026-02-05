@@ -37,6 +37,14 @@
           </select>
         </label>
         <label>
+          Date
+          <select id="date-select">
+            <option>Feb 4</option>
+            <option>Feb 3</option>
+            <option>Feb 2</option>
+          </select>
+        </label>
+        <label>
           Rider
           <select id="rider-select">
             <option>Maddie</option>
@@ -80,6 +88,14 @@
               <div class="dropzone-icon">?</div>
               <div class="dropzone-title">Drop CSV here</div>
               <div class="dropzone-sub">or click to browse</div>
+              <input type="file" id="csv-file" accept=".csv" hidden />
+              <input
+                type="text"
+                id="file-path"
+                class="file-path"
+                placeholder="Optional: paste full CSV path for import"
+              />
+              <div class="dropzone-sub" id="dropzone-note">No file selected</div>
               <button class="primary" id="analyze-now">Analyze now</button>
             </div>
           </div>
@@ -216,16 +232,40 @@
           </div>
           <div class="map-panel">
             <div class="map-card">
-              <div class="map-title">Track Map</div>
-              <div class="map-canvas">
-                <div class="map-line"></div>
-                <div class="map-highlight"></div>
+              <div class="map-title">Session Context</div>
+              <div class="map-meta" id="insights-context">
+                Loading session details...
               </div>
-              <div class="map-meta">Selected: Turn 1 ? HPR Full ? CW</div>
+            </div>
+            <div class="map-card">
+              <div class="map-head">
+                <div class="map-title">Track Map</div>
+                <div class="map-actions">
+                  <button class="ghost small" data-map-action="zoom-in" data-map-target="track">+</button>
+                  <button class="ghost small" data-map-action="zoom-out" data-map-target="track">−</button>
+                  <button class="ghost small" data-map-action="reset" data-map-target="track">Reset</button>
+                </div>
+              </div>
+              <div class="map-canvas track">
+                <svg id="track-map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg>
+              </div>
+              <div class="map-meta" id="track-map-meta">Select an insight to highlight.</div>
+              <div class="map-legend" id="track-map-legend">
+                <span class="swatch reference"></span> Reference
+                <span class="swatch target"></span> Target
+              </div>
             </div>
             <div class="delta-panel">
-              <div class="delta-title">Delta by Distance</div>
-              <div class="delta-chart"></div>
+              <div class="delta-title">Where Time Is Lost</div>
+              <div class="delta-chart">
+                <div id="delta-list"></div>
+              </div>
+            </div>
+            <div class="delta-panel">
+              <div class="delta-title">Insight Summary</div>
+              <div class="delta-chart">
+                <div id="insight-summary"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -257,9 +297,16 @@
             <div class="chip">Alignment: Start/Finish</div>
           </div>
           <div class="compare-map">
-            <div class="map-canvas big">
-              <div class="map-line"></div>
-              <div class="map-line alt"></div>
+            <div class="map-head">
+              <div class="map-title">Lap Overlay</div>
+              <div class="map-actions">
+                <button class="ghost small" data-map-action="zoom-in" data-map-target="compare">+</button>
+                <button class="ghost small" data-map-action="zoom-out" data-map-target="compare">−</button>
+                <button class="ghost small" data-map-action="reset" data-map-target="compare">Reset</button>
+              </div>
+            </div>
+            <div class="map-canvas big track">
+              <svg id="compare-map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg>
             </div>
             <div class="legend">
               <span class="dot a"></span> Lap A

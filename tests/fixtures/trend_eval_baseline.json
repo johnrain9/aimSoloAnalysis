@@ -1,0 +1,2723 @@
+{
+  "config": {
+    "cluster_apex_threshold_m": 6.0,
+    "iqr_k": 1.8,
+    "line_stddev_cap_m": 6.0,
+    "min_samples": 4,
+    "related_sessions_max": 8,
+    "speed_noise_cap_kmh": 2.8,
+    "strong_min_samples": 7
+  },
+  "entries": [
+    {
+      "id": "HPR_Full_09292024-2",
+      "path": "test_data/HPR_Full_09292024/2.csv",
+      "run_id": 1,
+      "segments": {
+        "1:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 5,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T3": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 6,
+          "retention": 0.3333,
+          "trend_strength": null
+        },
+        "1:CCW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 5,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T8": {
+          "apex": 3,
+          "filtered": 3,
+          "raw": 6,
+          "retention": 0.5,
+          "trend_strength": null
+        },
+        "1:CCW:T9": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 2,
+          "retention": 0.5,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_8": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 1,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 45,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 45,
+          "kept": 7,
+          "raw": 52
+        },
+        "sample_retention": {
+          "mean": 0.1667,
+          "p50": 0.0,
+          "p90": 0.5
+        },
+        "segment_count": 14,
+        "trend_segments": 0,
+        "trend_strength": {
+          "light": 0,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-4",
+      "path": "test_data/HPR_Full_09292024/4.csv",
+      "run_id": 2,
+      "segments": {
+        "2:CW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T2": {
+          "apex": 3,
+          "filtered": 3,
+          "raw": 6,
+          "retention": 0.5,
+          "trend_strength": null
+        },
+        "2:CW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 5,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 5,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T7": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 3,
+          "retention": 0.3333,
+          "trend_strength": null
+        },
+        "2:CW:T8": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 2,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_8": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 2,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_9": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 2,
+          "retention": 0.5,
+          "trend_strength": null
+        }
+      },
+      "session_id": 2,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 38,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 38,
+          "kept": 11,
+          "raw": 49
+        },
+        "sample_retention": {
+          "mean": 0.3556,
+          "p50": 0.0,
+          "p90": 1.0
+        },
+        "segment_count": 15,
+        "trend_segments": 0,
+        "trend_strength": {
+          "light": 0,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-5",
+      "path": "test_data/HPR_Full_09292024/5.csv",
+      "run_id": 3,
+      "segments": {
+        "1:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T8": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 4,
+          "retention": 0.5,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 3,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 29,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 29,
+          "kept": 4,
+          "raw": 33
+        },
+        "sample_retention": {
+          "mean": 0.2083,
+          "p50": 0.0,
+          "p90": 0.95
+        },
+        "segment_count": 12,
+        "trend_segments": 0,
+        "trend_strength": {
+          "light": 0,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-6",
+      "path": "test_data/HPR_Full_09292024/6.csv",
+      "run_id": 4,
+      "segments": {
+        "2:CW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T2": {
+          "apex": 3,
+          "filtered": 3,
+          "raw": 3,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "2:CW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_8": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 2,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_9": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 4,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 18,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 18,
+          "kept": 6,
+          "raw": 24
+        },
+        "sample_retention": {
+          "mean": 0.3,
+          "p50": 0.0,
+          "p90": 1.0
+        },
+        "segment_count": 10,
+        "trend_segments": 0,
+        "trend_strength": {
+          "light": 0,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-7",
+      "path": "test_data/HPR_Full_09292024/7.csv",
+      "run_id": 5,
+      "segments": {
+        "1:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 7,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T2": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 7,
+          "retention": 0.1429,
+          "trend_strength": null
+        },
+        "1:CCW:T3": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 8,
+          "retention": 0.25,
+          "trend_strength": null
+        },
+        "1:CCW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 8,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 7,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 8,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 5,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T8": {
+          "apex": 4,
+          "filtered": 4,
+          "raw": 7,
+          "retention": 0.5714,
+          "trend_strength": null
+        },
+        "1:CCW:T9": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 2,
+          "retention": 0.5,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_8": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 5,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 58,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 58,
+          "kept": 9,
+          "raw": 67
+        },
+        "sample_retention": {
+          "mean": 0.1643,
+          "p50": 0.0,
+          "p90": 0.5429
+        },
+        "segment_count": 15,
+        "trend_segments": 0,
+        "trend_strength": {
+          "light": 0,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-21",
+      "path": "test_data/HPR_Full_09292024/21.csv",
+      "run_id": 6,
+      "segments": {
+        "2:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CCW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CCW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CCW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CCW:T8": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_8": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_9": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 6,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 15,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 15,
+          "kept": 2,
+          "raw": 17
+        },
+        "sample_retention": {
+          "mean": 0.2,
+          "p50": 0.0,
+          "p90": 1.0
+        },
+        "segment_count": 10,
+        "trend_segments": 0,
+        "trend_strength": {
+          "light": 0,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-22",
+      "path": "test_data/HPR_Full_09292024/22.csv",
+      "run_id": 7,
+      "segments": {
+        "2:CW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 8,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T3": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 6,
+          "retention": 0.1667,
+          "trend_strength": null
+        },
+        "2:CW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 8,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 8,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 4,
+          "retention": 0.25,
+          "trend_strength": null
+        },
+        "2:CW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 8,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T8": {
+          "apex": 3,
+          "filtered": 3,
+          "raw": 6,
+          "retention": 0.5,
+          "trend_strength": null
+        },
+        "2:CW:T9": {
+          "apex": 6,
+          "filtered": 6,
+          "raw": 8,
+          "retention": 0.75,
+          "trend_strength": "light"
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_10": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_11": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_12": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_13": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_14": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_15": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_16": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_7": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_9": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 2,
+          "retention": 0.5,
+          "trend_strength": null
+        }
+      },
+      "session_id": 7,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 62,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 62,
+          "kept": 13,
+          "raw": 75
+        },
+        "sample_retention": {
+          "mean": 0.1583,
+          "p50": 0.0,
+          "p90": 0.525
+        },
+        "segment_count": 20,
+        "trend_segments": 1,
+        "trend_strength": {
+          "light": 1,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-23",
+      "path": "test_data/HPR_Full_09292024/23.csv",
+      "run_id": 8,
+      "segments": {
+        "2:CW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T3": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 4,
+          "retention": 0.25,
+          "trend_strength": null
+        },
+        "2:CW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 3,
+          "retention": 0.3333,
+          "trend_strength": null
+        },
+        "2:CW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T8": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 4,
+          "retention": 0.25,
+          "trend_strength": null
+        },
+        "2:CW:T9": {
+          "apex": 5,
+          "filtered": 5,
+          "raw": 6,
+          "retention": 0.8333,
+          "trend_strength": "light"
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_7": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_9": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 8,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 40,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 40,
+          "kept": 10,
+          "raw": 50
+        },
+        "sample_retention": {
+          "mean": 0.2821,
+          "p50": 0.0,
+          "p90": 0.9667
+        },
+        "segment_count": 13,
+        "trend_segments": 1,
+        "trend_strength": {
+          "light": 1,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-24",
+      "path": "test_data/HPR_Full_09292024/24.csv",
+      "run_id": 9,
+      "segments": {
+        "2:CW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T3": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 4,
+          "retention": 0.25,
+          "trend_strength": null
+        },
+        "2:CW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 3,
+          "retention": 0.3333,
+          "trend_strength": null
+        },
+        "2:CW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 6,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "2:CW:T8": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 4,
+          "retention": 0.25,
+          "trend_strength": null
+        },
+        "2:CW:T9": {
+          "apex": 5,
+          "filtered": 5,
+          "raw": 6,
+          "retention": 0.8333,
+          "trend_strength": "light"
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_7": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_9": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 9,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 40,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 40,
+          "kept": 10,
+          "raw": 50
+        },
+        "sample_retention": {
+          "mean": 0.2821,
+          "p50": 0.0,
+          "p90": 0.9667
+        },
+        "segment_count": 13,
+        "trend_segments": 1,
+        "trend_strength": {
+          "light": 1,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-87",
+      "path": "test_data/HPR_Full_09292024/87.csv",
+      "run_id": 10,
+      "segments": {
+        "1:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T10": {
+          "apex": 4,
+          "filtered": 4,
+          "raw": 5,
+          "retention": 0.8,
+          "trend_strength": null
+        },
+        "1:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 5,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 5,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 5,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 5,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T8": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 5,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T9": {
+          "apex": 4,
+          "filtered": 4,
+          "raw": 4,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 10,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 34,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 1,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 0.9714,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0286,
+            "speed_noise": 0.0
+          },
+          "dropped": 35,
+          "kept": 8,
+          "raw": 43
+        },
+        "sample_retention": {
+          "mean": 0.18,
+          "p50": 0.0,
+          "p90": 0.82
+        },
+        "segment_count": 10,
+        "trend_segments": 0,
+        "trend_strength": {
+          "light": 0,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-89",
+      "path": "test_data/HPR_Full_09292024/89.csv",
+      "run_id": 11,
+      "segments": {
+        "1:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 14,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T10": {
+          "apex": 4,
+          "filtered": 4,
+          "raw": 5,
+          "retention": 0.8,
+          "trend_strength": null
+        },
+        "1:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 14,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 9,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T8": {
+          "apex": 5,
+          "filtered": 5,
+          "raw": 14,
+          "retention": 0.3571,
+          "trend_strength": null
+        },
+        "1:CCW:T9": {
+          "apex": 8,
+          "filtered": 8,
+          "raw": 9,
+          "retention": 0.8889,
+          "trend_strength": "strong"
+        },
+        "segment_11": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_7": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_8": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_9": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 2,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 11,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 108,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 1,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 0.9908,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0092,
+            "speed_noise": 0.0
+          },
+          "dropped": 109,
+          "kept": 22,
+          "raw": 131
+        },
+        "sample_retention": {
+          "mean": 0.4031,
+          "p50": 0.0,
+          "p90": 1.0
+        },
+        "segment_count": 15,
+        "trend_segments": 1,
+        "trend_strength": {
+          "light": 0,
+          "strong": 1
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-90",
+      "path": "test_data/HPR_Full_09292024/90.csv",
+      "run_id": 12,
+      "segments": {
+        "1:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 14,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T10": {
+          "apex": 4,
+          "filtered": 4,
+          "raw": 5,
+          "retention": 0.8,
+          "trend_strength": null
+        },
+        "1:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 14,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 9,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T8": {
+          "apex": 5,
+          "filtered": 5,
+          "raw": 14,
+          "retention": 0.3571,
+          "trend_strength": null
+        },
+        "1:CCW:T9": {
+          "apex": 8,
+          "filtered": 8,
+          "raw": 9,
+          "retention": 0.8889,
+          "trend_strength": "strong"
+        },
+        "segment_11": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_7": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_8": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_9": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 2,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 12,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 108,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 1,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 0.9908,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0092,
+            "speed_noise": 0.0
+          },
+          "dropped": 109,
+          "kept": 22,
+          "raw": 131
+        },
+        "sample_retention": {
+          "mean": 0.4031,
+          "p50": 0.0,
+          "p90": 1.0
+        },
+        "segment_count": 15,
+        "trend_segments": 1,
+        "trend_strength": {
+          "light": 0,
+          "strong": 1
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-91",
+      "path": "test_data/HPR_Full_09292024/91.csv",
+      "run_id": 13,
+      "segments": {
+        "1:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 9,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T10": {
+          "apex": 4,
+          "filtered": 4,
+          "raw": 5,
+          "retention": 0.8,
+          "trend_strength": null
+        },
+        "1:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 9,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T8": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 9,
+          "retention": 0.1111,
+          "trend_strength": null
+        },
+        "1:CCW:T9": {
+          "apex": 8,
+          "filtered": 8,
+          "raw": 9,
+          "retention": 0.8889,
+          "trend_strength": "strong"
+        },
+        "segment_9": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 13,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 71,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 1,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 0.9861,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0139,
+            "speed_noise": 0.0
+          },
+          "dropped": 72,
+          "kept": 14,
+          "raw": 86
+        },
+        "sample_retention": {
+          "mean": 0.2545,
+          "p50": 0.0,
+          "p90": 0.8889
+        },
+        "segment_count": 11,
+        "trend_segments": 1,
+        "trend_strength": {
+          "light": 0,
+          "strong": 1
+        }
+      }
+    },
+    {
+      "id": "HPR_Full_09292024-92",
+      "path": "test_data/HPR_Full_09292024/92.csv",
+      "run_id": 14,
+      "segments": {
+        "1:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 9,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T10": {
+          "apex": 4,
+          "filtered": 4,
+          "raw": 5,
+          "retention": 0.8,
+          "trend_strength": null
+        },
+        "1:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T6": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 9,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "1:CCW:T8": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 9,
+          "retention": 0.1111,
+          "trend_strength": null
+        },
+        "1:CCW:T9": {
+          "apex": 8,
+          "filtered": 8,
+          "raw": 9,
+          "retention": 0.8889,
+          "trend_strength": "strong"
+        },
+        "segment_9": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 14,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 71,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 1,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 0.9861,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0139,
+            "speed_noise": 0.0
+          },
+          "dropped": 72,
+          "kept": 14,
+          "raw": 86
+        },
+        "sample_retention": {
+          "mean": 0.2545,
+          "p50": 0.0,
+          "p90": 0.8889
+        },
+        "segment_count": 11,
+        "trend_segments": 1,
+        "trend_strength": {
+          "light": 0,
+          "strong": 1
+        }
+      }
+    },
+    {
+      "id": "Pueblo_09142024-11",
+      "path": "test_data/Pueblo_09142024/11.csv",
+      "run_id": 15,
+      "segments": {
+        "3:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 14,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 17,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 20,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T4": {
+          "apex": 9,
+          "filtered": 9,
+          "raw": 17,
+          "retention": 0.5294,
+          "trend_strength": "strong"
+        },
+        "3:CCW:T5": {
+          "apex": 7,
+          "filtered": 7,
+          "raw": 19,
+          "retention": 0.3684,
+          "trend_strength": "strong"
+        },
+        "3:CCW:T6": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 20,
+          "retention": 0.1,
+          "trend_strength": null
+        },
+        "3:CCW:T7": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 11,
+          "retention": 0.1818,
+          "trend_strength": null
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 7,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        },
+        "segment_8": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 15,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 116,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 116,
+          "kept": 21,
+          "raw": 137
+        },
+        "sample_retention": {
+          "mean": 0.1557,
+          "p50": 0.0,
+          "p90": 0.4811
+        },
+        "segment_count": 14,
+        "trend_segments": 2,
+        "trend_strength": {
+          "light": 0,
+          "strong": 2
+        }
+      }
+    },
+    {
+      "id": "Pueblo_09142024-12",
+      "path": "test_data/Pueblo_09142024/12.csv",
+      "run_id": 16,
+      "segments": {
+        "3:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 12,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 18,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T4": {
+          "apex": 9,
+          "filtered": 9,
+          "raw": 15,
+          "retention": 0.6,
+          "trend_strength": "strong"
+        },
+        "3:CCW:T5": {
+          "apex": 5,
+          "filtered": 5,
+          "raw": 17,
+          "retention": 0.2941,
+          "trend_strength": null
+        },
+        "3:CCW:T6": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 18,
+          "retention": 0.1111,
+          "trend_strength": null
+        },
+        "3:CCW:T7": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 10,
+          "retention": 0.1,
+          "trend_strength": null
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 7,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 16,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 104,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 104,
+          "kept": 18,
+          "raw": 122
+        },
+        "sample_retention": {
+          "mean": 0.1619,
+          "p50": 0.0,
+          "p90": 0.5388
+        },
+        "segment_count": 13,
+        "trend_segments": 1,
+        "trend_strength": {
+          "light": 0,
+          "strong": 1
+        }
+      }
+    },
+    {
+      "id": "Pueblo_09142024-13",
+      "path": "test_data/Pueblo_09142024/13.csv",
+      "run_id": 17,
+      "segments": {
+        "3:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 12,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 18,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T4": {
+          "apex": 9,
+          "filtered": 9,
+          "raw": 15,
+          "retention": 0.6,
+          "trend_strength": "strong"
+        },
+        "3:CCW:T5": {
+          "apex": 5,
+          "filtered": 5,
+          "raw": 17,
+          "retention": 0.2941,
+          "trend_strength": null
+        },
+        "3:CCW:T6": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 18,
+          "retention": 0.1111,
+          "trend_strength": null
+        },
+        "3:CCW:T7": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 10,
+          "retention": 0.1,
+          "trend_strength": null
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 7,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 17,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 104,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 104,
+          "kept": 18,
+          "raw": 122
+        },
+        "sample_retention": {
+          "mean": 0.1619,
+          "p50": 0.0,
+          "p90": 0.5388
+        },
+        "segment_count": 13,
+        "trend_segments": 1,
+        "trend_strength": {
+          "light": 0,
+          "strong": 1
+        }
+      }
+    },
+    {
+      "id": "Pueblo_09142024-14",
+      "path": "test_data/Pueblo_09142024/14.csv",
+      "run_id": 18,
+      "segments": {
+        "3:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 12,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 15,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 18,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T4": {
+          "apex": 9,
+          "filtered": 9,
+          "raw": 15,
+          "retention": 0.6,
+          "trend_strength": "strong"
+        },
+        "3:CCW:T5": {
+          "apex": 5,
+          "filtered": 5,
+          "raw": 17,
+          "retention": 0.2941,
+          "trend_strength": null
+        },
+        "3:CCW:T6": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 18,
+          "retention": 0.1111,
+          "trend_strength": null
+        },
+        "3:CCW:T7": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 10,
+          "retention": 0.1,
+          "trend_strength": null
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 7,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 2,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_4": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 18,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 104,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 104,
+          "kept": 18,
+          "raw": 122
+        },
+        "sample_retention": {
+          "mean": 0.1619,
+          "p50": 0.0,
+          "p90": 0.5388
+        },
+        "segment_count": 13,
+        "trend_segments": 1,
+        "trend_strength": {
+          "light": 0,
+          "strong": 1
+        }
+      }
+    },
+    {
+      "id": "Pueblo_09142024-16",
+      "path": "test_data/Pueblo_09142024/16.csv",
+      "run_id": 19,
+      "segments": {
+        "3:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 7,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 8,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T4": {
+          "apex": 7,
+          "filtered": 7,
+          "raw": 11,
+          "retention": 0.6364,
+          "trend_strength": null
+        },
+        "3:CCW:T5": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 11,
+          "retention": 0.1818,
+          "trend_strength": null
+        },
+        "3:CCW:T6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 10,
+          "retention": 0.1,
+          "trend_strength": null
+        },
+        "3:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 19,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 60,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 60,
+          "kept": 11,
+          "raw": 71
+        },
+        "sample_retention": {
+          "mean": 0.1598,
+          "p50": 0.0,
+          "p90": 0.5909
+        },
+        "segment_count": 12,
+        "trend_segments": 0,
+        "trend_strength": {
+          "light": 0,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "Pueblo_09142024-18",
+      "path": "test_data/Pueblo_09142024/18.csv",
+      "run_id": 20,
+      "segments": {
+        "3:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 7,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 8,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T4": {
+          "apex": 7,
+          "filtered": 7,
+          "raw": 11,
+          "retention": 0.6364,
+          "trend_strength": null
+        },
+        "3:CCW:T5": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 11,
+          "retention": 0.1818,
+          "trend_strength": null
+        },
+        "3:CCW:T6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 10,
+          "retention": 0.1,
+          "trend_strength": null
+        },
+        "3:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 20,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 60,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 60,
+          "kept": 11,
+          "raw": 71
+        },
+        "sample_retention": {
+          "mean": 0.1598,
+          "p50": 0.0,
+          "p90": 0.5909
+        },
+        "segment_count": 12,
+        "trend_segments": 0,
+        "trend_strength": {
+          "light": 0,
+          "strong": 0
+        }
+      }
+    },
+    {
+      "id": "Pueblo_09142024-19",
+      "path": "test_data/Pueblo_09142024/19.csv",
+      "run_id": 21,
+      "segments": {
+        "3:CCW:T1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 7,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 8,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 10,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "3:CCW:T4": {
+          "apex": 7,
+          "filtered": 7,
+          "raw": 11,
+          "retention": 0.6364,
+          "trend_strength": null
+        },
+        "3:CCW:T5": {
+          "apex": 2,
+          "filtered": 2,
+          "raw": 11,
+          "retention": 0.1818,
+          "trend_strength": null
+        },
+        "3:CCW:T6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 10,
+          "retention": 0.1,
+          "trend_strength": null
+        },
+        "3:CCW:T7": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_1": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 4,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_2": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 3,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_3": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_5": {
+          "apex": 0,
+          "filtered": 0,
+          "raw": 1,
+          "retention": 0.0,
+          "trend_strength": null
+        },
+        "segment_6": {
+          "apex": 1,
+          "filtered": 1,
+          "raw": 1,
+          "retention": 1.0,
+          "trend_strength": null
+        }
+      },
+      "session_id": 21,
+      "summary": {
+        "drop_stats": {
+          "drop_reasons": {
+            "line_stddev": 60,
+            "min_speed_iqr": 0,
+            "segment_time_iqr": 0,
+            "speed_noise": 0
+          },
+          "drop_reasons_pct": {
+            "line_stddev": 1.0,
+            "min_speed_iqr": 0.0,
+            "segment_time_iqr": 0.0,
+            "speed_noise": 0.0
+          },
+          "dropped": 60,
+          "kept": 11,
+          "raw": 71
+        },
+        "sample_retention": {
+          "mean": 0.1598,
+          "p50": 0.0,
+          "p90": 0.5909
+        },
+        "segment_count": 12,
+        "trend_segments": 0,
+        "trend_strength": {
+          "light": 0,
+          "strong": 0
+        }
+      }
+    }
+  ],
+  "manifest": "tests/fixtures/trend_eval_manifest.json"
+}

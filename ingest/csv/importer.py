@@ -7,7 +7,7 @@ analytics and lap logic live elsewhere.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Sequence
 
 from ingest.csv.parser import CsvParseResult, parse_csv
 from domain.run_data import RunData
@@ -22,6 +22,14 @@ def _find_column(parse: CsvParseResult, name: str) -> Optional[int]:
         return parse.column_index[name]
     lowered = {key.lower(): idx for key, idx in parse.column_index.items()}
     return lowered.get(name.lower())
+
+
+def _find_column_any(parse: CsvParseResult, names: Sequence[str]) -> Optional[int]:
+    for name in names:
+        idx = _find_column(parse, name)
+        if idx is not None:
+            return idx
+    return None
 
 
 def _convert_speed(values: List[Optional[float]], unit: str) -> List[Optional[float]]:
@@ -57,8 +65,8 @@ def build_run_data(parse: CsvParseResult) -> RunData:
     - Time
     - Distance on GPS Speed
     - GPS Speed (normalized to m/s)
-    - Latitude
-    - Longitude
+    - Latitude / GPS Latitude
+    - Longitude / GPS Longitude
     """
     time_idx = _find_column(parse, "Time")
     if time_idx is None:
@@ -66,8 +74,8 @@ def build_run_data(parse: CsvParseResult) -> RunData:
 
     distance_idx = _find_column(parse, "Distance on GPS Speed")
     speed_idx = _find_column(parse, "GPS Speed")
-    lat_idx = _find_column(parse, "Latitude")
-    lon_idx = _find_column(parse, "Longitude")
+    lat_idx = _find_column_any(parse, ["Latitude", "GPS Latitude"])
+    lon_idx = _find_column_any(parse, ["Longitude", "GPS Longitude"])
 
     time_s = [row[time_idx] for row in parse.rows]
 

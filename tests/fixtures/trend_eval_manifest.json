@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "id": "HPR_Full_09292024-2",
+      "path": "test_data/HPR_Full_09292024/2.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-4",
+      "path": "test_data/HPR_Full_09292024/4.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-5",
+      "path": "test_data/HPR_Full_09292024/5.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-6",
+      "path": "test_data/HPR_Full_09292024/6.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-7",
+      "path": "test_data/HPR_Full_09292024/7.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-21",
+      "path": "test_data/HPR_Full_09292024/21.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-22",
+      "path": "test_data/HPR_Full_09292024/22.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-23",
+      "path": "test_data/HPR_Full_09292024/23.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-24",
+      "path": "test_data/HPR_Full_09292024/24.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-87",
+      "path": "test_data/HPR_Full_09292024/87.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-89",
+      "path": "test_data/HPR_Full_09292024/89.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-90",
+      "path": "test_data/HPR_Full_09292024/90.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-91",
+      "path": "test_data/HPR_Full_09292024/91.csv"
+    },
+    {
+      "id": "HPR_Full_09292024-92",
+      "path": "test_data/HPR_Full_09292024/92.csv"
+    },
+    {
+      "id": "Pueblo_09142024-11",
+      "path": "test_data/Pueblo_09142024/11.csv"
+    },
+    {
+      "id": "Pueblo_09142024-12",
+      "path": "test_data/Pueblo_09142024/12.csv"
+    },
+    {
+      "id": "Pueblo_09142024-13",
+      "path": "test_data/Pueblo_09142024/13.csv"
+    },
+    {
+      "id": "Pueblo_09142024-14",
+      "path": "test_data/Pueblo_09142024/14.csv"
+    },
+    {
+      "id": "Pueblo_09142024-16",
+      "path": "test_data/Pueblo_09142024/16.csv"
+    },
+    {
+      "id": "Pueblo_09142024-18",
+      "path": "test_data/Pueblo_09142024/18.csv"
+    },
+    {
+      "id": "Pueblo_09142024-19",
+      "path": "test_data/Pueblo_09142024/19.csv"
+    }
+  ]
+}
