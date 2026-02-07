@@ -7,6 +7,13 @@ Use this template when delegating implementation work to another AI.
 - Do not redefine scope; execute exactly what is requested below.
 - Do not make unrelated refactors or style-only edits.
 
+## 1.1 Branch and Workspace Assignment
+- Branch creation and worktree setup are handled by the planner.
+- Use the assigned branch and working directory exactly as provided.
+- Do not create/switch branches unless explicitly instructed.
+- Assigned branch: `{{assigned_branch}}`
+- Assigned working directory: `{{assigned_workdir}}`
+
 ## 2) Task Context
 - Project: `aimSoloAnalysis`
 - Objective: `{{objective}}`
