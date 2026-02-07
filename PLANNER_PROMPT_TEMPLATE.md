@@ -14,6 +14,13 @@ Use this template when delegating implementation work to another AI.
 - Assigned branch: `{{assigned_branch}}`
 - Assigned working directory: `{{assigned_workdir}}`
 
+## 1.2 Reasoning Mode (Required)
+- Add this line immediately before each worker prompt block:
+  - `Reasoning mode: <gpt-codex5.3|gpt-codex5.3high> — <one-line rationale>`
+- Selection rule:
+  - Use `gpt-codex5.3high` for ambiguous product behavior, safety/risk decisions, or non-obvious root-cause reasoning.
+  - Use `gpt-codex5.3` for implementation plumbing, deterministic harness/schema work, and straightforward contract wiring.
+
 ## 2) Task Context
 - Project: `aimSoloAnalysis`
 - Objective: `{{objective}}`
@@ -119,6 +126,8 @@ notes_for_planner:
 - [ ] One focused commit created for this task (or explicit reason if no commit requested).
 
 ## 10) Task Payload (Fill Before Sending)
+- Reasoning mode: `{{reasoning_mode}}`
+- Reasoning rationale: `{{reasoning_rationale}}`
 - Objective: `{{objective}}`
 - Requirements: `{{requirement_ids}}`
 - Acceptance criteria:

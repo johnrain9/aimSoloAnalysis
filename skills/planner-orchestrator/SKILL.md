@@ -25,6 +25,11 @@ description: Consistent planning, delegation, requirement tracking, and integrat
    - Keep each task tied to requirement IDs and clear acceptance checks.
 4. Delegate
    - Use `PLANNER_PROMPT_TEMPLATE.md` as base.
+   - Include a `Reasoning mode` recommendation immediately before each worker prompt block.
+   - Reasoning mode policy:
+     - Use `gpt-codex5.3high` for ambiguous product-behavior logic, recommendation/risk/safety reasoning, or non-obvious root-cause work.
+     - Use `gpt-codex5.3` (medium) for plumbing, schema/report wiring, deterministic harness/tooling, and straightforward API/UI contract updates.
+     - Default to medium when uncertain unless safety/behavior judgment is central to the task.
    - Always assign branch + workdir.
    - Require one focused commit per task and the fixed `[TASK-HANDOFF-START]` schema.
 5. Intake Worker Results
@@ -53,6 +58,7 @@ description: Consistent planning, delegation, requirement tracking, and integrat
   - concrete worker prompts
   - integration order
 - For each task prompt, enforce:
+  - explicit `Reasoning mode` line directly above the prompt
   - minimal scope
   - no unrelated refactors
   - explicit test execution
@@ -64,4 +70,3 @@ description: Consistent planning, delegation, requirement tracking, and integrat
   - verify by reading only directly impacted files
 - If worker handoff is incomplete:
   - return with specific missing fields; do not integrate partial ambiguous changes.
-

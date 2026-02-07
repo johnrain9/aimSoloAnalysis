@@ -3,6 +3,8 @@
 Use one block per worker thread. Each prompt assumes the worker can read this repo.
 
 ## TASK-ANL-03
+Reasoning mode: `gpt-codex5.3` - this is integration plumbing with clear persistence semantics and focused tests.
+
 ```text
 You are the implementation agent for this task.
 
@@ -48,6 +50,8 @@ Return final output strictly in the required [TASK-HANDOFF-START]/[TASK-HANDOFF-
 ```
 
 ## TASK-P0-02
+Reasoning mode: `gpt-codex5.3high` - this task requires safety/risk judgment and coaching-behavior reasoning.
+
 ```text
 You are the implementation agent for this task.
 
@@ -94,6 +98,8 @@ Return final output strictly in the required [TASK-HANDOFF-START]/[TASK-HANDOFF-
 ```
 
 ## TASK-EVAL-07
+Reasoning mode: `gpt-codex5.3` - this is deterministic report composition and contract wiring.
+
 ```text
 You are the implementation agent for this task.
 
@@ -140,6 +146,8 @@ Return final output strictly in the required [TASK-HANDOFF-START]/[TASK-HANDOFF-
 ```
 
 ## TASK-EVAL-08
+Reasoning mode: `gpt-codex5.3high` - behavior assertion and drift semantics involve non-trivial quality/judgment boundaries.
+
 ```text
 You are the implementation agent for this task.
 

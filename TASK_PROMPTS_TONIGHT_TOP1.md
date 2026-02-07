@@ -12,6 +12,8 @@ TASK-EVAL-10 depends on TASK-EVAL-09 output artifact shape.
 TASK-EVAL-11 depends on TASK-EVAL-10 report fields.
 
 ## TASK-P0-03
+Reasoning mode: `gpt-codex5.3high` - recommendation safety/quality judgment and gain-causality reasoning are central.
+
 ```text
 You are the implementation agent for this task.
 
@@ -59,6 +61,8 @@ Return final output strictly in the required [TASK-HANDOFF-START]/[TASK-HANDOFF-
 ```
 
 ## TASK-EVAL-09
+Reasoning mode: `gpt-codex5.3` - this is harness plumbing and deterministic artifact/report wiring.
+
 ```text
 You are the implementation agent for this task.
 
@@ -105,6 +109,8 @@ Return final output strictly in the required [TASK-HANDOFF-START]/[TASK-HANDOFF-
 ```
 
 ## TASK-EVAL-10
+Reasoning mode: `gpt-codex5.3` - this is deterministic aggregation/schema and hard-vs-soft scorecard logic.
+
 ```text
 You are the implementation agent for this task.
 
@@ -152,6 +158,8 @@ Return final output strictly in the required [TASK-HANDOFF-START]/[TASK-HANDOFF-
 ```
 
 ## TASK-EVAL-11
+Reasoning mode: `gpt-codex5.3` - this is deterministic review-packet generation and workflow/doc wiring.
+
 ```text
 You are the implementation agent for this task.
 
@@ -198,4 +206,3 @@ Suggested test commands:
 
 Return final output strictly in the required [TASK-HANDOFF-START]/[TASK-HANDOFF-END] schema from PLANNER_PROMPT_TEMPLATE.md.
 ```
-
