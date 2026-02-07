@@ -4,8 +4,17 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Dict, Iterable, Optional, Sequence, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
+from analytics.deltas import LapWindow
+from analytics.metrics_writer import (
+    lap_metrics_from_mapping,
+    segment_metrics_from_mapping,
+    write_lap_metrics,
+    write_segment_metrics,
+)
+from analytics.segment_metrics import compute_segment_metrics
+from analytics.segments import detect_segments
 from domain.run_data import RunData
 from ingest.csv.importer import build_run_data
 from ingest.csv.laps import infer_laps
@@ -22,6 +31,7 @@ _CORE_FIELDS = {
     "gps heading",
     "gps accuracy",
 }
+_ANALYTICS_VERSION = "0.1.0-local"
 
 
 @dataclass
@@ -38,6 +48,7 @@ def save_to_db(
     db_path: str,
     source_file: Optional[str] = None,
     run_index: int = 1,
+    analytics_version: str = _ANALYTICS_VERSION,
 ) -> SaveResult:
     """Persist a CsvParseResult or RunData into SQLite."""
     if isinstance(data, CsvParseResult):
@@ -114,7 +125,16 @@ def save_to_db(
             heading,
             accuracy,
         )
-        lap_count = _persist_laps(conn, run_id, laps)
+        persisted_laps = _persist_laps(conn, run_id, laps)
+        lap_count = len(persisted_laps)
+        _persist_derived_metrics(
+            conn,
+            session_id=session_id,
+            run_id=run_id,
+            run_data=run_data,
+            persisted_laps=persisted_laps,
+            analytics_version=analytics_version,
+        )
 
         _persist_channel_blobs_stub(run_id, run_data, channel_units)
 
@@ -188,13 +208,13 @@ def _persist_sample_points(
     return db.insert_sample_points(conn, rows)
 
 
-def _persist_laps(conn, run_id: int, laps) -> int:
-    count = 0
+def _persist_laps(conn, run_id: int, laps) -> List[Dict[str, float | int | None]]:
+    persisted: List[Dict[str, float | int | None]] = []
     for lap in laps:
         duration = None
         if lap.start_time_s is not None and lap.end_time_s is not None:
             duration = lap.end_time_s - lap.start_time_s
-        db.upsert_lap(
+        lap_id = db.upsert_lap(
             conn,
             run_id=run_id,
             lap_index=lap.lap_index,
@@ -202,8 +222,172 @@ def _persist_laps(conn, run_id: int, laps) -> int:
             end_time_s=lap.end_time_s,
             duration_s=duration,
         )
-        count += 1
-    return count
+        persisted.append(
+            {
+                "lap_id": int(lap_id),
+                "lap_index": int(lap.lap_index),
+                "start_time_s": lap.start_time_s,
+                "end_time_s": lap.end_time_s,
+                "duration_s": duration,
+            }
+        )
+    return persisted
+
+
+def _persist_derived_metrics(
+    conn,
+    *,
+    session_id: int,
+    run_id: int,
+    run_data: RunData,
+    persisted_laps: Sequence[Dict[str, float | int | None]],
+    analytics_version: str,
+) -> None:
+    if not persisted_laps:
+        return
+
+    lap_rows = [
+        lap for lap in persisted_laps
+        if lap.get("lap_id") is not None
+        and lap.get("start_time_s") is not None
+        and lap.get("end_time_s") is not None
+    ]
+    if not lap_rows:
+        return
+
+    if run_data.distance_m is None:
+        raise RuntimeError(
+            "derived metrics persistence prerequisites missing: distance_m is required"
+        )
+
+    lap_metrics: Dict[int, Dict[str, float | None]] = {}
+    segment_metrics: Dict[int, Dict[str, Dict[str, float]]] = {}
+
+    for lap in lap_rows:
+        lap_id = int(lap["lap_id"])  # type: ignore[arg-type]
+        start_time_s = float(lap["start_time_s"])  # type: ignore[arg-type]
+        end_time_s = float(lap["end_time_s"])  # type: ignore[arg-type]
+        duration_s = lap.get("duration_s")
+
+        lap_payload: Dict[str, float | None] = {
+            "lap_duration_s": float(duration_s) if duration_s is not None else max(0.0, end_time_s - start_time_s),
+        }
+        lap_metrics[lap_id] = lap_payload
+
+        lap_window = LapWindow(start_time_s=start_time_s, end_time_s=end_time_s)
+        lap_slice = _slice_run_data(run_data, start_time_s, end_time_s)
+        try:
+            segmentation = detect_segments(lap_slice)
+            computed = compute_segment_metrics(run_data, lap_window, segmentation.segments)
+        except Exception as exc:  # noqa: BLE001
+            lap_index = lap.get("lap_index")
+            raise RuntimeError(
+                f"derived metrics persistence failed for lap {lap_index}: {exc}"
+            ) from exc
+
+        per_lap_segment: Dict[str, Dict[str, float]] = {}
+        for segment_id, values in computed.items():
+            metrics: Dict[str, float] = {}
+            for metric_name in (
+                "segment_time_s",
+                "entry_speed_kmh",
+                "apex_speed_kmh",
+                "exit_speed_30m_kmh",
+                "min_speed_kmh",
+            ):
+                metric_value = _as_float(values.get(metric_name))
+                if metric_value is not None:
+                    metrics[metric_name] = metric_value
+            if metrics:
+                per_lap_segment[str(segment_id)] = metrics
+        if per_lap_segment:
+            segment_metrics[lap_id] = per_lap_segment
+
+    write_lap_metrics(
+        conn,
+        session_id=session_id,
+        run_id=run_id,
+        analytics_version=analytics_version,
+        metrics=lap_metrics_from_mapping(lap_metrics),
+        commit=False,
+    )
+    write_segment_metrics(
+        conn,
+        session_id=session_id,
+        run_id=run_id,
+        analytics_version=analytics_version,
+        metrics=segment_metrics_from_mapping(segment_metrics),
+        commit=False,
+    )
+
+
+def _slice_run_data(run_data: RunData, start_time_s: float, end_time_s: float) -> RunData:
+    start_idx, end_idx = _find_index_range(run_data.time_s, start_time_s, end_time_s)
+    if start_idx is None or end_idx is None or end_idx <= start_idx:
+        return RunData(
+            time_s=[],
+            distance_m=[],
+            lat=[],
+            lon=[],
+            speed=[],
+            channels={},
+            metadata=run_data.metadata,
+        )
+
+    time_slice = run_data.time_s[start_idx : end_idx + 1]
+    distance_slice = run_data.distance_m[start_idx : end_idx + 1] if run_data.distance_m else None
+    lat_slice = run_data.lat[start_idx : end_idx + 1] if run_data.lat else None
+    lon_slice = run_data.lon[start_idx : end_idx + 1] if run_data.lon else None
+    speed_slice = run_data.speed[start_idx : end_idx + 1] if run_data.speed else None
+
+    channels: Dict[str, List[Optional[float]]] = {}
+    for name, series in run_data.channels.items():
+        channels[name] = series[start_idx : end_idx + 1]
+
+    return RunData(
+        time_s=_rebase_series(time_slice),
+        distance_m=_rebase_series(distance_slice) if distance_slice else None,
+        lat=lat_slice,
+        lon=lon_slice,
+        speed=speed_slice,
+        channels=channels,
+        metadata=run_data.metadata,
+    )
+
+
+def _find_index_range(
+    time_s: Sequence[Optional[float]],
+    start_time_s: float,
+    end_time_s: float,
+) -> Tuple[Optional[int], Optional[int]]:
+    start_idx: Optional[int] = None
+    end_idx: Optional[int] = None
+    for idx, value in enumerate(time_s):
+        if value is None:
+            continue
+        if start_idx is None and value >= start_time_s:
+            start_idx = idx
+        if value <= end_time_s:
+            end_idx = idx
+        if value > end_time_s and end_idx is not None:
+            break
+    return start_idx, end_idx
+
+
+def _rebase_series(values: Sequence[Optional[float]]) -> List[Optional[float]]:
+    base = next((v for v in values if v is not None), None)
+    if base is None:
+        return list(values)
+    return [None if v is None else v - base for v in values]
+
+
+def _as_float(value: object) -> Optional[float]:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _channel_units_from_parse(parse: CsvParseResult) -> Dict[str, Optional[str]]:
