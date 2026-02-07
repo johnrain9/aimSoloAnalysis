@@ -30,6 +30,15 @@ from storage import db
 _KMH_TO_MPS = 1000.0 / 3600.0
 _MPS_TO_KMH = 3.6
 
+_FATIGUE_MIN_LAPS = 6
+_FATIGUE_EARLY_SHARE = 0.65
+_FATIGUE_MIN_FADE_S = 0.18
+_FATIGUE_MIN_FADE_RATIO = 0.015
+_FATIGUE_MAX_APEX_SHIFT_M = 4.0
+_FATIGUE_MAX_LINE_SHIFT_M = 0.35
+_RECURRENCE_PRIORITY_BIAS_MIN_M = 2.0
+_RECURRENCE_PRIORITY_GROWTH_MIN_M = 1.0
+
 # Line trend filtering (configurable, balanced defaults).
 
 
@@ -968,13 +977,17 @@ def _compute_line_trends(
             lap_ids=None,
         )
 
-        for lap, segments in zip(laps_for_track, labeled_laps):
+        lap_count = len(laps_for_track)
+        for lap_order, (lap, segments) in enumerate(zip(laps_for_track, labeled_laps), start=1):
             lap_window = LapWindow(start_time_s=lap.start_time_s, end_time_s=lap.end_time_s)
             metrics = compute_segment_metrics(run_data, lap_window, segments)
             for seg_id, values in metrics.items():
                 sample = {
                     "session_id": session_info.session_id,
                     "lap_id": lap.lap_id,
+                    "lap_index": lap.lap_index,
+                    "lap_order": lap_order,
+                    "lap_count": lap_count,
                     "apex_dist_m": _as_float(values.get("apex_dist_m")),
                     "line_stddev_m": _as_float(values.get("line_stddev_m")),
                     "segment_time_s": _as_float(values.get("segment_time_s")),
@@ -985,15 +998,17 @@ def _compute_line_trends(
                 }
                 samples.setdefault(seg_id, []).append(sample)
 
-    return _summarize_line_trends(samples)
+    return _summarize_line_trends(samples, current_session_id=session.session_id)
 
 
 def _summarize_line_trends(
     samples_by_seg: Dict[str, List[Dict[str, object]]],
+    *,
+    current_session_id: Optional[int] = None,
 ) -> Dict[str, Dict[str, object]]:
     trends: Dict[str, Dict[str, object]] = {}
     for seg_id, samples in samples_by_seg.items():
-        cleaned = _filter_segment_samples(samples)
+        cleaned, filter_stats = _filter_segment_samples_with_stats(samples)
         apex_samples = [s for s in cleaned if s.get("apex_dist_m") is not None]
         if len(apex_samples) < TREND_FILTERS.min_samples:
             continue
@@ -1008,6 +1023,14 @@ def _summarize_line_trends(
             continue
         cluster_stats = [_cluster_stats(c) for c in strong]
         recommendation = _pick_cluster(cluster_stats)
+        recurrence = _recurrence_context(
+            apex_samples,
+            recommendation,
+            current_session_id=current_session_id,
+        )
+        fatigue_sessions = int(filter_stats.get("fatigue_sessions") or 0)
+        fatigue_late_laps = int(filter_stats.get("fatigue_late_laps") or 0)
+        fatigue_max_fade_s = _as_float(filter_stats.get("fatigue_max_fade_s"))
         trends[seg_id] = {
             "trend_laps": total,
             "session_count": len({s.get("session_id") for s in apex_samples if s.get("session_id") is not None}),
@@ -1019,6 +1042,14 @@ def _summarize_line_trends(
             "line_stddev_mean_m": _mean([s["line_stddev_m"] for s in apex_samples if s.get("line_stddev_m") is not None]),
             "clusters": cluster_stats,
             "recommendation": recommendation,
+            "recurrence_detected": bool(recurrence["detected"]),
+            "recurrence_session_count": int(recurrence["session_count"]),
+            "recurrence_priority_shift": bool(recurrence["priority_shift"]),
+            "why_now": recurrence["why_now"],
+            "fatigue_likely": fatigue_sessions > 0 and fatigue_late_laps > 0,
+            "fatigue_session_count": fatigue_sessions,
+            "fatigue_late_laps": fatigue_late_laps,
+            "fatigue_max_fade_s": fatigue_max_fade_s,
         }
     return trends
 
@@ -1033,6 +1064,7 @@ def _filter_segment_samples_with_stats(
 ) -> Tuple[List[Dict[str, object]], Dict[str, object]]:
     if not samples:
         return [], {"raw": 0, "kept": 0, "dropped": 0, "drop_reasons": {}}
+    fatigue_late_samples, fatigue_stats = _detect_fatigue_late_samples(samples)
     times = [float(s["segment_time_s"]) for s in samples if s.get("segment_time_s") is not None]
     min_speeds = [float(s["min_speed_kmh"]) for s in samples if s.get("min_speed_kmh") is not None]
     time_median = _median(times)
@@ -1045,11 +1077,15 @@ def _filter_segment_samples_with_stats(
         "kept": 0,
         "dropped": 0,
         "drop_reasons": {
+            "fatigue_late_fade": 0,
             "line_stddev": 0,
             "speed_noise": 0,
             "segment_time_iqr": 0,
             "min_speed_iqr": 0,
         },
+        "fatigue_sessions": fatigue_stats["sessions"],
+        "fatigue_late_laps": fatigue_stats["late_laps"],
+        "fatigue_max_fade_s": fatigue_stats["max_fade_s"],
     }
     filtered: List[Dict[str, object]] = []
     for sample in samples:
@@ -1057,9 +1093,12 @@ def _filter_segment_samples_with_stats(
         line_std = _as_float(sample.get("line_stddev_m"))
         speed_noise = _as_float(sample.get("speed_noise_sigma_kmh"))
         min_speed = _as_float(sample.get("min_speed_kmh"))
+        sample_id = _sample_identity(sample)
 
         reason = None
-        if line_std is not None and line_std > TREND_FILTERS.line_stddev_cap_m:
+        if sample_id in fatigue_late_samples:
+            reason = "fatigue_late_fade"
+        elif line_std is not None and line_std > TREND_FILTERS.line_stddev_cap_m:
             reason = "line_stddev"
         elif speed_noise is not None and speed_noise > TREND_FILTERS.speed_noise_cap_kmh:
             reason = "speed_noise"
@@ -1079,6 +1118,187 @@ def _filter_segment_samples_with_stats(
 
     stats["dropped"] = stats["raw"] - stats["kept"]
     return filtered, stats
+
+
+def _sample_identity(sample: Dict[str, object]) -> Tuple[object, ...]:
+    lap_id = sample.get("lap_id")
+    if lap_id is not None:
+        return ("lap_id", lap_id)
+    return (
+        "session_lap",
+        sample.get("session_id"),
+        sample.get("lap_order"),
+        sample.get("lap_index"),
+    )
+
+
+def _sample_order(sample: Dict[str, object]) -> Tuple[float, float]:
+    lap_order = _as_float(sample.get("lap_order"))
+    lap_index = _as_float(sample.get("lap_index"))
+    if lap_order is None:
+        lap_order = lap_index
+    if lap_order is None:
+        lap_order = float("inf")
+    if lap_index is None:
+        lap_index = lap_order
+    return lap_order, lap_index
+
+
+def _detect_fatigue_late_samples(
+    samples: Sequence[Dict[str, object]],
+) -> Tuple[set[Tuple[object, ...]], Dict[str, object]]:
+    by_session: Dict[int, List[Dict[str, object]]] = {}
+    for sample in samples:
+        session_id = sample.get("session_id")
+        try:
+            if session_id is None:
+                continue
+            session_key = int(session_id)
+        except (TypeError, ValueError):
+            continue
+        by_session.setdefault(session_key, []).append(sample)
+
+    fatigue_sample_ids: set[Tuple[object, ...]] = set()
+    flagged_sessions = 0
+    max_fade_s: Optional[float] = None
+
+    for session_samples in by_session.values():
+        ordered = sorted(session_samples, key=_sample_order)
+        if len(ordered) < _FATIGUE_MIN_LAPS:
+            continue
+        split_idx = max(3, int(math.floor(len(ordered) * _FATIGUE_EARLY_SHARE)))
+        if split_idx >= len(ordered) - 1:
+            continue
+
+        early = ordered[:split_idx]
+        late = ordered[split_idx:]
+
+        early_times = [_as_float(sample.get("segment_time_s")) for sample in early]
+        early_times = [value for value in early_times if value is not None]
+        late_times = [_as_float(sample.get("segment_time_s")) for sample in late]
+        late_times = [value for value in late_times if value is not None]
+        if len(early_times) < 2 or len(late_times) < 2:
+            continue
+
+        early_median = _median(early_times)
+        late_median = _median(late_times)
+        if early_median is None or late_median is None or early_median <= 0:
+            continue
+
+        fade_s = late_median - early_median
+        fade_threshold = max(_FATIGUE_MIN_FADE_S, early_median * _FATIGUE_MIN_FADE_RATIO)
+        if fade_s < fade_threshold:
+            continue
+
+        early_apex = [_as_float(sample.get("apex_dist_m")) for sample in early]
+        early_apex = [value for value in early_apex if value is not None]
+        late_apex = [_as_float(sample.get("apex_dist_m")) for sample in late]
+        late_apex = [value for value in late_apex if value is not None]
+
+        early_line = [_as_float(sample.get("line_stddev_m")) for sample in early]
+        early_line = [value for value in early_line if value is not None]
+        late_line = [_as_float(sample.get("line_stddev_m")) for sample in late]
+        late_line = [value for value in late_line if value is not None]
+
+        apex_shift = 0.0
+        if early_apex and late_apex:
+            early_apex_median = _median(early_apex)
+            late_apex_median = _median(late_apex)
+            if early_apex_median is not None and late_apex_median is not None:
+                apex_shift = abs(late_apex_median - early_apex_median)
+
+        line_shift = 0.0
+        if early_line and late_line:
+            early_line_median = _median(early_line)
+            late_line_median = _median(late_line)
+            if early_line_median is not None and late_line_median is not None:
+                line_shift = abs(late_line_median - early_line_median)
+
+        if apex_shift > _FATIGUE_MAX_APEX_SHIFT_M or line_shift > _FATIGUE_MAX_LINE_SHIFT_M:
+            continue
+
+        flagged_sessions += 1
+        max_fade_s = fade_s if max_fade_s is None else max(max_fade_s, fade_s)
+        for sample in late:
+            fatigue_sample_ids.add(_sample_identity(sample))
+
+    return fatigue_sample_ids, {
+        "sessions": flagged_sessions,
+        "late_laps": len(fatigue_sample_ids),
+        "max_fade_s": max_fade_s,
+    }
+
+
+def _recurrence_context(
+    apex_samples: Sequence[Dict[str, object]],
+    recommendation: Optional[Dict[str, object]],
+    *,
+    current_session_id: Optional[int],
+) -> Dict[str, object]:
+    session_ids = {
+        int(session_id)
+        for session_id in (sample.get("session_id") for sample in apex_samples)
+        if session_id is not None
+    }
+    session_count = len(session_ids)
+    detected = session_count >= 2
+    rec_apex = _as_float((recommendation or {}).get("apex_mean_m"))
+    if not detected or rec_apex is None:
+        return {
+            "detected": detected,
+            "session_count": session_count,
+            "priority_shift": False,
+            "why_now": None,
+        }
+
+    current_apex_values = [
+        _as_float(sample.get("apex_dist_m"))
+        for sample in apex_samples
+        if current_session_id is not None and sample.get("session_id") == current_session_id
+    ]
+    current_apex_values = [value for value in current_apex_values if value is not None]
+    historical_apex_values = [
+        _as_float(sample.get("apex_dist_m"))
+        for sample in apex_samples
+        if current_session_id is None or sample.get("session_id") != current_session_id
+    ]
+    historical_apex_values = [value for value in historical_apex_values if value is not None]
+
+    current_apex = _median(current_apex_values) if current_apex_values else None
+    historical_apex = _median(historical_apex_values) if historical_apex_values else None
+    if current_apex is None:
+        return {
+            "detected": detected,
+            "session_count": session_count,
+            "priority_shift": False,
+            "why_now": None,
+        }
+
+    current_bias = abs(current_apex - rec_apex)
+    historical_bias = abs(historical_apex - rec_apex) if historical_apex is not None else None
+    priority_shift = current_bias >= _RECURRENCE_PRIORITY_BIAS_MIN_M and (
+        historical_bias is None
+        or current_bias >= historical_bias + _RECURRENCE_PRIORITY_GROWTH_MIN_M
+    )
+
+    why_now = None
+    if priority_shift:
+        if historical_bias is not None:
+            why_now = (
+                f"Current-session apex bias widened to {current_bias:.1f} m "
+                f"from {historical_bias:.1f} m in prior same-track sessions."
+            )
+        else:
+            why_now = (
+                f"Current-session apex bias is {current_bias:.1f} m versus the recurring stable line."
+            )
+
+    return {
+        "detected": detected,
+        "session_count": session_count,
+        "priority_shift": priority_shift,
+        "why_now": why_now,
+    }
 
 
 def _cluster_by_apex(

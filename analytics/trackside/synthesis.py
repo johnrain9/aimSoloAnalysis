@@ -356,6 +356,14 @@ def _apply_line_trend_copy(
     trend_laps = _get_float(trend, "trend_laps")
     session_count = _get_float(trend, "session_count")
     trend_strength = str(trend.get("trend_strength") or "").lower()
+    recurrence_detected = _as_bool(trend.get("recurrence_detected"))
+    recurrence_session_count = _get_float(trend, "recurrence_session_count")
+    recurrence_priority_shift = _as_bool(trend.get("recurrence_priority_shift"))
+    why_now = str(trend.get("why_now") or "").strip()
+    fatigue_likely = _as_bool(trend.get("fatigue_likely"))
+    fatigue_session_count = _get_float(trend, "fatigue_session_count")
+    fatigue_late_laps = _get_float(trend, "fatigue_late_laps")
+    fatigue_max_fade_s = _get_float(trend, "fatigue_max_fade_s")
     options = _format_line_options(trend)
 
     evidence: Dict[str, Any] = {}
@@ -369,6 +377,20 @@ def _apply_line_trend_copy(
         evidence["trend_session_count"] = session_count
     if trend_strength:
         evidence["trend_strength"] = trend_strength
+    if recurrence_detected and recurrence_session_count is not None:
+        evidence["recurrence_session_count"] = recurrence_session_count
+    if recurrence_priority_shift:
+        evidence["recurrence_priority_shift"] = True
+    if why_now:
+        evidence["why_now"] = why_now
+    if fatigue_likely:
+        evidence["fatigue_likely"] = True
+    if fatigue_session_count is not None:
+        evidence["fatigue_session_count"] = fatigue_session_count
+    if fatigue_late_laps is not None:
+        evidence["fatigue_late_laps"] = fatigue_late_laps
+    if fatigue_max_fade_s is not None:
+        evidence["fatigue_max_fade_s"] = fatigue_max_fade_s
 
     delta_ft = None
     if target_apex_m is not None and rec_apex is not None:
@@ -396,6 +418,29 @@ def _apply_line_trend_copy(
                     f"Apex tends to vary by about {std_ft:.0f} ft lap-to-lap. "
                     "Lock in a repeatable apex from your fastest stable laps."
                 )
+
+    if recurrence_priority_shift and why_now:
+        session_text = ""
+        if recurrence_session_count is not None:
+            session_text = f" across {int(recurrence_session_count)} same-track sessions"
+        detail = f"{detail} Recurrence detected{session_text}. Why now: {why_now}"
+        if actions:
+            actions = list(actions)
+            actions[0] = f"{actions[0]} Prioritize this corner first next session."
+
+    if fatigue_likely:
+        fade_text = ""
+        if fatigue_max_fade_s is not None:
+            fade_text = f" (~{fatigue_max_fade_s:.2f}s late fade)"
+        detail = (
+            f"{detail} Late-session pace fade looked fatigue-driven{fade_text}, "
+            "so late laps were de-weighted to avoid false technique regression."
+        )
+        if not any("fresh laps" in action.lower() for action in actions):
+            actions = list(actions)
+            actions.append(
+                "Validate on fresh laps next session before making larger technique corrections."
+            )
 
     return detail, actions, options, evidence
 
@@ -1134,3 +1179,11 @@ def _as_str(value: Any) -> Optional[str]:
     if value is None:
         return None
     return str(value)
+
+
+def _as_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
