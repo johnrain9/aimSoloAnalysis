@@ -261,13 +261,21 @@ def synthesize_insights(
             lean_high=lean_high,
             line_issue=line_issue,
         )
-        success_check = _success_check(primary_id, phase=phase, metrics=metrics, evidence=evidence)
+        behavior_class = _behavior_class(primary_id)
+        success_check = _success_check(
+            primary_id,
+            behavior_class=behavior_class,
+            phase=phase,
+            metrics=metrics,
+            evidence=evidence,
+        )
         expected_gain_s = applied_gain_s if applied_gain_s > 0 else 0.01
         experimental_protocol = None
         if risk_tier == "Experimental":
             experimental_protocol = _experimental_protocol(
                 expected_gain_s=expected_gain_s,
                 primary_id=primary_id,
+                behavior_class=behavior_class,
                 phase=phase,
                 evidence=evidence,
             )
@@ -978,38 +986,148 @@ def _uncertainty_note(confidence: float, quality: Dict[str, Any], evidence: Dict
 def _success_check(
     rule_id: str,
     *,
+    behavior_class: str,
     phase: str,
     metrics: Dict[str, Optional[float]],
     evidence: Dict[str, Any],
 ) -> str:
     if rule_id == "line_inconsistency":
-        return "Reduce line variance delta to <= +1.0 ft for 3 consecutive laps in this segment."
+        return (
+            "Rider check: repeat the same turn-in and apex marker for the next 3 laps with no"
+            " mid-corner correction. Telemetry confirmation (optional): keep line variance delta"
+            " <= +1.0 ft."
+        )
     if rule_id in {"entry_speed", "early_braking"}:
-        return "Improve entry speed delta by at least +1.2 mph without increasing line variance over the next 2 laps."
+        return (
+            "Rider check: for the next 2 laps, carry speed to apex with one clean brake release and"
+            " no extra scrub. Telemetry confirmation (optional): improve entry speed delta by"
+            " >= +1.2 mph without increasing line spread."
+        )
     if rule_id == "corner_speed_loss":
-        return "Improve apex minimum speed delta by at least +1.2 mph while keeping apex location within 13 ft."
+        return (
+            "Rider check: hold a single arc through apex for 2-3 laps and feel less steering scrub"
+            " at max lean. Telemetry confirmation (optional): improve apex minimum speed delta by"
+            " >= +1.2 mph while keeping apex location within 13 ft."
+        )
     if rule_id in {"late_throttle_pickup", "exit_speed"}:
-        return "Cut pickup delay by >= 20 ft (or 0.06 s) and improve exit speed delta by >= +1.2 mph."
+        return (
+            "Rider check: begin drive sooner after apex for the next 2 laps without widening exit."
+            " Telemetry confirmation (optional): cut pickup delay by >= 20 ft (or 0.06 s) and"
+            " improve exit speed delta by >= +1.2 mph."
+        )
     if rule_id == "neutral_throttle":
-        return "Reduce neutral throttle below 0.8 s (or below 39 ft) next session."
+        return (
+            "Rider check: replace post-apex coasting with one smooth roll-on within 2 laps while"
+            " keeping the same line. Telemetry confirmation (optional): reduce neutral throttle"
+            " below 0.8 s (or 39 ft)."
+        )
     if rule_id == "steering_smoothness":
-        return "Bring yaw_rms_ratio to <= 1.10 while improving apex minimum speed delta by >= +0.6 mph."
-    return f"Show a measurable {phase} improvement in this corner over the next 2-3 laps."
+        return (
+            "Rider check: make one clean steering input and hold it through apex for 2-3 laps."
+            " Telemetry confirmation (optional): bring yaw ratio to <= 1.10 while improving apex"
+            " minimum speed delta by >= +0.6 mph."
+        )
+    if behavior_class == "braking":
+        return (
+            "Rider check: run two laps with one braking marker change only and keep the same turn-in"
+            " line. Telemetry confirmation (optional): entry speed and brake timing trend in the"
+            " target direction."
+        )
+    if behavior_class == "throttle":
+        return (
+            "Rider check: run two laps with one earlier, smoother drive input while holding exit"
+            " line. Telemetry confirmation (optional): throttle pickup/exit-speed metrics improve"
+            " without extra line spread."
+        )
+    if behavior_class == "line_trajectory":
+        return (
+            "Rider check: lock one turn-in and apex marker for 3 laps with minimal correction."
+            " Telemetry confirmation (optional): line repeatability and segment speed trend improve."
+        )
+    return (
+        f"Rider check: run 2 controlled laps and feel a clear {phase} improvement with stable bike"
+        " behavior. Telemetry confirmation (optional): trend metrics in this segment improve."
+    )
 
 
 def _experimental_protocol(
     *,
     expected_gain_s: float,
     primary_id: str,
+    behavior_class: str,
     phase: str,
     evidence: Dict[str, Any],
 ) -> Dict[str, Any]:
-    return {
+    protocol_class = behavior_class
+    if protocol_class not in {"braking", "throttle", "line_trajectory"}:
+        protocol_class = "generic_safe"
+
+    protocol = {
+        "behavior_class": protocol_class,
         "expected_gain_s": round(expected_gain_s, 3),
-        "risk": "May reduce stability or consistency if over-applied.",
-        "bounds": "Change one variable only; run 2 laps; keep adjustment within ~10-15 ft / gentle input change.",
-        "abort_criteria": "Abort immediately if line variance rises >1.0 ft, confidence drops, or the bike feels unstable.",
+        "risk": "",
+        "bounds": "",
+        "abort_criteria": "",
     }
+
+    if protocol_class == "braking":
+        protocol["risk"] = "Over-braking can destabilize turn-in and increase front-end load abruptly."
+        protocol["bounds"] = (
+            "Change braking timing only; run 2 laps; adjust one marker step (~5-10 ft) while"
+            " keeping release shape and line constant."
+        )
+        protocol["abort_criteria"] = (
+            "Abort the test if the bike chatters, runs wide at turn-in, or needs a second brake"
+            " stab to make apex."
+        )
+        return protocol
+
+    if protocol_class == "throttle":
+        protocol["risk"] = "Early or abrupt drive can force line widening or rear instability."
+        protocol["bounds"] = (
+            "Change throttle timing/rate only; run 2 laps; begin drive one small step earlier (~5-10 ft)"
+            " with smooth roll-on."
+        )
+        protocol["abort_criteria"] = (
+            "Abort the test if rear slip spikes, exit line opens, or you must roll out to catch the"
+            " bike."
+        )
+        return protocol
+
+    if protocol_class == "line_trajectory":
+        protocol["risk"] = "Forcing line changes can reduce confidence and create mid-corner corrections."
+        protocol["bounds"] = (
+            "Change line marker choice only; run 3 laps; lock one turn-in/apex marker and keep brake"
+            " and throttle timing unchanged."
+        )
+        protocol["abort_criteria"] = (
+            "Abort the test if repeated mid-corner corrections appear, curb misses increase, or the"
+            " bike feels unsettled."
+        )
+        return protocol
+
+    protocol["risk"] = "Unknown change type; treat as elevated risk until classified."
+    protocol["bounds"] = (
+        "Conservative fallback: change one input only; run 1-2 laps max; keep all other references"
+        " fixed and prioritize stability."
+    )
+    protocol["abort_criteria"] = (
+        "Abort immediately on any instability, missed reference point, or confidence drop."
+    )
+    protocol["note"] = (
+        f"Unknown behavior class for rule '{primary_id}'. Applied conservative generic protocol."
+    )
+    return protocol
+
+
+def _behavior_class(rule_id: str) -> str:
+    if rule_id in {"entry_speed", "early_braking", "light_brake"}:
+        return "braking"
+    if rule_id in {"late_throttle_pickup", "exit_speed", "light_throttle", "neutral_throttle"}:
+        return "throttle"
+    if rule_id in {"line_inconsistency", "corner_speed_loss", "steering_smoothness"}:
+        return "line_trajectory"
+    return "generic_safe"
 
 
 def _as_str(value: Any) -> Optional[str]:
