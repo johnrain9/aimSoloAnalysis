@@ -1,16 +1,17 @@
 # Project Bootstrap Snapshot
 
-Generated: 2026-02-06T22:12:14-07:00
+Generated: 2026-02-06T22:22:46-07:00
 Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_bootstrap.ps1`.
 
 ## Repo State
 - Root: `C:\Users\Paul\ai\aimSoloAnalysis`
 - Branch: `master`
-- HEAD: `b6c0579`
+- HEAD: `f5dabf3`
 - Dirty: `True`
 
 ### Working Tree Changes
 - ` M PROJECT_BOOTSTRAP.md`
+- ` M REQUIREMENTS_BASELINE.md`
 - ` M TASKS.md`
 - ` M aimsolo.db`
 - ` M analytics/trackside/__pycache__/pipeline.cpython-310.pyc`
@@ -22,7 +23,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - ` M ingest/csv/__pycache__/save.cpython-310.pyc`
 - ` M storage/__pycache__/db.cpython-310.pyc`
 - `?? .claude/`
-- `?? TASK_PROMPTS_TONIGHT_TOP1.md`
 - `?? analytics/__pycache__/metrics_writer.cpython-310.pyc`
 - `?? artifacts/eval_backend_report.json`
 - `?? artifacts/frontend_eval_report.json`
@@ -37,15 +37,15 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `?? tools/__pycache__/`
 
 ## Recently Modified Files
-- `PROJECT_BOOTSTRAP.md` (2026-02-06 22:10:12)
-- `TASKS.md` (2026-02-06 22:12:09)
+- `PROJECT_BOOTSTRAP.md` (2026-02-06 22:19:25)
+- `REQUIREMENTS_BASELINE.md` (2026-02-06 22:22:32)
+- `TASKS.md` (2026-02-06 22:22:41)
 - `aimsolo.db` (2026-02-06 21:50:39)
-- `artifacts\project_bootstrap.json` (2026-02-06 22:10:12)
+- `artifacts\project_bootstrap.json` (2026-02-06 22:19:25)
 - `.claude\` (2026-02-06 22:10:48)
-- `TASK_PROMPTS_TONIGHT_TOP1.md` (2026-02-06 22:12:03)
 - `artifacts\eval_backend_report.json` (2026-02-06 21:53:00)
 - `artifacts\frontend_eval_report.json` (2026-02-06 21:52:43)
-- `REQUIREMENTS_BASELINE.md` (2026-02-06 21:49:24)
+- `TASK_PROMPTS_TONIGHT_TOP1.md` (2026-02-06 22:12:03)
 - `analytics\trackside\pipeline.py` (2026-02-06 21:48:03)
 - `analytics\trackside\rank.py` (2026-02-06 21:48:03)
 - `analytics\trackside\synthesis.py` (2026-02-06 21:48:03)
@@ -64,6 +64,7 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `tools\update_bootstrap.ps1` (2026-02-06 21:36:03)
 
 ## Recent Commits
+- `f5dabf3` 2026-02-06 - chore(planner): add tonight top1 quality task pack
 - `b6c0579` 2026-02-06 - chore(planner): refresh bootstrap after handoff integration
 - `a1f4445` 2026-02-06 - chore(planner): ingest handoffs and refresh baseline
 - `395d812` 2026-02-06 - feat(trackside): enforce p0 next-session insight contract
@@ -75,7 +76,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `a8ec07b` 2026-02-06 - fix(api): normalize units contract across insights/compare/map
 - `0f37b66` 2026-02-06 - chore(planner): optimize bootstrap recency and document cost model
 - `54914bb` 2026-02-06 - chore(planner): refresh bootstrap snapshot
-- `c4b8271` 2026-02-06 - chore(planner): add planner skill and bootstrap state cache
 
 ## Requirement Gap Snapshot
 ### Active Gaps
@@ -83,6 +83,12 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - GAP-007 (High): Backend/frontend harnesses exist, but no unified scorecard + release-gating flow yet.
 - GAP-008 (Medium): No formal human-in-the-loop qualitative review loop for coaching quality.
 - GAP-009 (Medium): Backend baseline governance unresolved for known drift case (`HPR_Full_09292024-21`).
+- GAP-013 (High): Rider-facing coaching copy is not guaranteed to be unit-consistent across all templated strings.
+- GAP-014 (High): Corner naming may still surface internal identifiers instead of rider-recognizable corner identity.
+- GAP-015 (Medium): Success checks and experimental abort criteria are not yet consistently rider-observable and change-type-specific.
+- GAP-016 (Medium): UI does not yet enforce visually dominant top-1 recommendation in a requirement-tested way.
+- GAP-017 (Medium): Recurring multi-session issue narration is not reliably surfaced in coaching copy.
+- GAP-018 (Medium): Fatigue-aware weighting for late-session laps is not implemented.
 
 ## Open Task Items (TASKS.md)
 - [in-progress] XRK R&D notes (PROGRESS_AIMSOLO_XRK.txt) - continue in parallel
@@ -100,6 +106,11 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - [todo] TASK-EVAL-09: Batch top-1 trace runner over CSV corpus (`artifacts/top1_session_traces.jsonl`)
 - [todo] TASK-EVAL-10: Aggregate top-1 scorecard with hard/soft metrics + drift support (`artifacts/eval_top1_quality_report.json`)
 - [todo] TASK-EVAL-11: Deterministic coach review packet generator (`artifacts/top1_review_packet.md/.csv`)
+- [todo] TASK-P0-04: Unit-consistent rider-facing coaching copy (RQ-P0-007, RQ-P0-024)
+- [todo] TASK-P0-05: Rider-recognizable corner identity and fallback phrasing (RQ-P0-006, RQ-P0-026)
+- [todo] TASK-P0-06: Rider-observable success checks and change-type-specific experimental protocols (RQ-P0-017, RQ-P0-018, RQ-P0-029)
+- [todo] TASK-P0-07: Make top-1 insight visually dominant in UI and evaluate explicitly (RQ-P0-025)
+- [todo] TASK-P0-08: Session recurrence narration + late-session fatigue-aware weighting (RQ-P0-027, RQ-P0-028)
 
 ## Planner Entrypoints
 - `PROJECT_BOOTSTRAP.md`

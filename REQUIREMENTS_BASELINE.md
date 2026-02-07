@@ -39,12 +39,14 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 ### 3.3 Output Shape and Brevity
 - RQ-P0-005: P0 briefing shall contain at most 3 insights, with at most 2 primary focus items.
   - Acceptance: API/UI enforce top-N limits and primary focus designation.
-- RQ-P0-006: Each recommendation shall be corner- and phase-specific (`entry`, `mid`, `exit`).
-  - Acceptance: Output includes corner/segment identifier and phase field or equivalent phrasing.
+- RQ-P0-006: Each recommendation shall be corner- and phase-specific (`entry`, `mid`, `exit`) using rider-recognizable corner identity.
+  - Acceptance: Output uses conventional corner naming a rider recognizes at that track (for example `T1`, `Turn 5`, `hairpin`) and includes phase field or equivalent phrasing.
+  - Acceptance: A rider familiar with the circuit can identify the corner from output alone without cross-referencing internal segment IDs or maps.
 
 ### 3.4 Operational and Causal Coaching Language
 - RQ-P0-007: Recommendations shall be operational ("what/where/how much"), not only diagnostic labels.
   - Acceptance: Insight copy includes concrete action cue (distance/time/marker-based).
+  - Acceptance: Rider-facing coaching copy uses the rider's preferred unit system consistently within action/evidence/causal text, not only in converted API numeric fields.
 - RQ-P0-008: Recommendations shall include causal reasoning tied to evidence.
   - Acceptance: Insight text follows "do X because Y evidence indicates Z" structure.
 
@@ -70,9 +72,9 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - RQ-P0-016: System shall resolve/suppress conflicting recommendations in the same corner-phase to avoid contradictory rider instructions.
   - Acceptance: Final briefing has coherent, non-conflicting action set.
 - RQ-P0-017: Each recommendation shall include a next-session success check (measurable validation target).
-  - Acceptance: Output includes concrete verification metric for the next run.
+  - Acceptance: Output includes a rider-observable success check for the next run (what to feel/see/do), optionally paired with post-session telemetry confirmation.
 - RQ-P0-018: Experimental recommendations shall include bounded test protocol.
-  - Acceptance: Output includes one-variable test guidance, short trial window, and abort criteria.
+  - Acceptance: Output includes one-variable test guidance, short trial window, and rider-observable abort criteria relevant while on track.
 
 ### 3.8 Trackside UI Quality
 - RQ-P0-019: P0 UI shall prioritize rapid understanding with strong information hierarchy.
@@ -85,6 +87,20 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
   - Acceptance: Track overlays include legend/context and clearly distinguish rider path vs target path in affected segments.
 - RQ-P0-023: UI interaction quality shall support trackside pace.
   - Acceptance: Common actions (screen switch, insight select, map highlight) feel immediate and do not require repeated retries.
+
+### 3.9 Additional P0 Behavior Requirements (Rider Comprehension and Actionability)
+- RQ-P0-024: Coaching copy shall be fully unit-consistent in the rider's preferred system.
+  - Acceptance: All rider-facing text (titles, details, actions, evidence summaries, causal reasons, success checks) uses one coherent unit system with no mixed-unit phrasing.
+- RQ-P0-025: Primary focus insight shall be visually dominant without requiring comparison across cards.
+  - Acceptance: The #1 recommendation is visually emphasized (position/size/weight) so a coach can identify first instruction at a glance.
+- RQ-P0-026: Corner identity shall use track-specific names recognizable to riders familiar with the circuit.
+  - Acceptance: Output uses conventional corner name/number when available; if unavailable, fallback is human-meaningful location phrasing (for example `left-hander onto back straight`) rather than raw segment ID.
+- RQ-P0-027: Session-over-session pattern narration shall be shown when directly actionable for next-session decisions.
+  - Acceptance: When recurrence is detected across 2+ same-track sessions and materially changes priority, coaching text explicitly states recurrence and "why now."
+- RQ-P0-028: Late-session fatigue awareness shall prevent misattribution of fatigue fade as technique regression.
+  - Acceptance: When late-session lap-time fade pattern is detected without matching technique signal shift, output flags likely fatigue and de-weights late laps for technique recommendations.
+- RQ-P0-029: Experimental protocol shall be specific to change type.
+  - Acceptance: Trial bounds and abort criteria are tailored to the tested behavior class (for example braking vs throttle vs line), using rider-observable cues.
 
 ## 4) Functional Requirements
 
@@ -211,6 +227,24 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - GAP-009 (Medium): Backend baseline governance unresolved for known drift case (`HPR_Full_09292024-21`).
   - Affects: reliable regression signaling for automated runs.
   - Related requirements: RQ-EVAL-002, RQ-EVAL-007.
+- GAP-013 (High): Rider-facing coaching copy is not guaranteed to be unit-consistent across all templated strings.
+  - Affects: trackside comprehension speed and trust under time pressure.
+  - Related requirements: RQ-P0-007, RQ-P0-024.
+- GAP-014 (High): Corner naming may still surface internal identifiers instead of rider-recognizable corner identity.
+  - Affects: immediate rider understanding of where to apply change.
+  - Related requirements: RQ-P0-006, RQ-P0-026.
+- GAP-015 (Medium): Success checks and experimental abort criteria are not yet consistently rider-observable and change-type-specific.
+  - Affects: safe/usable execution of recommendations on track.
+  - Related requirements: RQ-P0-017, RQ-P0-018, RQ-P0-029.
+- GAP-016 (Medium): UI does not yet enforce visually dominant top-1 recommendation in a requirement-tested way.
+  - Affects: rapid coach/rider prioritization in short pre-session briefings.
+  - Related requirements: RQ-P0-025.
+- GAP-017 (Medium): Recurring multi-session issue narration is not reliably surfaced in coaching copy.
+  - Affects: rider urgency and decision confidence for repeated corner problems.
+  - Related requirements: RQ-P0-002, RQ-P0-027.
+- GAP-018 (Medium): Fatigue-aware weighting for late-session laps is not implemented.
+  - Affects: false attribution of fade laps to technique errors.
+  - Related requirements: RQ-P0-028.
 
 ### 6.3 Recently Closed Gaps (Merged on `master`)
 - Closed GAP-001 (High): Upsert ID conflict-path correctness fixed.
@@ -243,7 +277,7 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - Gate B: API/UI compare contract aligned and tested.
 - Gate C: Unit declarations consistent across API responses.
 - Gate D: Test suite and trend harness pass in documented local command set.
-- Gate E: P0 behavior outputs satisfy RQ-P0-005 through RQ-P0-023 (brevity, coherence, risk tiering, measurable next-session checks, and UI quality).
+- Gate E: P0 behavior outputs satisfy RQ-P0-005 through RQ-P0-029 (brevity, coherence, risk tiering, rider-observable checks, unit-consistent coaching copy, corner recognizability, and UI quality).
 - Gate F: Unified evaluation harness is in place and passing (backend + frontend scorecard, baseline/regression checks, machine-readable artifacts).
 - Gate G: Product-behavior evaluation model is active (auto-scored checks + golden scenarios + current human-review status).
 
@@ -258,6 +292,11 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - TASK-EVAL-01: Define evaluation schema + scorecard contract for automated decision loops (RQ-EVAL-006/007, RQ-NFR-006).
 - TASK-EVAL-04: Add frequent-run workflow and release gating docs/commands (RQ-EVAL-007, RQ-NFR-005).
 - TASK-EVAL-05: Implement product-behavior assertion suite + golden scenario drift checks (RQ-EVAL-008/009/010).
+- TASK-P0-04: Enforce rider-facing unit consistency across synthesized coaching copy (RQ-P0-007, RQ-P0-024, RQ-UNT-001).
+- TASK-P0-05: Introduce rider-recognizable corner naming/fallback mapping in coaching output + API payloads (RQ-P0-006, RQ-P0-026).
+- TASK-P0-06: Rework success checks and experimental protocols to rider-observable, change-type-specific guidance (RQ-P0-017, RQ-P0-018, RQ-P0-029).
+- TASK-P0-07: Make top-1 recommendation visually dominant and test it in frontend harness checks (RQ-P0-025, RQ-EVAL-005).
+- TASK-P0-08: Add recurrence narration and fatigue-aware weighting for next-session decision quality (RQ-P0-002, RQ-P0-027, RQ-P0-028).
 - TASK-EVAL-06: Implement coach-review workflow + status integration into scorecard (RQ-EVAL-011/012, RQ-NFR-007).
 
 ### 9.1 Completed Task Breakdown (Merged)
