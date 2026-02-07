@@ -70,11 +70,45 @@ Use this template when delegating implementation work to another AI.
 - Risk notes and follow-ups.
 
 ## 8) Response Format (Required)
-1. Summary: what changed and why.
-2. Files changed: one-line purpose per file.
-3. Tests: commands + results.
-4. Requirement coverage: map each requirement ID to implementation evidence.
-5. Risks/open items: blockers, tradeoffs, deferred work.
+Return your final response in the exact structure below so it can be pasted directly into planner intake without reformatting.
+
+```text
+[TASK-HANDOFF-START]
+task_id: {{task_id}}
+branch: {{assigned_branch}}
+workdir: {{assigned_workdir}}
+commit: <commit-hash>
+status: <done|partial|blocked>
+
+summary:
+- <what changed and why>
+
+files_changed:
+- <path>: <one-line purpose>
+- <path>: <one-line purpose>
+
+tests:
+- command: <exact command>
+  result: <pass|fail>
+  details: <short result summary>
+- command: <exact command>
+  result: <pass|fail>
+  details: <short result summary>
+
+requirements_coverage:
+- requirement_id: <RQ-...>
+  evidence: <file/function/test proving coverage>
+- requirement_id: <RQ-...>
+  evidence: <file/function/test proving coverage>
+
+open_items:
+- <risk, deferred item, or blocker>
+- <risk, deferred item, or blocker>
+
+notes_for_planner:
+- <anything needed for integration/cherry-pick order>
+[TASK-HANDOFF-END]
+```
 
 ## 9) Quality Gate (Must Pass Before Hand-off)
 - [ ] All in-scope requirements implemented.
