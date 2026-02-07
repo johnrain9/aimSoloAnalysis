@@ -1,12 +1,12 @@
 # Project Bootstrap Snapshot
 
-Generated: 2026-02-06T22:28:54-07:00
+Generated: 2026-02-06T23:06:52-07:00
 Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_bootstrap.ps1`.
 
 ## Repo State
 - Root: `C:\Users\Paul\ai\aimSoloAnalysis`
 - Branch: `master`
-- HEAD: `fcc061f`
+- HEAD: `2a4eb84`
 - Dirty: `True`
 
 ### Working Tree Changes
@@ -26,10 +26,12 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `?? artifacts/eval_top1_batch_report.json`
 - `?? artifacts/eval_top1_quality_report.json`
 - `?? artifacts/frontend_eval_report.json`
+- `?? artifacts/top1_aggregated_report.json`
 - `?? artifacts/top1_review_packet.csv`
 - `?? artifacts/top1_review_packet.md`
 - `?? artifacts/top1_review_packet_fixture.csv`
 - `?? artifacts/top1_review_packet_fixture.md`
+- `?? artifacts/top1_traces.jsonl`
 - `?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc`
@@ -44,33 +46,36 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `?? tools/__pycache__/`
 
 ## Recently Modified Files
-- `REQUIREMENTS_BASELINE.md` (2026-02-06 22:28:48)
-- `TASKS.md` (2026-02-06 22:28:24)
+- `REQUIREMENTS_BASELINE.md` (2026-02-06 23:06:43)
+- `TASKS.md` (2026-02-06 23:06:34)
 - `aimsolo.db` (2026-02-06 21:50:39)
-- `.claude\` (2026-02-06 22:10:48)
+- `.claude\` (2026-02-06 22:38:17)
 - `artifacts\eval_backend_report.json` (2026-02-06 21:53:00)
-- `artifacts\eval_top1_batch_report.json` (2026-02-06 22:27:34)
+- `artifacts\eval_top1_batch_report.json` (2026-02-06 23:06:06)
 - `artifacts\eval_top1_quality_report.json` (2026-02-06 22:27:37)
 - `artifacts\frontend_eval_report.json` (2026-02-06 21:52:43)
-- `artifacts\top1_review_packet.csv` (2026-02-06 22:27:42)
-- `artifacts\top1_review_packet.md` (2026-02-06 22:27:42)
+- `artifacts\top1_aggregated_report.json` (2026-02-06 23:06:09)
+- `artifacts\top1_review_packet.csv` (2026-02-06 23:06:12)
+- `artifacts\top1_review_packet.md` (2026-02-06 23:06:12)
 - `artifacts\top1_review_packet_fixture.csv` (2026-02-06 22:27:50)
 - `artifacts\top1_review_packet_fixture.md` (2026-02-06 22:27:50)
-- `docs\top1_review_packet_workflow.md` (2026-02-06 22:26:59)
-- `tests\fixtures\top1_review_report.json` (2026-02-06 22:26:59)
-- `tests\fixtures\top1_review_traces.jsonl` (2026-02-06 22:26:59)
-- `tests\test_review_packet.py` (2026-02-06 22:26:59)
-- `tools\build_top1_review_packet.py` (2026-02-06 22:26:59)
-- `tests\test_eval_top1_scorecard.py` (2026-02-06 22:26:55)
-- `tools\eval_top1_scorecard.py` (2026-02-06 22:26:55)
-- `tests\test_eval_top1_batch.py` (2026-02-06 22:26:52)
-- `tools\eval_top1_batch.py` (2026-02-06 22:26:52)
-- `analytics\trackside\rank.py` (2026-02-06 22:26:49)
-- `api\app.py` (2026-02-06 22:26:49)
-- `tests\test_trackside_insight_contract.py` (2026-02-06 22:26:49)
-- `PROJECT_BOOTSTRAP.md` (2026-02-06 22:23:22)
+- `artifacts\top1_traces.jsonl` (2026-02-06 23:06:06)
+- `docs\top1_review_packet_workflow.md` (2026-02-06 23:05:36)
+- `tests\test_eval_top1_batch.py` (2026-02-06 23:05:36)
+- `tests\test_eval_top1_scorecard.py` (2026-02-06 23:05:36)
+- `tests\test_review_packet.py` (2026-02-06 23:05:36)
+- `tools\build_top1_review_packet.py` (2026-02-06 23:05:36)
+- `tools\eval_top1_batch.py` (2026-02-06 23:05:36)
+- `tools\eval_top1_scorecard.py` (2026-02-06 23:05:36)
+- `tools\top1_artifact_contract.py` (2026-02-06 23:05:36)
+- `PLANNER_PROMPT_TEMPLATE.md` (2026-02-06 22:33:51)
+- `TASK_PROMPTS_TONIGHT_TOP1.md` (2026-02-06 22:33:57)
+- `TASK_PROMPTS_WAVE2.md` (2026-02-06 22:34:09)
 
 ## Recent Commits
+- `2a4eb84` 2026-02-06 - fix(eval): align top1 artifact contracts for default chain
+- `6affae2` 2026-02-06 - chore(planner): add reasoning-mode guidance to prompts and skill
+- `4185a60` 2026-02-06 - chore(planner): integrate top1 handoffs and update requirement gaps
 - `fcc061f` 2026-02-06 - feat(eval): add deterministic top1 coach review packet
 - `2cb36f1` 2026-02-06 - feat(eval): add top1 decision trace scorecard
 - `d1dd2e2` 2026-02-06 - feat(eval): add top-1 batch evaluation harness
@@ -80,9 +85,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `f5dabf3` 2026-02-06 - chore(planner): add tonight top1 quality task pack
 - `b6c0579` 2026-02-06 - chore(planner): refresh bootstrap after handoff integration
 - `a1f4445` 2026-02-06 - chore(planner): ingest handoffs and refresh baseline
-- `395d812` 2026-02-06 - feat(trackside): enforce p0 next-session insight contract
-- `f1fa416` 2026-02-06 - feat(eval): add frontend flow harness and JSON report
-- `2df0b3e` 2026-02-06 - feat(eval): add backend evaluation harness and JSON report
 
 ## Requirement Gap Snapshot
 ### Active Gaps
@@ -96,7 +98,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - GAP-016 (Medium): UI does not yet enforce visually dominant top-1 recommendation in a requirement-tested way.
 - GAP-017 (Medium): Recurring multi-session issue narration is not reliably surfaced in coaching copy.
 - GAP-018 (Medium): Fatigue-aware weighting for late-session laps is not implemented.
-- GAP-019 (High): Default top-1 evaluation artifact paths are not aligned across batch, scorecard, and review packet tools.
 
 ## Open Task Items (TASKS.md)
 - [in-progress] XRK R&D notes (PROGRESS_AIMSOLO_XRK.txt) - continue in parallel
@@ -110,7 +111,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - [todo] Unified scorecard + release gating workflow combining backend/frontend checks
 - [todo] Product-behavior assertion suite + golden scenario drift checks
 - [todo] Human coach review workflow integrated into evaluation status
-- [todo] TASK-EVAL-12: Align top-1 artifact path contracts so default no-arg chain works end-to-end (batch -> scorecard -> review packet)
 - [todo] TASK-P0-04: Unit-consistent rider-facing coaching copy (RQ-P0-007, RQ-P0-024)
 - [todo] TASK-P0-05: Rider-recognizable corner identity and fallback phrasing (RQ-P0-006, RQ-P0-026)
 - [todo] TASK-P0-06: Rider-observable success checks and change-type-specific experimental protocols (RQ-P0-017, RQ-P0-018, RQ-P0-029)

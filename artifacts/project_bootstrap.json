@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-02-06T22:28:54-07:00",
+  "generated_at": "2026-02-06T23:06:52-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
     "branch": "master",
-    "head": "fcc061f",
+    "head": "2a4eb84",
     "dirty": true,
     "status": [
       " M REQUIREMENTS_BASELINE.md",
@@ -22,10 +22,12 @@
       "?? artifacts/eval_top1_batch_report.json",
       "?? artifacts/eval_top1_quality_report.json",
       "?? artifacts/frontend_eval_report.json",
+      "?? artifacts/top1_aggregated_report.json",
       "?? artifacts/top1_review_packet.csv",
       "?? artifacts/top1_review_packet.md",
       "?? artifacts/top1_review_packet_fixture.csv",
       "?? artifacts/top1_review_packet_fixture.md",
+      "?? artifacts/top1_traces.jsonl",
       "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
@@ -41,6 +43,21 @@
     ]
   },
   "recent_commits": [
+    {
+      "hash": "2a4eb84",
+      "date": "2026-02-06",
+      "subject": "fix(eval): align top1 artifact contracts for default chain"
+    },
+    {
+      "hash": "6affae2",
+      "date": "2026-02-06",
+      "subject": "chore(planner): add reasoning-mode guidance to prompts and skill"
+    },
+    {
+      "hash": "4185a60",
+      "date": "2026-02-06",
+      "subject": "chore(planner): integrate top1 handoffs and update requirement gaps"
+    },
     {
       "hash": "fcc061f",
       "date": "2026-02-06",
@@ -85,31 +102,16 @@
       "hash": "a1f4445",
       "date": "2026-02-06",
       "subject": "chore(planner): ingest handoffs and refresh baseline"
-    },
-    {
-      "hash": "395d812",
-      "date": "2026-02-06",
-      "subject": "feat(trackside): enforce p0 next-session insight contract"
-    },
-    {
-      "hash": "f1fa416",
-      "date": "2026-02-06",
-      "subject": "feat(eval): add frontend flow harness and JSON report"
-    },
-    {
-      "hash": "2df0b3e",
-      "date": "2026-02-06",
-      "subject": "feat(eval): add backend evaluation harness and JSON report"
     }
   ],
   "recent_files": [
     {
       "path": "REQUIREMENTS_BASELINE.md",
-      "last_write": "2026-02-06 22:28:48"
+      "last_write": "2026-02-06 23:06:43"
     },
     {
       "path": "TASKS.md",
-      "last_write": "2026-02-06 22:28:24"
+      "last_write": "2026-02-06 23:06:34"
     },
     {
       "path": "aimsolo.db",
@@ -117,7 +119,7 @@
     },
     {
       "path": ".claude\\",
-      "last_write": "2026-02-06 22:10:48"
+      "last_write": "2026-02-06 22:38:17"
     },
     {
       "path": "artifacts\\eval_backend_report.json",
@@ -125,7 +127,7 @@
     },
     {
       "path": "artifacts\\eval_top1_batch_report.json",
-      "last_write": "2026-02-06 22:27:34"
+      "last_write": "2026-02-06 23:06:06"
     },
     {
       "path": "artifacts\\eval_top1_quality_report.json",
@@ -136,12 +138,16 @@
       "last_write": "2026-02-06 21:52:43"
     },
     {
+      "path": "artifacts\\top1_aggregated_report.json",
+      "last_write": "2026-02-06 23:06:09"
+    },
+    {
       "path": "artifacts\\top1_review_packet.csv",
-      "last_write": "2026-02-06 22:27:42"
+      "last_write": "2026-02-06 23:06:12"
     },
     {
       "path": "artifacts\\top1_review_packet.md",
-      "last_write": "2026-02-06 22:27:42"
+      "last_write": "2026-02-06 23:06:12"
     },
     {
       "path": "artifacts\\top1_review_packet_fixture.csv",
@@ -152,56 +158,52 @@
       "last_write": "2026-02-06 22:27:50"
     },
     {
+      "path": "artifacts\\top1_traces.jsonl",
+      "last_write": "2026-02-06 23:06:06"
+    },
+    {
       "path": "docs\\top1_review_packet_workflow.md",
-      "last_write": "2026-02-06 22:26:59"
-    },
-    {
-      "path": "tests\\fixtures\\top1_review_report.json",
-      "last_write": "2026-02-06 22:26:59"
-    },
-    {
-      "path": "tests\\fixtures\\top1_review_traces.jsonl",
-      "last_write": "2026-02-06 22:26:59"
-    },
-    {
-      "path": "tests\\test_review_packet.py",
-      "last_write": "2026-02-06 22:26:59"
-    },
-    {
-      "path": "tools\\build_top1_review_packet.py",
-      "last_write": "2026-02-06 22:26:59"
-    },
-    {
-      "path": "tests\\test_eval_top1_scorecard.py",
-      "last_write": "2026-02-06 22:26:55"
-    },
-    {
-      "path": "tools\\eval_top1_scorecard.py",
-      "last_write": "2026-02-06 22:26:55"
+      "last_write": "2026-02-06 23:05:36"
     },
     {
       "path": "tests\\test_eval_top1_batch.py",
-      "last_write": "2026-02-06 22:26:52"
+      "last_write": "2026-02-06 23:05:36"
+    },
+    {
+      "path": "tests\\test_eval_top1_scorecard.py",
+      "last_write": "2026-02-06 23:05:36"
+    },
+    {
+      "path": "tests\\test_review_packet.py",
+      "last_write": "2026-02-06 23:05:36"
+    },
+    {
+      "path": "tools\\build_top1_review_packet.py",
+      "last_write": "2026-02-06 23:05:36"
     },
     {
       "path": "tools\\eval_top1_batch.py",
-      "last_write": "2026-02-06 22:26:52"
+      "last_write": "2026-02-06 23:05:36"
     },
     {
-      "path": "analytics\\trackside\\rank.py",
-      "last_write": "2026-02-06 22:26:49"
+      "path": "tools\\eval_top1_scorecard.py",
+      "last_write": "2026-02-06 23:05:36"
     },
     {
-      "path": "api\\app.py",
-      "last_write": "2026-02-06 22:26:49"
+      "path": "tools\\top1_artifact_contract.py",
+      "last_write": "2026-02-06 23:05:36"
     },
     {
-      "path": "tests\\test_trackside_insight_contract.py",
-      "last_write": "2026-02-06 22:26:49"
+      "path": "PLANNER_PROMPT_TEMPLATE.md",
+      "last_write": "2026-02-06 22:33:51"
     },
     {
-      "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-06 22:23:22"
+      "path": "TASK_PROMPTS_TONIGHT_TOP1.md",
+      "last_write": "2026-02-06 22:33:57"
+    },
+    {
+      "path": "TASK_PROMPTS_WAVE2.md",
+      "last_write": "2026-02-06 22:34:09"
     }
   ],
   "likely_closed_gaps": [],
@@ -215,8 +217,7 @@
     "GAP-015 (Medium): Success checks and experimental abort criteria are not yet consistently rider-observable and change-type-specific.",
     "GAP-016 (Medium): UI does not yet enforce visually dominant top-1 recommendation in a requirement-tested way.",
     "GAP-017 (Medium): Recurring multi-session issue narration is not reliably surfaced in coaching copy.",
-    "GAP-018 (Medium): Fatigue-aware weighting for late-session laps is not implemented.",
-    "GAP-019 (High): Default top-1 evaluation artifact paths are not aligned across batch, scorecard, and review packet tools."
+    "GAP-018 (Medium): Fatigue-aware weighting for late-session laps is not implemented."
   ],
   "open_task_items": [
     "[in-progress] XRK R&D notes (PROGRESS_AIMSOLO_XRK.txt) - continue in parallel",
@@ -230,7 +231,6 @@
     "[todo] Unified scorecard + release gating workflow combining backend/frontend checks",
     "[todo] Product-behavior assertion suite + golden scenario drift checks",
     "[todo] Human coach review workflow integrated into evaluation status",
-    "[todo] TASK-EVAL-12: Align top-1 artifact path contracts so default no-arg chain works end-to-end (batch -> scorecard -> review packet)",
     "[todo] TASK-P0-04: Unit-consistent rider-facing coaching copy (RQ-P0-007, RQ-P0-024)",
     "[todo] TASK-P0-05: Rider-recognizable corner identity and fallback phrasing (RQ-P0-006, RQ-P0-026)",
     "[todo] TASK-P0-06: Rider-observable success checks and change-type-specific experimental protocols (RQ-P0-017, RQ-P0-018, RQ-P0-029)",

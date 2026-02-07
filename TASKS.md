@@ -79,10 +79,10 @@ Status key: [done] [in-progress] [todo]
 
 ## Tonight Focus: Top-1 Recommendation Quality
 - [done] TASK-P0-03: Top-1 quality gates + gain root-cause trace (keep rec 2/3 behavior unchanged)
-- [done] TASK-EVAL-09: Batch top-1 trace runner over CSV corpus (`tools/eval_top1_batch.py`, `artifacts/eval_top1_batch_report.json`)
-- [done] TASK-EVAL-10: Aggregate top-1 scorecard with hard/soft metrics + drift support (`tools/eval_top1_scorecard.py`, `artifacts/eval_top1_quality_report.json`)
+- [done] TASK-EVAL-09: Batch top-1 trace runner over CSV corpus (`tools/eval_top1_batch.py`, canonical `artifacts/top1_traces.jsonl`)
+- [done] TASK-EVAL-10: Aggregate top-1 scorecard with hard/soft metrics + drift support (`tools/eval_top1_scorecard.py`, canonical `artifacts/top1_aggregated_report.json`)
 - [done] TASK-EVAL-11: Deterministic coach review packet generator (`tools/build_top1_review_packet.py`, `artifacts/top1_review_packet.md/.csv`)
-- [todo] TASK-EVAL-12: Align top-1 artifact path contracts so default no-arg chain works end-to-end (batch -> scorecard -> review packet)
+- [done] TASK-EVAL-12: Align top-1 artifact path contracts so default no-arg chain works end-to-end (batch -> scorecard -> review packet)
 
 ## P0 Requirement Updates (Newly Added/Strengthened)
 - [todo] TASK-P0-04: Unit-consistent rider-facing coaching copy (RQ-P0-007, RQ-P0-024)

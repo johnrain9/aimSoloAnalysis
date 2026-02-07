@@ -245,9 +245,6 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - GAP-018 (Medium): Fatigue-aware weighting for late-session laps is not implemented.
   - Affects: false attribution of fade laps to technique errors.
   - Related requirements: RQ-P0-028.
-- GAP-019 (High): Default top-1 evaluation artifact paths are not aligned across batch, scorecard, and review packet tools.
-  - Affects: single-command/default-command end-to-end automation reliability.
-  - Related requirements: RQ-EVAL-007, RQ-EVAL-008, RQ-EVAL-010, RQ-NFR-006.
 
 ### 6.3 Recently Closed Gaps (Merged on `master`)
 - Closed GAP-001 (High): Upsert ID conflict-path correctness fixed.
@@ -286,6 +283,9 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - Closed GAP-023 (Medium): Deterministic top-1 human-review packet generator and workflow docs added.
   - Evidence: commit `fcc061f`, tests `tests/test_review_packet.py`, docs `docs/top1_review_packet_workflow.md`.
   - Related requirements: RQ-EVAL-011, RQ-EVAL-012, RQ-NFR-007.
+- Closed GAP-019 (High): Default top-1 evaluation artifact path contracts aligned across batch, scorecard, and review packet tools.
+  - Evidence: commit `2a4eb84`, tests `tests/test_eval_top1_batch.py`, `tests/test_eval_top1_scorecard.py`, `tests/test_review_packet.py`.
+  - Related requirements: RQ-EVAL-007, RQ-EVAL-008, RQ-EVAL-010, RQ-EVAL-011, RQ-EVAL-012, RQ-NFR-006, RQ-NFR-007.
 
 ## 7) Release Gates (P0)
 - Gate A: No high severity data-integrity defects open (GAP-001/002 resolved).
@@ -313,7 +313,6 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - TASK-P0-07: Make top-1 recommendation visually dominant and test it in frontend harness checks (RQ-P0-025, RQ-EVAL-005).
 - TASK-P0-08: Add recurrence narration and fatigue-aware weighting for next-session decision quality (RQ-P0-002, RQ-P0-027, RQ-P0-028).
 - TASK-EVAL-06: Implement coach-review workflow + status integration into scorecard (RQ-EVAL-011/012, RQ-NFR-007).
-- TASK-EVAL-12: Align top-1 artifact path contracts and defaults across batch -> scorecard -> review packet tools (RQ-EVAL-007, RQ-EVAL-010, RQ-NFR-006).
 
 ### 9.1 Completed Task Breakdown (Merged)
 - TASK-DB-01: Fix upsert key return guarantees (RQ-DB-002/004).
@@ -328,6 +327,7 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - TASK-EVAL-09: Add batch top-1 evaluation harness and report artifact (RQ-EVAL-007/008/010, RQ-NFR-006).
 - TASK-EVAL-10: Add top-1 quality scorecard harness (hard gates + soft indicators) (RQ-EVAL-008/009/010, RQ-NFR-006).
 - TASK-EVAL-11: Add deterministic top-1 human-review packet generator + workflow docs (RQ-EVAL-011/012, RQ-NFR-007).
+- TASK-EVAL-12: Align top-1 artifact path contracts and defaults across batch -> scorecard -> review packet tools (RQ-EVAL-007/008/010/011/012, RQ-NFR-006/007).
 
 ## 10) P1 Planned Requirements (Non-Blocking)
 
