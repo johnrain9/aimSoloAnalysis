@@ -221,9 +221,9 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - GAP-007 (High): Backend/frontend harnesses exist, but no unified scorecard + release-gating flow yet.
   - Affects: confidence in automated AI-driven iteration and go/no-go decisions.
   - Related requirements: RQ-EVAL-006, RQ-EVAL-007, RQ-NFR-005, RQ-NFR-006.
-- GAP-008 (Medium): No formal human-in-the-loop qualitative review loop for coaching quality.
-  - Affects: validation of nuanced coaching usefulness/safety framing beyond deterministic checks.
-  - Related requirements: RQ-EVAL-011, RQ-EVAL-012, RQ-NFR-007.
+- GAP-008 (Medium): Human-review packet exists, but review outcomes are not yet integrated into unified release scorecard status.
+  - Affects: end-to-end gate visibility for qualitative coaching quality in release decisions.
+  - Related requirements: RQ-EVAL-006, RQ-EVAL-011, RQ-EVAL-012, RQ-NFR-007.
 - GAP-009 (Medium): Backend baseline governance unresolved for known drift case (`HPR_Full_09292024-21`).
   - Affects: reliable regression signaling for automated runs.
   - Related requirements: RQ-EVAL-002, RQ-EVAL-007.
@@ -245,6 +245,9 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - GAP-018 (Medium): Fatigue-aware weighting for late-session laps is not implemented.
   - Affects: false attribution of fade laps to technique errors.
   - Related requirements: RQ-P0-028.
+- GAP-019 (High): Default top-1 evaluation artifact paths are not aligned across batch, scorecard, and review packet tools.
+  - Affects: single-command/default-command end-to-end automation reliability.
+  - Related requirements: RQ-EVAL-007, RQ-EVAL-008, RQ-EVAL-010, RQ-NFR-006.
 
 ### 6.3 Recently Closed Gaps (Merged on `master`)
 - Closed GAP-001 (High): Upsert ID conflict-path correctness fixed.
@@ -271,6 +274,18 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - Closed GAP-012 (Medium): Repeatable frontend evaluation harness added with machine-readable report.
   - Evidence: commit `f1fa416`, tests `tests/test_eval_frontend.py`.
   - Related requirements: RQ-EVAL-004, RQ-EVAL-005, RQ-EVAL-007, RQ-NFR-006.
+- Closed GAP-020 (High): Top-1 ranking now includes machine-readable quality gate decisions and gain root-cause trace.
+  - Evidence: commit `ee27d45`, tests `tests/test_trackside_insight_contract.py`.
+  - Related requirements: RQ-P0-007, RQ-P0-008, RQ-P0-011, RQ-P0-012, RQ-P0-013, RQ-P0-014, RQ-P0-015, RQ-P0-017, RQ-EVAL-008.
+- Closed GAP-021 (Medium): Batch top-1 evaluation harness added with per-file pass/fail/not_ready/error status artifact.
+  - Evidence: commit `d1dd2e2`, tests `tests/test_eval_top1_batch.py`.
+  - Related requirements: RQ-EVAL-007, RQ-EVAL-008, RQ-EVAL-010, RQ-NFR-006.
+- Closed GAP-022 (Medium): Top-1 scorecard harness added with hard-gate vs soft-indicator output.
+  - Evidence: commit `2cb36f1`, tests `tests/test_eval_top1_scorecard.py`.
+  - Related requirements: RQ-EVAL-008, RQ-EVAL-009, RQ-EVAL-010, RQ-NFR-006.
+- Closed GAP-023 (Medium): Deterministic top-1 human-review packet generator and workflow docs added.
+  - Evidence: commit `fcc061f`, tests `tests/test_review_packet.py`, docs `docs/top1_review_packet_workflow.md`.
+  - Related requirements: RQ-EVAL-011, RQ-EVAL-012, RQ-NFR-007.
 
 ## 7) Release Gates (P0)
 - Gate A: No high severity data-integrity defects open (GAP-001/002 resolved).
@@ -298,6 +313,7 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - TASK-P0-07: Make top-1 recommendation visually dominant and test it in frontend harness checks (RQ-P0-025, RQ-EVAL-005).
 - TASK-P0-08: Add recurrence narration and fatigue-aware weighting for next-session decision quality (RQ-P0-002, RQ-P0-027, RQ-P0-028).
 - TASK-EVAL-06: Implement coach-review workflow + status integration into scorecard (RQ-EVAL-011/012, RQ-NFR-007).
+- TASK-EVAL-12: Align top-1 artifact path contracts and defaults across batch -> scorecard -> review packet tools (RQ-EVAL-007, RQ-EVAL-010, RQ-NFR-006).
 
 ### 9.1 Completed Task Breakdown (Merged)
 - TASK-DB-01: Fix upsert key return guarantees (RQ-DB-002/004).
@@ -308,6 +324,10 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - TASK-EVAL-02: Expand backend harness with baseline/latency/failure reporting (RQ-EVAL-001/002/003, RQ-EVAL-007, RQ-NFR-006).
 - TASK-EVAL-03: Implement frontend harness for critical flow and did-vs-should semantics (RQ-EVAL-004/005, RQ-EVAL-007, RQ-NFR-006).
 - TASK-P0-01: Enforce P0 insight contract and ranking/risk semantics (RQ-P0-005, RQ-P0-007/008, RQ-P0-011/012/013, RQ-P0-016/017/018).
+- TASK-P0-03: Add top-1 quality gate + gain trace contract for recommendation #1 (RQ-P0-007/008, RQ-P0-011/012/013/014/015/017, RQ-EVAL-008).
+- TASK-EVAL-09: Add batch top-1 evaluation harness and report artifact (RQ-EVAL-007/008/010, RQ-NFR-006).
+- TASK-EVAL-10: Add top-1 quality scorecard harness (hard gates + soft indicators) (RQ-EVAL-008/009/010, RQ-NFR-006).
+- TASK-EVAL-11: Add deterministic top-1 human-review packet generator + workflow docs (RQ-EVAL-011/012, RQ-NFR-007).
 
 ## 10) P1 Planned Requirements (Non-Blocking)
 

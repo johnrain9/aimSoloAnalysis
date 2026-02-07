@@ -1,11 +1,13 @@
 {
-  "generated_at": "2026-02-06T22:23:22-07:00",
+  "generated_at": "2026-02-06T22:28:54-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
     "branch": "master",
-    "head": "11d436e",
+    "head": "fcc061f",
     "dirty": true,
     "status": [
+      " M REQUIREMENTS_BASELINE.md",
+      " M TASKS.md",
       " M aimsolo.db",
       " M analytics/trackside/__pycache__/pipeline.cpython-310.pyc",
       " M analytics/trackside/__pycache__/rank.cpython-310.pyc",
@@ -17,19 +19,53 @@
       "?? .claude/",
       "?? analytics/__pycache__/metrics_writer.cpython-310.pyc",
       "?? artifacts/eval_backend_report.json",
+      "?? artifacts/eval_top1_batch_report.json",
+      "?? artifacts/eval_top1_quality_report.json",
       "?? artifacts/frontend_eval_report.json",
+      "?? artifacts/top1_review_packet.csv",
+      "?? artifacts/top1_review_packet.md",
+      "?? artifacts/top1_review_packet_fixture.csv",
+      "?? artifacts/top1_review_packet_fixture.md",
       "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_eval_backend.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_eval_frontend.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_eval_top1_batch.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_eval_top1_scorecard.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_metrics_persistence_ingestion.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_review_packet.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_trackside_insight_contract.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc",
       "?? tools/__pycache__/"
     ]
   },
   "recent_commits": [
+    {
+      "hash": "fcc061f",
+      "date": "2026-02-06",
+      "subject": "feat(eval): add deterministic top1 coach review packet"
+    },
+    {
+      "hash": "2cb36f1",
+      "date": "2026-02-06",
+      "subject": "feat(eval): add top1 decision trace scorecard"
+    },
+    {
+      "hash": "d1dd2e2",
+      "date": "2026-02-06",
+      "subject": "feat(eval): add top-1 batch evaluation harness"
+    },
+    {
+      "hash": "ee27d45",
+      "date": "2026-02-06",
+      "subject": "feat(trackside): add top-1 quality gate trace and decisions"
+    },
+    {
+      "hash": "b8e11bd",
+      "date": "2026-02-06",
+      "subject": "chore(planner): refresh bootstrap after requirements update"
+    },
     {
       "hash": "11d436e",
       "date": "2026-02-06",
@@ -64,34 +100,17 @@
       "hash": "2df0b3e",
       "date": "2026-02-06",
       "subject": "feat(eval): add backend evaluation harness and JSON report"
-    },
-    {
-      "hash": "6f62753",
-      "date": "2026-02-06",
-      "subject": "feat(analytics): persist derived metrics in ingestion path"
-    },
-    {
-      "hash": "f650d9e",
-      "date": "2026-02-06",
-      "subject": "chore(planner): add wave-2 prompt pack and refresh bootstrap"
-    },
-    {
-      "hash": "a7da7c0",
-      "date": "2026-02-06",
-      "subject": "chore(planner): update baseline and tasks after units merge"
-    },
-    {
-      "hash": "a8ec07b",
-      "date": "2026-02-06",
-      "subject": "fix(api): normalize units contract across insights/compare/map"
-    },
-    {
-      "hash": "0f37b66",
-      "date": "2026-02-06",
-      "subject": "chore(planner): optimize bootstrap recency and document cost model"
     }
   ],
   "recent_files": [
+    {
+      "path": "REQUIREMENTS_BASELINE.md",
+      "last_write": "2026-02-06 22:28:48"
+    },
+    {
+      "path": "TASKS.md",
+      "last_write": "2026-02-06 22:28:24"
+    },
     {
       "path": "aimsolo.db",
       "last_write": "2026-02-06 21:50:39"
@@ -105,106 +124,99 @@
       "last_write": "2026-02-06 21:53:00"
     },
     {
+      "path": "artifacts\\eval_top1_batch_report.json",
+      "last_write": "2026-02-06 22:27:34"
+    },
+    {
+      "path": "artifacts\\eval_top1_quality_report.json",
+      "last_write": "2026-02-06 22:27:37"
+    },
+    {
       "path": "artifacts\\frontend_eval_report.json",
       "last_write": "2026-02-06 21:52:43"
     },
     {
-      "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-06 22:22:47"
+      "path": "artifacts\\top1_review_packet.csv",
+      "last_write": "2026-02-06 22:27:42"
     },
     {
-      "path": "REQUIREMENTS_BASELINE.md",
-      "last_write": "2026-02-06 22:22:32"
+      "path": "artifacts\\top1_review_packet.md",
+      "last_write": "2026-02-06 22:27:42"
     },
     {
-      "path": "TASKS.md",
-      "last_write": "2026-02-06 22:22:41"
+      "path": "artifacts\\top1_review_packet_fixture.csv",
+      "last_write": "2026-02-06 22:27:50"
     },
     {
-      "path": "artifacts\\project_bootstrap.json",
-      "last_write": "2026-02-06 22:22:47"
+      "path": "artifacts\\top1_review_packet_fixture.md",
+      "last_write": "2026-02-06 22:27:50"
     },
     {
-      "path": "TASK_PROMPTS_TONIGHT_TOP1.md",
-      "last_write": "2026-02-06 22:12:03"
+      "path": "docs\\top1_review_packet_workflow.md",
+      "last_write": "2026-02-06 22:26:59"
     },
     {
-      "path": "analytics\\trackside\\pipeline.py",
-      "last_write": "2026-02-06 21:48:03"
+      "path": "tests\\fixtures\\top1_review_report.json",
+      "last_write": "2026-02-06 22:26:59"
+    },
+    {
+      "path": "tests\\fixtures\\top1_review_traces.jsonl",
+      "last_write": "2026-02-06 22:26:59"
+    },
+    {
+      "path": "tests\\test_review_packet.py",
+      "last_write": "2026-02-06 22:26:59"
+    },
+    {
+      "path": "tools\\build_top1_review_packet.py",
+      "last_write": "2026-02-06 22:26:59"
+    },
+    {
+      "path": "tests\\test_eval_top1_scorecard.py",
+      "last_write": "2026-02-06 22:26:55"
+    },
+    {
+      "path": "tools\\eval_top1_scorecard.py",
+      "last_write": "2026-02-06 22:26:55"
+    },
+    {
+      "path": "tests\\test_eval_top1_batch.py",
+      "last_write": "2026-02-06 22:26:52"
+    },
+    {
+      "path": "tools\\eval_top1_batch.py",
+      "last_write": "2026-02-06 22:26:52"
     },
     {
       "path": "analytics\\trackside\\rank.py",
-      "last_write": "2026-02-06 21:48:03"
-    },
-    {
-      "path": "analytics\\trackside\\synthesis.py",
-      "last_write": "2026-02-06 21:48:03"
+      "last_write": "2026-02-06 22:26:49"
     },
     {
       "path": "api\\app.py",
-      "last_write": "2026-02-06 21:48:03"
+      "last_write": "2026-02-06 22:26:49"
     },
     {
       "path": "tests\\test_trackside_insight_contract.py",
-      "last_write": "2026-02-06 21:48:03"
+      "last_write": "2026-02-06 22:26:49"
     },
     {
-      "path": "tests\\test_eval_frontend.py",
-      "last_write": "2026-02-06 21:47:59"
-    },
-    {
-      "path": "tools\\eval_frontend.py",
-      "last_write": "2026-02-06 21:47:59"
-    },
-    {
-      "path": "tests\\test_eval_backend.py",
-      "last_write": "2026-02-06 21:47:56"
-    },
-    {
-      "path": "tools\\eval_backend.py",
-      "last_write": "2026-02-06 21:47:56"
-    },
-    {
-      "path": "ingest\\csv\\save.py",
-      "last_write": "2026-02-06 21:47:53"
-    },
-    {
-      "path": "tests\\test_metrics_persistence_ingestion.py",
-      "last_write": "2026-02-06 21:47:53"
-    },
-    {
-      "path": "TASK_PROMPTS_WAVE2.md",
-      "last_write": "2026-02-06 21:43:12"
-    },
-    {
-      "path": "api\\units.py",
-      "last_write": "2026-02-06 21:37:36"
-    },
-    {
-      "path": "tests\\test_units_contract.py",
-      "last_write": "2026-02-06 21:37:36"
-    },
-    {
-      "path": "PLANNER_BOOTSTRAP.md",
-      "last_write": "2026-02-06 21:36:08"
-    },
-    {
-      "path": "tools\\update_bootstrap.ps1",
-      "last_write": "2026-02-06 21:36:03"
+      "path": "PROJECT_BOOTSTRAP.md",
+      "last_write": "2026-02-06 22:23:22"
     }
   ],
   "likely_closed_gaps": [],
   "active_gaps": [
     "GAP-006 (Low): Channel blob persistence remains stubbed.",
     "GAP-007 (High): Backend/frontend harnesses exist, but no unified scorecard + release-gating flow yet.",
-    "GAP-008 (Medium): No formal human-in-the-loop qualitative review loop for coaching quality.",
+    "GAP-008 (Medium): Human-review packet exists, but review outcomes are not yet integrated into unified release scorecard status.",
     "GAP-009 (Medium): Backend baseline governance unresolved for known drift case (`HPR_Full_09292024-21`).",
     "GAP-013 (High): Rider-facing coaching copy is not guaranteed to be unit-consistent across all templated strings.",
     "GAP-014 (High): Corner naming may still surface internal identifiers instead of rider-recognizable corner identity.",
     "GAP-015 (Medium): Success checks and experimental abort criteria are not yet consistently rider-observable and change-type-specific.",
     "GAP-016 (Medium): UI does not yet enforce visually dominant top-1 recommendation in a requirement-tested way.",
     "GAP-017 (Medium): Recurring multi-session issue narration is not reliably surfaced in coaching copy.",
-    "GAP-018 (Medium): Fatigue-aware weighting for late-session laps is not implemented."
+    "GAP-018 (Medium): Fatigue-aware weighting for late-session laps is not implemented.",
+    "GAP-019 (High): Default top-1 evaluation artifact paths are not aligned across batch, scorecard, and review packet tools."
   ],
   "open_task_items": [
     "[in-progress] XRK R&D notes (PROGRESS_AIMSOLO_XRK.txt) - continue in parallel",
@@ -218,10 +230,7 @@
     "[todo] Unified scorecard + release gating workflow combining backend/frontend checks",
     "[todo] Product-behavior assertion suite + golden scenario drift checks",
     "[todo] Human coach review workflow integrated into evaluation status",
-    "[todo] TASK-P0-03: Top-1 quality gates + gain root-cause trace (keep rec 2/3 behavior unchanged)",
-    "[todo] TASK-EVAL-09: Batch top-1 trace runner over CSV corpus (`artifacts/top1_session_traces.jsonl`)",
-    "[todo] TASK-EVAL-10: Aggregate top-1 scorecard with hard/soft metrics + drift support (`artifacts/eval_top1_quality_report.json`)",
-    "[todo] TASK-EVAL-11: Deterministic coach review packet generator (`artifacts/top1_review_packet.md/.csv`)",
+    "[todo] TASK-EVAL-12: Align top-1 artifact path contracts so default no-arg chain works end-to-end (batch -> scorecard -> review packet)",
     "[todo] TASK-P0-04: Unit-consistent rider-facing coaching copy (RQ-P0-007, RQ-P0-024)",
     "[todo] TASK-P0-05: Rider-recognizable corner identity and fallback phrasing (RQ-P0-006, RQ-P0-026)",
     "[todo] TASK-P0-06: Rider-observable success checks and change-type-specific experimental protocols (RQ-P0-017, RQ-P0-018, RQ-P0-029)",
