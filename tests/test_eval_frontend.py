@@ -66,3 +66,19 @@ def test_eval_frontend_did_vs_should_check_detects_missing_semantics(tmp_path: P
     report = eval_frontend.build_report(index_path=index_path, js_path=js_path)
     checks = {check["check_id"]: check for check in report["checks"]}
     assert checks["did_vs_should_map_semantics"]["status"] == "fail"
+
+
+def test_eval_frontend_top1_check_passes_against_repo_ui():
+    report = eval_frontend.build_report()
+    checks = {check["check_id"]: check for check in report["checks"]}
+    assert checks["top1_visual_priority_semantics"]["status"] == "pass"
+
+
+def test_eval_frontend_top1_check_detects_missing_semantics():
+    ok, _details, evidence = eval_frontend._check_top1_visual_priority_semantics(
+        "<div class='insight-list'></div>",
+        "function renderInsights(){}",
+        ".insight{ }",
+    )
+    assert ok is False
+    assert evidence["missing_js_tokens"] != []

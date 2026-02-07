@@ -588,6 +588,11 @@ function createMockData() {
         {
           id: "trail_braking",
           title: "Longer trail braking into T3",
+          is_primary_focus: true,
+          phase: "entry",
+          operational_action: "Hold light trail brake to apex in T3.",
+          causal_reason: "Entry speed is down versus reference and rotation starts late.",
+          risk_tier: "Primary",
           confidence: 0.78,
           gain: "+0.18",
           detail: "Maintain 5% brake to apex for better rotation.",
@@ -595,6 +600,10 @@ function createMockData() {
         {
           id: "throttle_pickup",
           title: "Earlier throttle in T7",
+          phase: "exit",
+          operational_action: "Start throttle pickup earlier at T7 apex.",
+          causal_reason: "Neutral throttle window is longer than the reference lap.",
+          risk_tier: "Experimental",
           confidence: 0.64,
           gain: "+0.09",
           detail: "Smooth to 70% throttle by mid-corner.",
@@ -751,24 +760,79 @@ function renderSummary(summary) {
   }
 }
 
-function clearInsights() {
+function insightTitle(item) {
+  if (!item) return "Insight";
+  if (item.title) return item.title;
+  if (item.operational_action) return item.operational_action;
+  return "Insight";
+}
+
+function insightReason(item) {
+  if (!item) return "";
+  return item.causal_reason || item.detail || "Apply this change and validate with the next-session success check.";
+}
+
+function resolveTopInsightIndex(items) {
+  if (!Array.isArray(items) || items.length === 0) return -1;
+  const primaryIndex = items.findIndex((item) => Boolean(item?.is_primary_focus));
+  if (primaryIndex >= 0) return primaryIndex;
+  return 0;
+}
+
+function renderTop1Briefing(item, source) {
+  const panel = qs("#top1-briefing");
+  if (!panel) return;
+  if (!item) {
+    panel.classList.add("empty");
+    panel.dataset.top1Source = source || "empty";
+    panel.innerHTML = `
+      <div class="briefing-label">Say This First</div>
+      <div class="briefing-action">No top recommendation yet</div>
+      <div class="briefing-reason">Run analysis to generate the first coaching instruction.</div>
+    `;
+    return;
+  }
+  panel.classList.remove("empty");
+  panel.dataset.top1Source = source;
+  const action = item.operational_action || insightTitle(item);
+  const reason = insightReason(item) || "Use this as the first instruction before heading out.";
+  const phase = item.phase ? ` (${String(item.phase).toUpperCase()})` : "";
+  const focusLabel = item.is_primary_focus ? "Primary focus" : "Rank fallback";
+  panel.innerHTML = `
+    <div class="briefing-label">Say This First</div>
+    <div class="briefing-action">${action}${phase}</div>
+    <div class="briefing-reason">${reason}</div>
+    <div class="insight-meta-line">
+      <span>${focusLabel}</span>
+      <span>Top 1</span>
+    </div>
+  `;
+}
+
+function clearInsights(message = "Run analysis to generate coaching insights.") {
   const list = qs(".insight-list");
   if (!list) return;
   clearChildren(list);
+  appState.selectedSegmentId = null;
   const article = document.createElement("article");
-  article.className = "card insight";
+  article.className = "card insight insight-secondary";
+  article.dataset.visualPriority = "secondary";
   article.innerHTML = `
+    <div class="insight-priority-line">
+      <span class="insight-rank">Waiting</span>
+    </div>
     <div class="card-head">
       <h3>Insights not ready</h3>
       <span class="badge low">Low</span>
     </div>
-    <p>Run analysis to generate coaching insights.</p>
+    <p>${message}</p>
     <div class="card-foot">
       <span class="gain">--</span>
-      <button class="ghost">Why?</button>
+      <button class="ghost" type="button" disabled>Why?</button>
     </div>
   `;
   list.appendChild(article);
+  renderTop1Briefing(null, "empty");
   setText(qs(".map-meta"), "Selected: Overview");
 }
 
@@ -926,8 +990,9 @@ function actionStepsFor(ruleId) {
 }
 
 function renderInsights(insights) {
-  if (!insights) {
-    clearInsights();
+  if (!insights || insights.error === "not_ready") {
+    const detail = insights?.detail || "Run analysis to generate coaching insights.";
+    clearInsights(detail);
     return;
   }
   const list = qs(".insight-list");
@@ -942,33 +1007,67 @@ function renderInsights(insights) {
     seen.add(key);
     deduped.push(item);
   });
+  if (deduped.length === 0) {
+    clearInsights("No coaching recommendations ready for this session.");
+    return;
+  }
+  const topIndex = resolveTopInsightIndex(deduped);
+  const topEntry = deduped[topIndex];
+  const topSource = topEntry?.is_primary_focus ? "primary_focus" : "rank_fallback";
+  renderTop1Briefing(topEntry, topSource);
+
   deduped.forEach((item, index) => {
     const confidence = Number(item.confidence ?? 0);
     const badgeClass = confidence >= 0.75 ? "high" : confidence >= 0.5 ? "med" : "low";
     const badgeLabel = confidence >= 0.75 ? "High" : confidence >= 0.5 ? "Med" : "Low";
+    const confidenceLabel = Number.isFinite(confidence) ? `${Math.round(confidence * 100)}%` : "N/A";
+    const isTop1 = index === topIndex;
     const segmentId = item.segment_id || item.corner_id;
-    const segmentLabel = segmentId ? `Segment ${segmentId}` : "";
+    const segmentLabel = segmentId ? `Where: ${segmentId}` : "";
+    const phaseLabel = item.phase ? `Phase: ${item.phase}` : "";
+    const riskTier = item.risk_tier || "Unspecified";
     const evidenceRows = formatEvidence(item.evidence || {});
     const actions =
       Array.isArray(item.actions) && item.actions.length > 0
         ? item.actions
         : actionStepsFor(item.rule_id || item.id);
     const options = Array.isArray(item.options) ? item.options : [];
+    const reason = insightReason(item);
     const article = document.createElement("article");
-    article.className = "card insight";
+    article.className = isTop1 ? "card insight insight-top1" : "card insight insight-secondary";
+    article.dataset.visualPriority = isTop1 ? "top1" : "secondary";
+    article.dataset.rank = String(index + 1);
+    article.dataset.primaryFocus = String(Boolean(item.is_primary_focus));
+    if (isTop1) {
+      article.dataset.top1Source = topSource;
+    }
     if (segmentId) {
       article.dataset.segmentId = segmentId;
     }
     article.style.setProperty("--delay", `${index * 80}ms`);
-    const gainValue = parseGain(item.gain);
-    const gainText = gainValue != null ? `${gainValue.toFixed(3)}s` : "";
+    const gainFromContract =
+      item.expected_gain_s != null ? Number(item.expected_gain_s) : Number(item.time_gain_s);
+    const gainValue = Number.isFinite(gainFromContract) ? gainFromContract : parseGain(item.gain);
+    const gainText = gainValue != null ? `+${Number(gainValue).toFixed(3)}s` : item.gain || "--";
+    const title = insightTitle(item);
+    const rankLabel = isTop1 ? "Top 1" : `#${index + 1}`;
+    const focusTag = item.is_primary_focus ? '<span class="insight-rank">Primary Focus</span>' : "";
     article.innerHTML = `
+      <div class="insight-priority-line">
+        <span class="insight-rank">${rankLabel}</span>
+        ${focusTag}
+      </div>
       <div class="card-head">
-        <h3>${item.title ?? "Insight"}</h3>
+        <h3>${title}</h3>
         <span class="badge ${badgeClass}">${badgeLabel}</span>
       </div>
-      <p>${item.detail ?? ""}</p>
-      ${segmentLabel ? `<div class="meta">${segmentLabel}</div>` : ""}
+      <p>${reason}</p>
+      <div class="insight-meta-line">
+        ${phaseLabel ? `<span>${phaseLabel}</span>` : ""}
+        ${segmentLabel ? `<span>${segmentLabel}</span>` : ""}
+        <span>Risk: ${riskTier}</span>
+        <span>Confidence: ${confidenceLabel}</span>
+      </div>
       <div class="card-foot">
         <span class="gain">${gainText}</span>
         <button class="ghost">Why?</button>
@@ -982,6 +1081,7 @@ function renderInsights(insights) {
         <ul>
           ${actions.map((step) => `<li>${step}</li>`).join("")}
         </ul>
+        ${item.success_check ? `<div class="meta">Success check: ${item.success_check}</div>` : ""}
         ${
           options.length > 0
             ? `<div class="meta">Alternate lines</div>
@@ -1045,7 +1145,11 @@ function renderInsights(insights) {
     const med = deduped.filter((item) => (item.confidence ?? 0) >= 0.5 && (item.confidence ?? 0) < 0.75).length;
     const low = total - high - med;
     const topGain = deduped
-      .map((item) => parseGain(item.gain))
+      .map((item) => {
+        const gain = item.expected_gain_s != null ? Number(item.expected_gain_s) : Number(item.time_gain_s);
+        if (Number.isFinite(gain)) return gain;
+        return parseGain(item.gain);
+      })
       .filter((value) => value != null)
       .sort((a, b) => b - a)[0];
     const rows = [

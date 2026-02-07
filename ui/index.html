@@ -195,40 +195,56 @@
           <p>Top fixes ranked by estimated time gain and confidence.</p>
         </div>
         <div class="insights-grid">
-          <div class="insight-list">
-            <article class="card insight" style="--delay: 0ms;">
-              <div class="card-head">
-                <h3>Brake 10?15m later into T1</h3>
-                <span class="badge high">High</span>
-              </div>
-              <p>Entry speed ?6 km/h vs best lap. Brake point 12m early.</p>
-              <div class="card-foot">
-                <span class="gain">+0.18s</span>
-                <button class="ghost">Why?</button>
-              </div>
-            </article>
-            <article class="card insight" style="--delay: 80ms;">
-              <div class="card-head">
-                <h3>Line inconsistent in T2</h3>
-                <span class="badge med">Med</span>
-              </div>
-              <p>Cross?track variance 1.6m vs 0.7m reference.</p>
-              <div class="card-foot">
-                <span class="gain">+0.14s</span>
-                <button class="ghost">Why?</button>
-              </div>
-            </article>
-            <article class="card insight" style="--delay: 160ms;">
-              <div class="card-head">
-                <h3>Accelerate harder between T7?T8</h3>
-                <span class="badge med">Med</span>
-              </div>
-              <p>Neutral accel for 0.9s while speed flatlines.</p>
-              <div class="card-foot">
-                <span class="gain">+0.11s</span>
-                <button class="ghost">Why?</button>
-              </div>
-            </article>
+          <div class="insight-stack">
+            <section id="top1-briefing" class="top1-briefing" aria-live="polite">
+              <div class="briefing-label">Say This First</div>
+              <div class="briefing-action">Loading top recommendation...</div>
+              <div class="briefing-reason">Waiting for session insights.</div>
+            </section>
+            <div class="insight-list">
+              <article class="card insight insight-top1" style="--delay: 0ms;">
+                <div class="insight-priority-line">
+                  <span class="insight-rank">Top 1</span>
+                </div>
+                <div class="card-head">
+                  <h3>Brake 10?15m later into T1</h3>
+                  <span class="badge high">High</span>
+                </div>
+                <p>Entry speed ?6 km/h vs best lap. Brake point 12m early.</p>
+                <div class="card-foot">
+                  <span class="gain">+0.18s</span>
+                  <button class="ghost">Why?</button>
+                </div>
+              </article>
+              <article class="card insight insight-secondary" style="--delay: 80ms;">
+                <div class="insight-priority-line">
+                  <span class="insight-rank">#2</span>
+                </div>
+                <div class="card-head">
+                  <h3>Line inconsistent in T2</h3>
+                  <span class="badge med">Med</span>
+                </div>
+                <p>Cross?track variance 1.6m vs 0.7m reference.</p>
+                <div class="card-foot">
+                  <span class="gain">+0.14s</span>
+                  <button class="ghost">Why?</button>
+                </div>
+              </article>
+              <article class="card insight insight-secondary" style="--delay: 160ms;">
+                <div class="insight-priority-line">
+                  <span class="insight-rank">#3</span>
+                </div>
+                <div class="card-head">
+                  <h3>Accelerate harder between T7?T8</h3>
+                  <span class="badge med">Med</span>
+                </div>
+                <p>Neutral accel for 0.9s while speed flatlines.</p>
+                <div class="card-foot">
+                  <span class="gain">+0.11s</span>
+                  <button class="ghost">Why?</button>
+                </div>
+              </article>
+            </div>
           </div>
           <div class="map-panel">
             <div class="map-card">

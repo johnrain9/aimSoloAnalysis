@@ -18,10 +18,12 @@ from typing import Any, Callable
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_HTML = ROOT / "ui" / "index.html"
 DEFAULT_JS = ROOT / "ui" / "app.js"
+DEFAULT_CSS = ROOT / "ui" / "styles.css"
 DEFAULT_REPORT = ROOT / "artifacts" / "frontend_eval_report.json"
 
 REQ_FLOW = ["RQ-EVAL-004", "RQ-EVAL-007"]
 REQ_MAP = ["RQ-EVAL-005", "RQ-EVAL-007"]
+REQ_TOP1 = ["RQ-P0-025", "RQ-P0-019", "RQ-P0-020", "RQ-EVAL-005", "RQ-EVAL-007"]
 REQ_JSON = ["RQ-NFR-006", "RQ-EVAL-007"]
 
 
@@ -58,7 +60,7 @@ def _extract_routes(js_text: str) -> list[str]:
     return routes
 
 
-def _check_flow_wiring(index_text: str, js_text: str) -> tuple[bool, str, dict[str, Any]]:
+def _check_flow_wiring(index_text: str, js_text: str, _css_text: str) -> tuple[bool, str, dict[str, Any]]:
     required_routes = ["import", "summary", "insights", "compare"]
     routes = _extract_routes(js_text)
     route_set = set(routes)
@@ -102,7 +104,9 @@ def _check_flow_wiring(index_text: str, js_text: str) -> tuple[bool, str, dict[s
     return ok, details, evidence
 
 
-def _check_ui_state_expectations(index_text: str, js_text: str) -> tuple[bool, str, dict[str, Any]]:
+def _check_ui_state_expectations(
+    index_text: str, js_text: str, _css_text: str
+) -> tuple[bool, str, dict[str, Any]]:
     required_ids = [
         "analyze-now",
         "csv-file",
@@ -144,7 +148,9 @@ def _check_ui_state_expectations(index_text: str, js_text: str) -> tuple[bool, s
     return ok, details, evidence
 
 
-def _check_did_vs_should_map_semantics(index_text: str, js_text: str) -> tuple[bool, str, dict[str, Any]]:
+def _check_did_vs_should_map_semantics(
+    index_text: str, js_text: str, _css_text: str
+) -> tuple[bool, str, dict[str, Any]]:
     legend_tokens = [
         'id="track-map-legend"',
         "Reference",
@@ -178,16 +184,58 @@ def _check_did_vs_should_map_semantics(index_text: str, js_text: str) -> tuple[b
     return ok, details, evidence
 
 
+def _check_top1_visual_priority_semantics(
+    index_text: str, js_text: str, css_text: str
+) -> tuple[bool, str, dict[str, Any]]:
+    dom_tokens = [
+        'id="top1-briefing"',
+        'class="insight-list"',
+    ]
+    missing_dom_tokens = [token for token in dom_tokens if token not in index_text]
+
+    js_tokens = [
+        "function resolveTopInsightIndex(items)",
+        "function renderTop1Briefing(item, source)",
+        'article.className = isTop1 ? "card insight insight-top1" : "card insight insight-secondary";',
+        'article.dataset.visualPriority = isTop1 ? "top1" : "secondary";',
+        "const topIndex = resolveTopInsightIndex(deduped);",
+    ]
+    missing_js_tokens = [token for token in js_tokens if token not in js_text]
+
+    css_tokens = [
+        ".top1-briefing",
+        ".insight.insight-top1",
+        ".insight-list .insight.insight-secondary",
+        ".briefing-action",
+        ".insight-priority-line",
+    ]
+    missing_css_tokens = [token for token in css_tokens if token not in css_text]
+
+    ok = not missing_dom_tokens and not missing_js_tokens and not missing_css_tokens
+    details = (
+        "Top-1 visual priority semantics are explicit (dominant card + fast briefing panel + fallback)."
+        if ok
+        else "Missing explicit top-1 visual priority semantics."
+    )
+    evidence = {
+        "missing_dom_tokens": missing_dom_tokens,
+        "missing_js_tokens": missing_js_tokens,
+        "missing_css_tokens": missing_css_tokens,
+    }
+    return ok, details, evidence
+
+
 def _run_check(
     check_id: str,
     requirement_ids: list[str],
-    fn: Callable[[str, str], tuple[bool, str, dict[str, Any]]],
+    fn: Callable[[str, str, str], tuple[bool, str, dict[str, Any]]],
     *,
     index_text: str,
     js_text: str,
+    css_text: str,
 ) -> CheckResult:
     start = time.perf_counter()
-    ok, details, evidence = fn(index_text, js_text)
+    ok, details, evidence = fn(index_text, js_text, css_text)
     duration_ms = (time.perf_counter() - start) * 1000.0
     return CheckResult(
         check_id=check_id,
@@ -199,10 +247,13 @@ def _run_check(
     )
 
 
-def build_report(*, index_path: Path = DEFAULT_HTML, js_path: Path = DEFAULT_JS) -> dict[str, Any]:
+def build_report(
+    *, index_path: Path = DEFAULT_HTML, js_path: Path = DEFAULT_JS, css_path: Path = DEFAULT_CSS
+) -> dict[str, Any]:
     started = time.perf_counter()
     index_text = index_path.read_text(encoding="utf-8")
     js_text = js_path.read_text(encoding="utf-8")
+    css_text = css_path.read_text(encoding="utf-8")
 
     checks = [
         _run_check(
@@ -211,6 +262,7 @@ def build_report(*, index_path: Path = DEFAULT_HTML, js_path: Path = DEFAULT_JS)
             _check_flow_wiring,
             index_text=index_text,
             js_text=js_text,
+            css_text=css_text,
         ),
         _run_check(
             "ui_state_expectations",
@@ -218,6 +270,7 @@ def build_report(*, index_path: Path = DEFAULT_HTML, js_path: Path = DEFAULT_JS)
             _check_ui_state_expectations,
             index_text=index_text,
             js_text=js_text,
+            css_text=css_text,
         ),
         _run_check(
             "did_vs_should_map_semantics",
@@ -225,6 +278,15 @@ def build_report(*, index_path: Path = DEFAULT_HTML, js_path: Path = DEFAULT_JS)
             _check_did_vs_should_map_semantics,
             index_text=index_text,
             js_text=js_text,
+            css_text=css_text,
+        ),
+        _run_check(
+            "top1_visual_priority_semantics",
+            REQ_TOP1,
+            _check_top1_visual_priority_semantics,
+            index_text=index_text,
+            js_text=js_text,
+            css_text=css_text,
         ),
     ]
 
@@ -262,10 +324,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run frontend evaluation harness and emit JSON artifact.")
     parser.add_argument("--index", default=str(DEFAULT_HTML))
     parser.add_argument("--appjs", default=str(DEFAULT_JS))
+    parser.add_argument("--css", default=str(DEFAULT_CSS))
     parser.add_argument("--out", default=str(DEFAULT_REPORT))
     args = parser.parse_args(argv)
 
-    report = build_report(index_path=Path(args.index), js_path=Path(args.appjs))
+    report = build_report(index_path=Path(args.index), js_path=Path(args.appjs), css_path=Path(args.css))
     report_path = write_report(report, Path(args.out))
     print(f"frontend_eval status={report['status']} checks={report['summary']['total_checks']}")
     print(f"report={report_path.as_posix()}")

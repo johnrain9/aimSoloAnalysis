@@ -333,11 +333,120 @@ main {
   gap: 18px;
 }
 
+.insight-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.top1-briefing {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 2px solid rgba(27, 127, 121, 0.45);
+  background: linear-gradient(130deg, rgba(27, 127, 121, 0.22), rgba(240, 138, 91, 0.12));
+  box-shadow: 0 18px 36px rgba(27, 127, 121, 0.18);
+}
+
+.top1-briefing.empty {
+  border-color: var(--outline);
+  background: #f8f4ed;
+  box-shadow: none;
+}
+
+.briefing-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.briefing-action {
+  margin-top: 4px;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.briefing-reason {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #2f2d2a;
+}
+
+.insight-list {
+  display: grid;
+  gap: 12px;
+}
+
 .insight {
   animation: rise 0.5s ease forwards;
   opacity: 0;
   transform: translateY(12px);
   animation-delay: var(--delay, 0ms);
+}
+
+.insight-priority-line {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.insight-rank {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #efe7d8;
+  border: 1px solid #d7cbb8;
+  color: #4e473f;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.insight.insight-top1 {
+  border: 2px solid rgba(27, 127, 121, 0.45);
+  background: linear-gradient(140deg, #ffffff, #f7fdfc);
+  box-shadow: 0 24px 44px rgba(27, 127, 121, 0.18);
+  transform: translateY(0) scale(1.02);
+}
+
+.insight.insight-top1 .card-head h3 {
+  font-size: 24px;
+  line-height: 1.22;
+}
+
+.insight.insight-top1 .gain {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.insight.insight-top1 .insight-rank {
+  background: rgba(27, 127, 121, 0.16);
+  border-color: rgba(27, 127, 121, 0.35);
+  color: #0f5b56;
+}
+
+.insight-list .insight.insight-secondary {
+  box-shadow: 0 10px 24px rgba(31, 29, 26, 0.1);
+}
+
+.insight-meta-line {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.insight-meta-line span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f4eee4;
+  border: 1px solid var(--outline);
+  font-size: 11px;
+  color: #4e473f;
 }
 
 .card-head {
@@ -639,4 +748,7 @@ main {
   .lap-row { grid-template-columns: repeat(4, 1fr); }
   .lap-row button { grid-column: 1 / -1; justify-self: start; }
   .selectors { width: 100%; }
+  .briefing-action { font-size: 20px; }
+  .insight.insight-top1 { transform: none; }
+  .insight.insight-top1 .card-head h3 { font-size: 20px; }
 }
