@@ -54,7 +54,7 @@ def generate_trackside_insights(
         target_lap_index: Optional lap index to compare against the reference lap.
 
     Returns:
-        JSON-serializable insight dicts (top 3-5 by rank).
+        JSON-serializable insight dicts (top 3 by rank).
     """
     conn = db.connect(db_path)
     with conn:
@@ -172,7 +172,7 @@ def generate_trackside_insights(
         signals,
         comparison_label=comparison_label,
     )
-    return rank_insights(insights, min_count=3, max_count=5)
+    return rank_insights(insights, min_count=3, max_count=3, max_primary_focus=2)
 
 
 def generate_trackside_map(

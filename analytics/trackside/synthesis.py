@@ -14,6 +14,16 @@ class Insight:
     rule_id: str
     title: str
     detail: str
+    phase: str
+    operational_action: str
+    causal_reason: str
+    risk_tier: str
+    risk_reason: str
+    data_quality_note: str
+    uncertainty_note: str
+    success_check: str
+    expected_gain_s: float
+    experimental_protocol: Optional[Dict[str, Any]]
     actions: List[str]
     options: List[str]
     corner_id: Optional[str]
@@ -29,6 +39,16 @@ class Insight:
             "rule_id": self.rule_id,
             "title": self.title,
             "detail": self.detail,
+            "phase": self.phase,
+            "operational_action": self.operational_action,
+            "causal_reason": self.causal_reason,
+            "risk_tier": self.risk_tier,
+            "risk_reason": self.risk_reason,
+            "data_quality_note": self.data_quality_note,
+            "uncertainty_note": self.uncertainty_note,
+            "success_check": self.success_check,
+            "expected_gain_s": self.expected_gain_s,
+            "experimental_protocol": self.experimental_protocol,
             "actions": list(self.actions),
             "options": list(self.options),
             "corner_id": self.corner_id,
@@ -216,17 +236,50 @@ def synthesize_insights(
 
         confidence = _confidence_from(primary_signal, quality)
         confidence_label = _confidence_label(confidence)
+        applied_gain_s = round(_time_gain(primary_signal, time_gain_s), 4)
+        operational_action = _operational_action(actions, primary_id, phase)
+        causal_reason = _causal_reason(primary_id, evidence, phase)
+        data_quality_note = _data_quality_note(quality)
+        uncertainty_note = _uncertainty_note(confidence, quality, evidence)
+        risk_tier, risk_reason = _risk_tier(
+            primary_id,
+            phase=phase,
+            confidence=confidence,
+            quality=quality,
+            lean_high=lean_high,
+            line_issue=line_issue,
+        )
+        success_check = _success_check(primary_id, phase=phase, metrics=metrics, evidence=evidence)
+        expected_gain_s = applied_gain_s if applied_gain_s > 0 else 0.01
+        experimental_protocol = None
+        if risk_tier == "Experimental":
+            experimental_protocol = _experimental_protocol(
+                expected_gain_s=expected_gain_s,
+                primary_id=primary_id,
+                phase=phase,
+                evidence=evidence,
+            )
 
         insights.append(
             Insight(
                 rule_id=primary_id,
                 title=title,
                 detail=detail,
+                phase=phase,
+                operational_action=operational_action,
+                causal_reason=causal_reason,
+                risk_tier=risk_tier,
+                risk_reason=risk_reason,
+                data_quality_note=data_quality_note,
+                uncertainty_note=uncertainty_note,
+                success_check=success_check,
+                expected_gain_s=expected_gain_s,
+                experimental_protocol=experimental_protocol,
                 actions=actions,
                 options=options,
                 corner_id=_as_str(segment.get("corner_id")),
                 segment_id=_as_str(segment.get("segment_id")),
-                time_gain_s=round(_time_gain(primary_signal, time_gain_s), 4),
+                time_gain_s=applied_gain_s,
                 confidence=round(confidence, 3),
                 confidence_label=confidence_label,
                 evidence=evidence,
@@ -779,6 +832,147 @@ def _coalesce(*values: Optional[float]) -> Optional[float]:
         if value is not None:
             return value
     return None
+
+
+def _operational_action(actions: List[str], rule_id: str, phase: str) -> str:
+    if actions:
+        return actions[0]
+    return f"Use one repeatable {phase} marker in this corner and keep inputs smooth."
+
+
+def _causal_reason(rule_id: str, evidence: Dict[str, Any], phase: str) -> str:
+    if rule_id == "line_inconsistency":
+        line_std = _get_float(evidence, "line_stddev_m")
+        if line_std is not None:
+            return f"Because line variance is elevated ({line_std:.2f} m), timing and speed consistency drop through {phase}."
+    if rule_id in {"early_braking", "entry_speed"}:
+        entry_delta = _get_float(evidence, "entry_speed_delta_kmh")
+        brake_delta = _get_float(evidence, "brake_point_delta_m")
+        if entry_delta is not None:
+            return f"Because entry speed is down by {abs(entry_delta):.1f} km/h, this segment starts slower than reference."
+        if brake_delta is not None:
+            return f"Because braking starts {abs(brake_delta):.1f} m earlier, speed is shed too soon before apex."
+    if rule_id == "corner_speed_loss":
+        min_delta = _get_float(evidence, "min_speed_delta_kmh")
+        if min_delta is not None:
+            return f"Because apex minimum speed is lower by {abs(min_delta):.1f} km/h, mid-corner time is being lost."
+    if rule_id in {"late_throttle_pickup", "exit_speed"}:
+        pickup_delta = _get_float(evidence, "pickup_delta_m")
+        exit_delta = _get_float(evidence, "exit_speed_delta_kmh")
+        if pickup_delta is not None:
+            return f"Because throttle pickup is delayed by {pickup_delta:.1f} m, exit drive starts late."
+        if exit_delta is not None:
+            return f"Because exit speed is down by {abs(exit_delta):.1f} km/h, acceleration phase is underperforming."
+    if rule_id == "neutral_throttle":
+        neutral_s = _get_float(evidence, "neutral_throttle_s")
+        if neutral_s is not None:
+            return f"Because neutral throttle lasts {neutral_s:.2f} s, the bike coasts instead of braking or driving."
+    if rule_id == "steering_smoothness":
+        yaw_ratio = _get_float(evidence, "yaw_rms_ratio")
+        if yaw_ratio is not None:
+            return f"Because steering activity is {yaw_ratio:.2f}x reference, mid-corner scrub is likely increasing."
+    return "Because segment evidence shows this is the dominant controllable source of lost time."
+
+
+def _risk_tier(
+    rule_id: str,
+    *,
+    phase: str,
+    confidence: float,
+    quality: Dict[str, Any],
+    lean_high: bool,
+    line_issue: bool,
+) -> Tuple[str, str]:
+    gps_accuracy = _get_float(quality, "gps_accuracy_m")
+    satellites = _get_float(quality, "satellites")
+    low_quality = (gps_accuracy is not None and gps_accuracy > 2.0) or (
+        satellites is not None and satellites < 7
+    )
+    if lean_high and rule_id in {"entry_speed", "early_braking", "late_throttle_pickup", "exit_speed"}:
+        return (
+            "Blocked",
+            f"High-lean {phase} context; avoid aggressive brake/throttle timing changes until stability improves.",
+        )
+    if confidence < 0.55 or low_quality or (line_issue and rule_id in {"late_throttle_pickup", "exit_speed"}):
+        return (
+            "Experimental",
+            "Plausible gain with uncertainty; run as a bounded test before adopting as primary focus.",
+        )
+    return ("Primary", "Evidence quality and context support this as a main next-session focus.")
+
+
+def _data_quality_note(quality: Dict[str, Any]) -> str:
+    gps_accuracy = _get_float(quality, "gps_accuracy_m")
+    satellites = _get_float(quality, "satellites")
+    notes: List[str] = []
+    if gps_accuracy is None:
+        notes.append("gps accuracy unknown")
+    elif gps_accuracy <= 1.0:
+        notes.append(f"gps accuracy good ({gps_accuracy:.1f} m)")
+    elif gps_accuracy <= 2.0:
+        notes.append(f"gps accuracy fair ({gps_accuracy:.1f} m)")
+    else:
+        notes.append(f"gps accuracy weak ({gps_accuracy:.1f} m)")
+    if satellites is None:
+        notes.append("satellite count unavailable")
+    elif satellites >= 10:
+        notes.append(f"{satellites:.0f} satellites")
+    elif satellites >= 7:
+        notes.append(f"{satellites:.0f} satellites (borderline)")
+    else:
+        notes.append(f"{satellites:.0f} satellites (low)")
+    return "; ".join(notes)
+
+
+def _uncertainty_note(confidence: float, quality: Dict[str, Any], evidence: Dict[str, Any]) -> str:
+    confidence_label = _confidence_label(confidence)
+    gaps: List[str] = []
+    if quality.get("imu_present") is False:
+        gaps.append("no IMU channels")
+    if _get_float(evidence, "segment_time_delta_s") is None:
+        gaps.append("segment time delta missing")
+    if _get_float(quality, "gps_accuracy_m") is None:
+        gaps.append("gps accuracy missing")
+    if not gaps:
+        return f"{confidence_label.capitalize()} confidence from current telemetry quality."
+    return f"{confidence_label.capitalize()} confidence; uncertainty from " + ", ".join(gaps) + "."
+
+
+def _success_check(
+    rule_id: str,
+    *,
+    phase: str,
+    metrics: Dict[str, Optional[float]],
+    evidence: Dict[str, Any],
+) -> str:
+    if rule_id == "line_inconsistency":
+        return "Reduce line_stddev_delta_m to <= +0.30 m for 3 consecutive laps in this segment."
+    if rule_id in {"entry_speed", "early_braking"}:
+        return "Improve entry_speed_delta_kmh by at least +2.0 km/h without increasing line_stddev_m over the next 2 laps."
+    if rule_id == "corner_speed_loss":
+        return "Improve min_speed_delta_kmh by at least +2.0 km/h while keeping apex_delta_m within 4.0 m."
+    if rule_id in {"late_throttle_pickup", "exit_speed"}:
+        return "Cut pickup delay by >= 6 m (or 0.06 s) and improve exit_speed_delta_kmh by >= +2.0 km/h."
+    if rule_id == "neutral_throttle":
+        return "Reduce neutral_throttle_s below 0.8 s (or neutral_throttle_dist_m below 12 m) next session."
+    if rule_id == "steering_smoothness":
+        return "Bring yaw_rms_ratio to <= 1.10 while improving min_speed_delta_kmh by >= +1.0 km/h."
+    return f"Show a measurable {phase} improvement in this corner over the next 2-3 laps."
+
+
+def _experimental_protocol(
+    *,
+    expected_gain_s: float,
+    primary_id: str,
+    phase: str,
+    evidence: Dict[str, Any],
+) -> Dict[str, Any]:
+    return {
+        "expected_gain_s": round(expected_gain_s, 3),
+        "risk": "May reduce stability or consistency if over-applied.",
+        "bounds": "Change one variable only; run 2 laps; keep adjustment within ~10-15 ft / gentle input change.",
+        "abort_criteria": "Abort immediately if line variance rises >0.3 m, confidence drops, or the bike feels unstable.",
+    }
 
 
 def _as_str(value: Any) -> Optional[str]:

@@ -15,9 +15,10 @@ def rank_insights(
     insights: Iterable[Dict[str, Any]],
     *,
     min_count: int = 3,
-    max_count: int = 5,
+    max_count: int = 3,
     min_confidence: float = 0.5,
     max_per_corner: int = 2,
+    max_primary_focus: int = 2,
 ) -> List[Dict[str, Any]]:
     """Select top insights by gain * confidence with corner diversity."""
 
@@ -40,9 +41,14 @@ def rank_insights(
 
     selected: List[Dict[str, Any]] = []
     per_corner: Dict[Optional[str], int] = {}
+    seen_corner_phase: set[tuple[str, str]] = set()
 
     def can_take(item: Dict[str, Any]) -> bool:
         corner_id = _corner_key(item)
+        phase = _phase_key(item)
+        if corner_id is not None and phase is not None:
+            if (corner_id, phase) in seen_corner_phase:
+                return False
         if corner_id is None:
             return True
         return per_corner.get(corner_id, 0) < max_per_corner
@@ -54,8 +60,11 @@ def rank_insights(
             continue
         selected.append(item)
         corner_id = _corner_key(item)
+        phase = _phase_key(item)
         if corner_id is not None:
             per_corner[corner_id] = per_corner.get(corner_id, 0) + 1
+        if corner_id is not None and phase is not None:
+            seen_corner_phase.add((corner_id, phase))
 
     if len(selected) < min_count and candidates is not items:
         remaining = [item for item in items if item not in selected]
@@ -66,8 +75,20 @@ def rank_insights(
                 continue
             selected.append(item)
             corner_id = _corner_key(item)
+            phase = _phase_key(item)
             if corner_id is not None:
                 per_corner[corner_id] = per_corner.get(corner_id, 0) + 1
+            if corner_id is not None and phase is not None:
+                seen_corner_phase.add((corner_id, phase))
+
+    primary_assigned = 0
+    for item in selected:
+        tier = str(item.get("risk_tier") or "Primary")
+        if tier == "Primary" and primary_assigned < max_primary_focus:
+            item["is_primary_focus"] = True
+            primary_assigned += 1
+        else:
+            item["is_primary_focus"] = False
 
     return selected
 
@@ -96,3 +117,10 @@ def _corner_key(item: Dict[str, Any]) -> Optional[str]:
     if corner_id is None:
         return None
     return str(corner_id)
+
+
+def _phase_key(item: Dict[str, Any]) -> Optional[str]:
+    phase = item.get("phase")
+    if phase is None:
+        return None
+    return str(phase)
