@@ -1,19 +1,16 @@
 {
-  "generated_at": "2026-02-06T21:39:26-07:00",
+  "generated_at": "2026-02-06T21:43:18-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
     "branch": "master",
-    "head": "a8ec07b",
+    "head": "a7da7c0",
     "dirty": true,
     "status": [
-      " M PROJECT_BOOTSTRAP.md",
-      " M REQUIREMENTS_BASELINE.md",
-      " M TASKS.md",
       " M aimsolo.db",
       " M api/__pycache__/app.cpython-310.pyc",
       " M api/__pycache__/units.cpython-310.pyc",
-      " M artifacts/project_bootstrap.json",
       " M storage/__pycache__/db.cpython-310.pyc",
+      "?? TASK_PROMPTS_WAVE2.md",
       "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
@@ -21,6 +18,11 @@
     ]
   },
   "recent_commits": [
+    {
+      "hash": "a7da7c0",
+      "date": "2026-02-06",
+      "subject": "chore(planner): update baseline and tasks after units merge"
+    },
     {
       "hash": "a8ec07b",
       "date": "2026-02-06",
@@ -75,17 +77,20 @@
       "hash": "9855aac",
       "date": "2026-02-06",
       "subject": "Add planner prompt template and requirements baseline for P0"
-    },
-    {
-      "hash": "2800617",
-      "date": "2026-02-05",
-      "subject": "Update trend evaluation and data"
     }
   ],
   "recent_files": [
     {
+      "path": "aimsolo.db",
+      "last_write": "2026-02-06 20:06:04"
+    },
+    {
+      "path": "TASK_PROMPTS_WAVE2.md",
+      "last_write": "2026-02-06 21:43:12"
+    },
+    {
       "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-06 21:39:03"
+      "last_write": "2026-02-06 21:39:26"
     },
     {
       "path": "REQUIREMENTS_BASELINE.md",
@@ -96,12 +101,8 @@
       "last_write": "2026-02-06 21:38:56"
     },
     {
-      "path": "aimsolo.db",
-      "last_write": "2026-02-06 20:06:04"
-    },
-    {
       "path": "artifacts\\project_bootstrap.json",
-      "last_write": "2026-02-06 21:39:03"
+      "last_write": "2026-02-06 21:39:26"
     },
     {
       "path": "api\\app.py",
@@ -154,34 +155,6 @@
     {
       "path": ".gitignore",
       "last_write": "2026-02-06 20:46:53"
-    },
-    {
-      "path": "IMPERIAL_CONVERSION_PLAN.md",
-      "last_write": "2026-02-05 11:02:33"
-    },
-    {
-      "path": "INSIGHT_COPY_TEMPLATES.md",
-      "last_write": "2026-02-05 11:04:47"
-    },
-    {
-      "path": "INSIGHT_LEAN_PROXY.md",
-      "last_write": "2026-02-05 10:59:24"
-    },
-    {
-      "path": "INSIGHT_LIGHT_BRAKE_THROTTLE.md",
-      "last_write": "2026-02-05 11:00:54"
-    },
-    {
-      "path": "INSIGHT_SYNTHESIS_ALGORITHM.md",
-      "last_write": "2026-02-05 10:54:21"
-    },
-    {
-      "path": "INSIGHT_SYNTHESIS_OUTLINE.md",
-      "last_write": "2026-02-05 10:42:58"
-    },
-    {
-      "path": "LINE_STDDEV_RESEARCH.md",
-      "last_write": "2026-02-05 16:02:33"
     }
   ],
   "likely_closed_gaps": [],

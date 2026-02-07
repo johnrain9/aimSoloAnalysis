@@ -1,34 +1,32 @@
 # Project Bootstrap Snapshot
 
-Generated: 2026-02-06T21:39:26-07:00
+Generated: 2026-02-06T21:43:18-07:00
 Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_bootstrap.ps1`.
 
 ## Repo State
 - Root: `C:\Users\Paul\ai\aimSoloAnalysis`
 - Branch: `master`
-- HEAD: `a8ec07b`
+- HEAD: `a7da7c0`
 - Dirty: `True`
 
 ### Working Tree Changes
-- ` M PROJECT_BOOTSTRAP.md`
-- ` M REQUIREMENTS_BASELINE.md`
-- ` M TASKS.md`
 - ` M aimsolo.db`
 - ` M api/__pycache__/app.cpython-310.pyc`
 - ` M api/__pycache__/units.cpython-310.pyc`
-- ` M artifacts/project_bootstrap.json`
 - ` M storage/__pycache__/db.cpython-310.pyc`
+- `?? TASK_PROMPTS_WAVE2.md`
 - `?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc`
 
 ## Recently Modified Files
-- `PROJECT_BOOTSTRAP.md` (2026-02-06 21:39:03)
+- `aimsolo.db` (2026-02-06 20:06:04)
+- `TASK_PROMPTS_WAVE2.md` (2026-02-06 21:43:12)
+- `PROJECT_BOOTSTRAP.md` (2026-02-06 21:39:26)
 - `REQUIREMENTS_BASELINE.md` (2026-02-06 21:39:22)
 - `TASKS.md` (2026-02-06 21:38:56)
-- `aimsolo.db` (2026-02-06 20:06:04)
-- `artifacts\project_bootstrap.json` (2026-02-06 21:39:03)
+- `artifacts\project_bootstrap.json` (2026-02-06 21:39:26)
 - `api\app.py` (2026-02-06 21:37:36)
 - `api\units.py` (2026-02-06 21:37:36)
 - `tests\test_units_contract.py` (2026-02-06 21:37:36)
@@ -42,15 +40,9 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `tests\test_db_upsert_ids.py` (2026-02-06 20:53:08)
 - `PLANNER_PROMPT_TEMPLATE.md` (2026-02-06 20:51:10)
 - `.gitignore` (2026-02-06 20:46:53)
-- `IMPERIAL_CONVERSION_PLAN.md` (2026-02-05 11:02:33)
-- `INSIGHT_COPY_TEMPLATES.md` (2026-02-05 11:04:47)
-- `INSIGHT_LEAN_PROXY.md` (2026-02-05 10:59:24)
-- `INSIGHT_LIGHT_BRAKE_THROTTLE.md` (2026-02-05 11:00:54)
-- `INSIGHT_SYNTHESIS_ALGORITHM.md` (2026-02-05 10:54:21)
-- `INSIGHT_SYNTHESIS_OUTLINE.md` (2026-02-05 10:42:58)
-- `LINE_STDDEV_RESEARCH.md` (2026-02-05 16:02:33)
 
 ## Recent Commits
+- `a7da7c0` 2026-02-06 - chore(planner): update baseline and tasks after units merge
 - `a8ec07b` 2026-02-06 - fix(api): normalize units contract across insights/compare/map
 - `0f37b66` 2026-02-06 - chore(planner): optimize bootstrap recency and document cost model
 - `54914bb` 2026-02-06 - chore(planner): refresh bootstrap snapshot
@@ -62,7 +54,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `765609b` 2026-02-06 - chore(planner): assign branch/workdir in delegation template and ignore worktrees
 - `f006526` 2026-02-06 - chore(planner): enforce per-task git commit discipline in prompt template
 - `9855aac` 2026-02-06 - Add planner prompt template and requirements baseline for P0
-- `2800617` 2026-02-05 - Update trend evaluation and data
 
 ## Requirement Gap Snapshot
 ### Active Gaps
