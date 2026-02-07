@@ -573,6 +573,7 @@ def import_session(payload: ImportRequest) -> ImportResponse:
         """,
         (save_result.session_id,),
     ).fetchone()
+    run_meta = _load_run_meta(conn, save_result.run_id)
     conn.close()
 
     if not row:
@@ -586,7 +587,6 @@ def import_session(payload: ImportRequest) -> ImportResponse:
     track_direction = row["track_direction"] or f"{track_name} {direction}".strip()
     session_id = str(save_result.session_id)
 
-    run_meta = _load_run_meta(conn, save_result.run_id)
     return ImportResponse(
         session_id=session_id,
         track_name=track_name,
