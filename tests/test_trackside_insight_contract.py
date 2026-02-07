@@ -21,6 +21,7 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
                 "entry_speed_kmh": 95.0,
                 "min_speed_kmh": 70.0,
                 "exit_speed_30m_kmh": 92.0,
+                "start_dist_m": 118.0,
                 "apex_dist_m": 50.0,
                 "segment_time_s": 21.1,
             },
@@ -29,6 +30,7 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
                 "entry_speed_kmh": 99.0,
                 "min_speed_kmh": 73.0,
                 "exit_speed_30m_kmh": 95.0,
+                "start_dist_m": 121.0,
                 "apex_dist_m": 52.0,
                 "segment_time_s": 20.9,
             },
@@ -106,6 +108,10 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
         rider_text.extend(str(value) for value in protocol.values() if isinstance(value, str))
         for text in rider_text:
             assert not metric_token.search(text)
+
+    line_item = next(item for item in insights if item["rule_id"] == "line_inconsistency")
+    assert line_item["operational_action"].startswith("T1:")
+    assert "lap distance" in line_item["operational_action"]
 
     experimental = next(item for item in insights if item["rule_id"] == "late_throttle_pickup")
     assert experimental["risk_tier"] == "Experimental"
@@ -194,6 +200,104 @@ def test_synthesize_insight_corner_identity_uses_deterministic_human_fallback():
     assert insights[0]["corner_id"] == "corner near 123 m"
     assert insights[0]["corner_label"] == "corner near 123 m"
     assert "segment_internal_9" not in insights[0]["corner_id"]
+
+
+def test_line_inconsistency_action_includes_recent_turn_in_context():
+    segments = [
+        {
+            "segment_id": "T1",
+            "corner_id": "T1",
+            "target": {
+                "line_stddev_m": 1.8,
+                "entry_speed_kmh": 95.0,
+                "min_speed_kmh": 70.0,
+                "start_dist_m": 118.0,
+                "apex_dist_m": 50.0,
+                "segment_time_s": 21.1,
+            },
+            "reference": {
+                "line_stddev_m": 1.0,
+                "entry_speed_kmh": 99.0,
+                "min_speed_kmh": 73.0,
+                "start_dist_m": 121.0,
+                "apex_dist_m": 52.0,
+                "segment_time_s": 20.9,
+            },
+            "trend": {"recent_turn_in_dist_m": [125.0, 126.8, 112.8]},
+            "quality": {"gps_accuracy_m": 0.9, "satellites": 11},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "line_inconsistency",
+            "segment_id": "T1",
+            "corner_id": "T1",
+            "time_gain_s": 0.21,
+            "confidence": 0.8,
+            "evidence": {"line_stddev_m": 1.8, "line_stddev_delta_m": 0.8},
+            "comparison": "Lap 4 vs best Lap 2",
+        }
+    ]
+
+    insights = synthesize_insights(segments, signals, comparison_label="Lap 4 vs best Lap 2")
+    assert len(insights) == 1
+    evidence = insights[0]["evidence"]
+    assert evidence["turn_in_target_dist_m"] == 121.0
+    assert evidence["turn_in_reference_dist_m"] == 121.0
+    assert evidence["turn_in_rider_avg_dist_m"] == (125.0 + 126.8 + 112.8) / 3.0
+    assert evidence["turn_in_fallback_status"] == "resolved"
+    action = insights[0]["operational_action"]
+    assert "initiate turn-in at about 397 ft lap distance" in action
+    assert "Recent turn-in points were 410 ft, 416 ft, 370 ft." in action
+
+
+def test_line_inconsistency_evidence_gracefully_degrades_when_turn_in_missing():
+    segments = [
+        {
+            "segment_id": "T5",
+            "corner_id": "T5",
+            "target": {
+                "line_stddev_m": 1.9,
+                "entry_speed_kmh": 94.0,
+                "min_speed_kmh": 71.0,
+                "apex_dist_m": 48.0,
+                "segment_time_s": 20.8,
+            },
+            "reference": {
+                "line_stddev_m": 1.2,
+                "entry_speed_kmh": 97.0,
+                "min_speed_kmh": 73.0,
+                "apex_dist_m": 47.5,
+                "segment_time_s": 20.6,
+            },
+            "trend": {"recent_turn_in_dist_m": []},
+            "quality": {"gps_accuracy_m": 1.0, "satellites": 10},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "line_inconsistency",
+            "segment_id": "T5",
+            "corner_id": "T5",
+            "time_gain_s": 0.18,
+            "confidence": 0.75,
+            "evidence": {"line_stddev_m": 1.9, "line_stddev_delta_m": 0.7},
+            "comparison": "Lap 6 vs best Lap 3",
+        }
+    ]
+
+    insights = synthesize_insights(segments, signals, comparison_label="Lap 6 vs best Lap 3")
+    assert len(insights) == 1
+    evidence = insights[0]["evidence"]
+    assert "turn_in_target_dist_m" in evidence
+    assert "turn_in_reference_dist_m" in evidence
+    assert "turn_in_rider_avg_dist_m" in evidence
+    assert "recent_turn_in_dist_m" in evidence
+    assert evidence["turn_in_target_dist_m"] is None
+    assert evidence["turn_in_reference_dist_m"] is None
+    assert evidence["turn_in_rider_avg_dist_m"] is None
+    assert evidence["recent_turn_in_dist_m"] == []
+    assert evidence["turn_in_fallback_status"] == "missing"
 
 
 def test_rank_insights_enforces_top_n_primary_cap_and_conflict_suppression():

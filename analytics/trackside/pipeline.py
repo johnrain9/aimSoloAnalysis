@@ -988,6 +988,7 @@ def _compute_line_trends(
                     "lap_index": lap.lap_index,
                     "lap_order": lap_order,
                     "lap_count": lap_count,
+                    "start_dist_m": _as_float(values.get("start_dist_m")),
                     "apex_dist_m": _as_float(values.get("apex_dist_m")),
                     "line_stddev_m": _as_float(values.get("line_stddev_m")),
                     "segment_time_s": _as_float(values.get("segment_time_s")),
@@ -1031,6 +1032,11 @@ def _summarize_line_trends(
         fatigue_sessions = int(filter_stats.get("fatigue_sessions") or 0)
         fatigue_late_laps = int(filter_stats.get("fatigue_late_laps") or 0)
         fatigue_max_fade_s = _as_float(filter_stats.get("fatigue_max_fade_s"))
+        recent_turn_in = _recent_turn_in_history(
+            cleaned,
+            current_session_id=current_session_id,
+            limit=4,
+        )
         trends[seg_id] = {
             "trend_laps": total,
             "session_count": len({s.get("session_id") for s in apex_samples if s.get("session_id") is not None}),
@@ -1050,6 +1056,7 @@ def _summarize_line_trends(
             "fatigue_session_count": fatigue_sessions,
             "fatigue_late_laps": fatigue_late_laps,
             "fatigue_max_fade_s": fatigue_max_fade_s,
+            "recent_turn_in_dist_m": recent_turn_in,
         }
     return trends
 
@@ -1142,6 +1149,27 @@ def _sample_order(sample: Dict[str, object]) -> Tuple[float, float]:
     if lap_index is None:
         lap_index = lap_order
     return lap_order, lap_index
+
+
+def _recent_turn_in_history(
+    samples: Sequence[Dict[str, object]],
+    *,
+    current_session_id: Optional[int],
+    limit: int,
+) -> List[float]:
+    ordered = sorted(samples, key=_sample_order)
+    if current_session_id is not None:
+        current = [s for s in ordered if s.get("session_id") == current_session_id]
+        if len(current) >= 2:
+            ordered = current
+    values: List[float] = []
+    for sample in ordered:
+        start_dist = _as_float(sample.get("start_dist_m"))
+        if start_dist is not None:
+            values.append(start_dist)
+    if len(values) < 2:
+        return []
+    return values[-max(2, limit) :]
 
 
 def _detect_fatigue_late_samples(
