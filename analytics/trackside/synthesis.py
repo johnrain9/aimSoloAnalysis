@@ -177,6 +177,8 @@ def synthesize_insights(
                 min_speed_delta_kmh=min_speed_delta_kmh,
                 pickup_delta_m=pickup_delta_m,
                 pickup_delta_s=pickup_delta_s,
+                turn_in_target_dist_m=metrics.get("turn_in_target_dist_m"),
+                turn_in_reference_dist_m=metrics.get("turn_in_reference_dist_m"),
             )
             detail, actions, options, trend_evidence = _apply_line_trend_copy(
                 detail,
@@ -186,6 +188,7 @@ def synthesize_insights(
             )
             if trend_evidence:
                 evidence.update(trend_evidence)
+            evidence = _line_evidence_defaults(evidence)
         elif early_braking or entry_speed:
             if early_braking:
                 primary_id = "early_braking"
@@ -252,14 +255,15 @@ def synthesize_insights(
         else:
             continue
 
-        confidence = _confidence_from(primary_signal, quality)
-        confidence_label = _confidence_label(confidence)
-        applied_gain_s = round(_time_gain(primary_signal, time_gain_s), 4)
         corner_label = rider_corner_label(
             segment.get("corner_label") or segment.get("corner_id"),
             fallback_internal_id=segment_id,
             apex_m=metrics.get("apex_dist_m"),
         )
+
+        confidence = _confidence_from(primary_signal, quality)
+        confidence_label = _confidence_label(confidence)
+        applied_gain_s = round(_time_gain(primary_signal, time_gain_s), 4)
         detail = _policy_detail_copy(
             detail=detail,
             rule_id=primary_id,
@@ -273,6 +277,7 @@ def synthesize_insights(
             primary_id,
             phase,
             corner_label=corner_label,
+            evidence=evidence,
         )
         causal_reason = _causal_reason(primary_id, evidence, phase)
         data_quality_note = _data_quality_note(quality)
@@ -393,6 +398,7 @@ def _apply_line_trend_copy(
     fatigue_session_count = _get_float(trend, "fatigue_session_count")
     fatigue_late_laps = _get_float(trend, "fatigue_late_laps")
     fatigue_max_fade_s = _get_float(trend, "fatigue_max_fade_s")
+    recent_turn_in = trend.get("recent_turn_in_dist_m")
     options = _format_line_options(trend)
 
     evidence: Dict[str, Any] = {}
@@ -420,6 +426,14 @@ def _apply_line_trend_copy(
         evidence["fatigue_late_laps"] = fatigue_late_laps
     if fatigue_max_fade_s is not None:
         evidence["fatigue_max_fade_s"] = fatigue_max_fade_s
+    if isinstance(recent_turn_in, list):
+        recent_turn_in_vals: List[float] = []
+        for value in recent_turn_in:
+            try:
+                recent_turn_in_vals.append(float(value))
+            except (TypeError, ValueError):
+                continue
+        evidence["recent_turn_in_dist_m"] = recent_turn_in_vals[-4:]
 
     delta_ft = None
     if target_apex_m is not None and rec_apex is not None:
@@ -783,7 +797,7 @@ def _lean_quality_good(value: object) -> bool:
     return text in {"good", "ok", "true", "1"}
 
 
-def _merge_evidence(signal: Optional[Dict[str, Any]], **extras: Optional[float]) -> Dict[str, Any]:
+def _merge_evidence(signal: Optional[Dict[str, Any]], **extras: Any) -> Dict[str, Any]:
     merged: Dict[str, Any] = {}
     if signal and signal.get("evidence"):
         merged.update(signal["evidence"])
@@ -866,6 +880,11 @@ def _extract_metrics(target: Dict[str, Any], reference: Dict[str, Any]) -> Dict[
     metrics["decel_time_s"] = _get_float(target, "decel_time_s")
     metrics["decel_dist_m"] = _get_float(target, "decel_dist_m")
     metrics["decel_g_per_10m"] = _get_float(target, "decel_g_per_10m")
+    metrics["turn_in_reference_dist_m"] = _get_float(reference, "start_dist_m")
+    metrics["turn_in_target_dist_m"] = _coalesce(
+        metrics["turn_in_reference_dist_m"],
+        _get_float(target, "start_dist_m"),
+    )
     metrics["lean_proxy_deg"] = _get_float(target, "lean_proxy_deg")
     metrics["yaw_rms_ratio"] = _ratio_metric(target, reference, "yaw_rms")
     metrics["segment_time_delta_s"] = _segment_time_delta(target, reference)
@@ -941,7 +960,25 @@ def _operational_action(
     phase: str,
     *,
     corner_label: Optional[str],
+    evidence: Dict[str, Any],
 ) -> str:
+    def _line_action(base: str) -> str:
+        history_text = _turn_in_history_text(evidence.get("recent_turn_in_dist_m"))
+        if history_text:
+            return f"{base} Recent turn-in points were {history_text}."
+        return base
+
+    if rule_id == "line_inconsistency":
+        turn_in_dist_m = _get_float(evidence, "turn_in_target_dist_m")
+        if turn_in_dist_m is not None and corner_label:
+            return _line_action(
+                f"{corner_label}: initiate turn-in at about {_to_ft(turn_in_dist_m):.0f} ft lap distance "
+                "each lap, then hold one apex marker."
+            )
+        if corner_label:
+            return _line_action(
+                f"{corner_label}: initiate turn-in at the same lap distance each lap and hold one apex marker."
+            )
     if actions:
         candidate = actions[0]
     else:
@@ -1127,6 +1164,56 @@ def _marker_context_available(primary_id: str, evidence: Dict[str, Any]) -> bool
             or _get_float(evidence, "neutral_throttle_dist_m") is not None
         )
     return bool(evidence)
+
+
+def _turn_in_history_text(raw_values: Any) -> str:
+    if not isinstance(raw_values, list):
+        return ""
+    values_ft: List[str] = []
+    for value in raw_values[-4:]:
+        try:
+            values_ft.append(f"{_to_ft(float(value)):.0f} ft")
+        except (TypeError, ValueError):
+            continue
+    if len(values_ft) < 2:
+        return ""
+    return ", ".join(values_ft)
+
+
+def _line_evidence_defaults(evidence: Dict[str, Any]) -> Dict[str, Any]:
+    normalized = dict(evidence)
+    history = normalized.get("recent_turn_in_dist_m")
+    if not isinstance(history, list):
+        history = []
+    normalized["recent_turn_in_dist_m"] = history
+
+    if _get_float(normalized, "turn_in_target_dist_m") is None:
+        normalized["turn_in_target_dist_m"] = None
+    if _get_float(normalized, "turn_in_reference_dist_m") is None:
+        normalized["turn_in_reference_dist_m"] = None
+
+    turn_in_avg = _turn_in_average(history)
+    normalized["turn_in_rider_avg_dist_m"] = turn_in_avg
+
+    if _get_float(normalized, "turn_in_target_dist_m") is not None:
+        normalized["turn_in_fallback_status"] = "resolved"
+    elif turn_in_avg is not None:
+        normalized["turn_in_fallback_status"] = "rider_average_only"
+    else:
+        normalized["turn_in_fallback_status"] = "missing"
+    return normalized
+
+
+def _turn_in_average(values: List[Any]) -> Optional[float]:
+    numeric: List[float] = []
+    for value in values:
+        try:
+            numeric.append(float(value))
+        except (TypeError, ValueError):
+            continue
+    if not numeric:
+        return None
+    return sum(numeric) / len(numeric)
 
 
 def _causal_reason(rule_id: str, evidence: Dict[str, Any], phase: str) -> str:

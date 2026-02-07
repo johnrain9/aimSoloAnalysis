@@ -123,6 +123,27 @@ def test_filter_segment_samples_short_session_skips_fatigue_detection():
     assert stats["fatigue_late_laps"] == 0
 
 
+def test_summarize_line_trends_sets_recent_turn_in_list_when_missing():
+    samples = [
+        {
+            "session_id": 21,
+            "lap_id": 500 + idx,
+            "lap_index": idx,
+            "lap_order": idx,
+            "apex_dist_m": 48.0 + idx * 0.1,
+            "line_stddev_m": 1.1,
+            "segment_time_s": 10.0,
+            "min_speed_kmh": 80.0,
+            "speed_noise_sigma_kmh": 0.2,
+        }
+        for idx in range(1, 7)
+    ]
+
+    trends = pipeline._summarize_line_trends({"T3": samples}, current_session_id=21)
+    assert "recent_turn_in_dist_m" in trends["T3"]
+    assert trends["T3"]["recent_turn_in_dist_m"] == []
+
+
 def test_apply_line_trend_copy_adds_recurrence_why_now_and_fatigue_note():
     detail, actions, _options, evidence = synthesis._apply_line_trend_copy(
         "Base detail.",
@@ -147,3 +168,17 @@ def test_apply_line_trend_copy_adds_recurrence_why_now_and_fatigue_note():
     assert any("fresh laps" in action.lower() for action in actions)
     assert evidence["recurrence_priority_shift"] is True
     assert evidence["fatigue_likely"] is True
+
+
+def test_apply_line_trend_copy_omits_recent_turn_in_when_unavailable():
+    _detail, _actions, _options, evidence = synthesis._apply_line_trend_copy(
+        "Base detail.",
+        ["Use the reference apex marker."],
+        {
+            "apex_stddev_m": 1.2,
+            "recommendation": {"apex_mean_m": 44.0},
+        },
+        target_apex_m=45.0,
+    )
+
+    assert "recent_turn_in_dist_m" not in evidence
