@@ -198,19 +198,7 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - Trend harness baseline currently matches fixtures.
 - Existing trend harness provides partial backend measurement coverage (`tools/eval_trends.py`).
 
-### 6.2 Gaps / Must-Fix
-- GAP-001 (High): Upsert ID return logic can return wrong IDs in conflict paths.
-  - Affects: `storage/db.py` upsert helpers.
-  - Risks: Foreign key failures, corrupted linkage.
-  - Related requirements: RQ-DB-002, RQ-DB-004.
-- GAP-002 (High): Import route uses DB connection after close in one code path.
-  - Affects: `api/app.py` import path metadata lookup.
-  - Related requirements: RQ-API-001.
-- GAP-003 (Medium): Compare route/query mismatch between UI and API lap selection contract.
-  - Affects: UI sends `reference_lap`/`target_lap`, API compare handler does not currently accept these params.
-  - Related requirements: RQ-API-004, RQ-UI-001.
-- GAP-004 (Medium): Units contract inconsistency (imperial flags with metric map payloads).
-  - Related requirements: RQ-UNT-001.
+### 6.2 Active Gaps / Must-Fix
 - GAP-005 (Medium): Derived metrics writer exists but is not integrated into pipeline persistence path.
   - Related requirements: RQ-ANL-003, RQ-ANL-006.
 - GAP-006 (Low): Channel blob persistence remains stubbed.
@@ -222,6 +210,20 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - GAP-008 (Medium): No formal human-in-the-loop qualitative review loop for coaching quality.
   - Affects: validation of nuanced coaching usefulness/safety framing beyond deterministic checks.
   - Related requirements: RQ-EVAL-011, RQ-EVAL-012, RQ-NFR-007.
+
+### 6.3 Recently Closed Gaps (Merged on `master`)
+- Closed GAP-001 (High): Upsert ID conflict-path correctness fixed.
+  - Evidence: commit `8a8ee59`, tests `tests/test_db_upsert_ids.py`.
+  - Related requirements: RQ-DB-002, RQ-DB-004.
+- Closed GAP-002 (High): `/import` closed-connection metadata lookup fixed.
+  - Evidence: commit `995028b`, regression test `tests/test_api_import.py`.
+  - Related requirements: RQ-API-001.
+- Closed GAP-003 (Medium): `/compare` explicit lap query params aligned with UI.
+  - Evidence: commit `be3d5c9`, tests `tests/test_compare_endpoint.py`.
+  - Related requirements: RQ-API-004, RQ-UI-001.
+- Closed GAP-004 (Medium): Units contract normalized across `/insights`, `/compare`, `/map`.
+  - Evidence: commit `a8ec07b`, tests `tests/test_units_contract.py`.
+  - Related requirements: RQ-UNT-001, RQ-UNT-002.
 
 ## 7) Release Gates (P0)
 - Gate A: No high severity data-integrity defects open (GAP-001/002 resolved).
@@ -240,10 +242,6 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
   - Explicit list of deferred items.
 
 ## 9) Suggested Task Breakdown
-- TASK-DB-01: Fix upsert key return guarantees (RQ-DB-002/004).
-- TASK-API-01: Fix `/import` connection lifecycle bug (RQ-API-001).
-- TASK-API-02: Align `/compare` query contract with UI (RQ-API-004, RQ-UI-001).
-- TASK-UNT-01: Normalize units contract for compare/map/insights (RQ-UNT-001/002).
 - TASK-ANL-01: Wire `metrics_writer` into persistence path (RQ-ANL-003/006).
 - TASK-EVAL-01: Define evaluation schema + scorecard contract for automated decision loops (RQ-EVAL-006/007, RQ-NFR-006).
 - TASK-EVAL-02: Expand backend harness to include latency/failure KPIs and baseline governance (RQ-EVAL-001/002/003).
@@ -251,6 +249,12 @@ Purpose: Convert implicit project assumptions into explicit, trackable requireme
 - TASK-EVAL-04: Add frequent-run workflow and release gating docs/commands (RQ-EVAL-007, RQ-NFR-005).
 - TASK-EVAL-05: Implement product-behavior assertion suite + golden scenario drift checks (RQ-EVAL-008/009/010).
 - TASK-EVAL-06: Implement coach-review workflow + status integration into scorecard (RQ-EVAL-011/012, RQ-NFR-007).
+
+### 9.1 Completed Task Breakdown (Merged)
+- TASK-DB-01: Fix upsert key return guarantees (RQ-DB-002/004).
+- TASK-API-01: Fix `/import` connection lifecycle bug (RQ-API-001).
+- TASK-API-02: Align `/compare` query contract with UI (RQ-API-004, RQ-UI-001).
+- TASK-UNT-02: Normalize units contract for `/insights`, `/compare`, `/map` (RQ-UNT-001/002).
 
 ## 10) P1 Planned Requirements (Non-Blocking)
 

@@ -1,23 +1,36 @@
 {
-  "generated_at": "2026-02-06T21:36:11-07:00",
+  "generated_at": "2026-02-06T21:39:26-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
     "branch": "master",
-    "head": "54914bb",
+    "head": "a8ec07b",
     "dirty": true,
     "status": [
-      " M PLANNER_BOOTSTRAP.md",
+      " M PROJECT_BOOTSTRAP.md",
+      " M REQUIREMENTS_BASELINE.md",
+      " M TASKS.md",
       " M aimsolo.db",
       " M api/__pycache__/app.cpython-310.pyc",
       " M api/__pycache__/units.cpython-310.pyc",
+      " M artifacts/project_bootstrap.json",
       " M storage/__pycache__/db.cpython-310.pyc",
-      " M tools/update_bootstrap.ps1",
       "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc"
+      "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc"
     ]
   },
   "recent_commits": [
+    {
+      "hash": "a8ec07b",
+      "date": "2026-02-06",
+      "subject": "fix(api): normalize units contract across insights/compare/map"
+    },
+    {
+      "hash": "0f37b66",
+      "date": "2026-02-06",
+      "subject": "chore(planner): optimize bootstrap recency and document cost model"
+    },
     {
       "hash": "54914bb",
       "date": "2026-02-06",
@@ -67,38 +80,48 @@
       "hash": "2800617",
       "date": "2026-02-05",
       "subject": "Update trend evaluation and data"
-    },
-    {
-      "hash": "e0b54da",
-      "date": "2026-02-04",
-      "subject": "Implement trackside pipeline, API wiring, and analytics docs"
-    },
-    {
-      "hash": "91d0944",
-      "date": "2026-02-04",
-      "subject": "plan"
     }
   ],
   "recent_files": [
     {
-      "path": "PLANNER_BOOTSTRAP.md",
-      "last_write": "2026-02-06 21:36:08"
+      "path": "PROJECT_BOOTSTRAP.md",
+      "last_write": "2026-02-06 21:39:03"
+    },
+    {
+      "path": "REQUIREMENTS_BASELINE.md",
+      "last_write": "2026-02-06 21:39:22"
+    },
+    {
+      "path": "TASKS.md",
+      "last_write": "2026-02-06 21:38:56"
     },
     {
       "path": "aimsolo.db",
       "last_write": "2026-02-06 20:06:04"
     },
     {
+      "path": "artifacts\\project_bootstrap.json",
+      "last_write": "2026-02-06 21:39:03"
+    },
+    {
+      "path": "api\\app.py",
+      "last_write": "2026-02-06 21:37:36"
+    },
+    {
+      "path": "api\\units.py",
+      "last_write": "2026-02-06 21:37:36"
+    },
+    {
+      "path": "tests\\test_units_contract.py",
+      "last_write": "2026-02-06 21:37:36"
+    },
+    {
+      "path": "PLANNER_BOOTSTRAP.md",
+      "last_write": "2026-02-06 21:36:08"
+    },
+    {
       "path": "tools\\update_bootstrap.ps1",
       "last_write": "2026-02-06 21:36:03"
-    },
-    {
-      "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-06 21:33:23"
-    },
-    {
-      "path": "artifacts\\project_bootstrap.json",
-      "last_write": "2026-02-06 21:33:23"
     },
     {
       "path": "AGENTS.md",
@@ -107,10 +130,6 @@
     {
       "path": "skills\\planner-orchestrator\\SKILL.md",
       "last_write": "2026-02-06 21:30:13"
-    },
-    {
-      "path": "api\\app.py",
-      "last_write": "2026-02-06 20:55:25"
     },
     {
       "path": "tests\\test_compare_endpoint.py",
@@ -135,10 +154,6 @@
     {
       "path": ".gitignore",
       "last_write": "2026-02-06 20:46:53"
-    },
-    {
-      "path": "REQUIREMENTS_BASELINE.md",
-      "last_write": "2026-02-06 20:37:58"
     },
     {
       "path": "IMPERIAL_CONVERSION_PLAN.md",
@@ -167,36 +182,10 @@
     {
       "path": "LINE_STDDEV_RESEARCH.md",
       "last_write": "2026-02-05 16:02:33"
-    },
-    {
-      "path": "ML_DATA_COLLECTION_PLAN.md",
-      "last_write": "2026-02-05 12:06:53"
-    },
-    {
-      "path": "RULES_SIGNALS_SYNTHESIS_CHECKLIST.md",
-      "last_write": "2026-02-05 11:05:35"
-    },
-    {
-      "path": "TASKS.md",
-      "last_write": "2026-02-05 10:42:19"
     }
   ],
-  "likely_closed_gaps": [
-    {
-      "id": "GAP-001",
-      "reason": "Recent commit subjects indicate upsert conflict-ID fix landed."
-    },
-    {
-      "id": "GAP-002",
-      "reason": "Recent commit subjects indicate /import connection-lifecycle bug fix landed."
-    },
-    {
-      "id": "GAP-003",
-      "reason": "Recent commit subjects indicate /compare explicit lap query support landed."
-    }
-  ],
+  "likely_closed_gaps": [],
   "active_gaps": [
-    "GAP-004 (Medium): Units contract inconsistency (imperial flags with metric map payloads).",
     "GAP-005 (Medium): Derived metrics writer exists but is not integrated into pipeline persistence path.",
     "GAP-006 (Low): Channel blob persistence remains stubbed.",
     "GAP-007 (High): No unified backend+frontend evaluation harness with a single scorecard and release gating.",
@@ -209,7 +198,6 @@
     "[todo] Add lean-angle proxy (from lateral accel + GPS radius) with quality gating",
     "[todo] Add synthesis layer to reconcile conflicting insights (phase inference + suppression + actionable templates)",
     "[todo] Add light brake/throttle detection (turn/lean dependent) to synthesis",
-    "[todo] Convert insight outputs to imperial units (mph, ft) for UI/evidence",
     "[todo] Decode hGPS 56-byte record format",
     "[todo] Validate CRC16 trailer and timebase mapping",
     "[todo] Map hCHS fields to data types + sample rates",

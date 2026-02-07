@@ -42,7 +42,7 @@ Status key: [done] [in-progress] [todo]
 - [todo] Add lean-angle proxy (from lateral accel + GPS radius) with quality gating
 - [todo] Add synthesis layer to reconcile conflicting insights (phase inference + suppression + actionable templates)
 - [todo] Add light brake/throttle detection (turn/lean dependent) to synthesis
-- [todo] Convert insight outputs to imperial units (mph, ft) for UI/evidence
+- [done] Convert insight outputs to imperial units (mph, ft) for UI/evidence
 
 ## API (Local)
 - [done] Minimal API skeleton (import, summary, insights, compare)
