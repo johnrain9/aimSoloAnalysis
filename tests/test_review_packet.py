@@ -1,7 +1,9 @@
 import csv
+import json
 from pathlib import Path
 
 from tools import build_top1_review_packet as packet
+from tools import eval_top1_scorecard
 
 
 def test_review_packet_deterministic_sampling_and_required_columns(tmp_path: Path):
@@ -104,3 +106,49 @@ def test_review_packet_missing_inputs_writes_minimal_failure_artifacts(tmp_path:
     assert len(rows) == 1
     assert rows[0]["case_id"] == "ERROR"
     assert "blocked_missing_inputs" == rows[0]["disposition"]
+
+
+def test_default_chain_scorecard_to_review_packet_interoperability(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    artifacts = tmp_path / "artifacts"
+    artifacts.mkdir(parents=True, exist_ok=True)
+
+    trace_path = artifacts / "top1_traces.jsonl"
+    rows = [
+        {
+            "trace_id": "t-pass",
+            "case_id": "t-pass",
+            "top1_pass": True,
+            "rule_id": "RULE_A",
+            "risk_tier": "Primary",
+            "expected_gain_s": 0.3,
+            "recommendation_text": "Keep turn-in point",
+            "evidence_summary": "Stable confidence-weighted gain",
+        },
+        {
+            "trace_id": "t-fail",
+            "case_id": "t-fail",
+            "top1_pass": False,
+            "failure_reason": "missing_success_check",
+            "rule_id": "RULE_B",
+            "risk_tier": "Blocked",
+            "expected_gain_s": -0.1,
+            "recommendation_text": "Do not apply until verified",
+            "evidence_summary": "Missing success check",
+        },
+    ]
+    trace_path.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+
+    score_exit = eval_top1_scorecard.main([])
+    assert score_exit == 0
+
+    review_exit = packet.main([])
+    assert review_exit == 0
+
+    out_md = artifacts / "top1_review_packet.md"
+    out_csv = artifacts / "top1_review_packet.csv"
+    assert out_md.exists()
+    assert out_csv.exists()
+
+    packet_rows = list(csv.DictReader(out_csv.open("r", encoding="utf-8")))
+    assert {row["case_id"] for row in packet_rows} == {"t-pass", "t-fail"}

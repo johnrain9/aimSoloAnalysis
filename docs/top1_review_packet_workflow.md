@@ -1,15 +1,25 @@
 # Top-1 Review Packet Workflow
 
-Command:
+Canonical default chain (no extra args):
+
+```powershell
+$env:PYTHONPATH='.'; python tools/eval_top1_batch.py
+$env:PYTHONPATH='.'; python tools/eval_top1_scorecard.py
+$env:PYTHONPATH='.'; python tools/build_top1_review_packet.py
+```
+
+Default artifact contract:
+
+- Batch trace output: `artifacts/top1_traces.jsonl` (consumed by scorecard and review packet).
+- Scorecard aggregated output: `artifacts/top1_aggregated_report.json` (consumed by review packet).
+- Review outputs: `artifacts/top1_review_packet.md`, `artifacts/top1_review_packet.csv`.
+- Legacy paths remain supported via explicit CLI flags or fallback resolution.
+
+Optional deterministic sampling overrides:
 
 ```powershell
 $env:PYTHONPATH='.'; python tools/build_top1_review_packet.py --sample-size 25 --seed 11
 ```
-
-Outputs:
-
-- `artifacts/top1_review_packet.md`
-- `artifacts/top1_review_packet.csv`
 
 Purpose:
 

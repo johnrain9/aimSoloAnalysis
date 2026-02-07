@@ -16,11 +16,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REPORT = ROOT / "artifacts" / "top1_aggregated_report.json"
-DEFAULT_TRACES = ROOT / "artifacts" / "top1_traces.jsonl"
-DEFAULT_MD = ROOT / "artifacts" / "top1_review_packet.md"
-DEFAULT_CSV = ROOT / "artifacts" / "top1_review_packet.csv"
+from tools.top1_artifact_contract import (
+    DEFAULT_TOP1_SCORECARD_PATH,
+    DEFAULT_TOP1_TRACE_PATH,
+    LEGACY_SCORECARD_INPUT_PATH,
+    LEGACY_SCORECARD_REPORT_PATH,
+)
+
+DEFAULT_REPORT = DEFAULT_TOP1_SCORECARD_PATH
+DEFAULT_TRACES = DEFAULT_TOP1_TRACE_PATH
+DEFAULT_MD = Path("artifacts") / "top1_review_packet.md"
+DEFAULT_CSV = Path("artifacts") / "top1_review_packet.csv"
 DEFAULT_SAMPLE_SIZE = 25
 DEFAULT_SEED = 11
 
@@ -94,6 +100,26 @@ def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
             raise ValueError(f"Invalid JSONL at line {idx}: expected object")
         items.append(row)
     return items
+
+
+def _resolve_report_path(path: Path) -> Path:
+    if path.exists():
+        return path
+    if path.as_posix() == DEFAULT_REPORT.as_posix():
+        legacy = Path(LEGACY_SCORECARD_REPORT_PATH)
+        if legacy.exists():
+            return legacy
+    return path
+
+
+def _resolve_traces_path(path: Path) -> Path:
+    if path.exists():
+        return path
+    if path.as_posix() == DEFAULT_TRACES.as_posix():
+        legacy = Path(LEGACY_SCORECARD_INPUT_PATH)
+        if legacy.exists():
+            return legacy
+    return path
 
 
 def _as_list(value: Any) -> List[Any]:
@@ -439,28 +465,38 @@ def build_review_packet(
     errors: List[str] = []
     report_payload: Any = None
     trace_payload: List[Dict[str, Any]] = []
+    resolved_report_path = _resolve_report_path(report_path)
+    resolved_traces_path = _resolve_traces_path(traces_path)
 
-    if report_path.exists():
+    if resolved_report_path.exists():
+        if resolved_report_path.as_posix() != report_path.as_posix():
+            errors.append(
+                f"report_fallback: requested={report_path.as_posix()} resolved={resolved_report_path.as_posix()}"
+            )
         try:
-            report_payload = _read_json(report_path)
+            report_payload = _read_json(resolved_report_path)
         except Exception as exc:
             errors.append(
-                f"Failed reading aggregated report `{report_path.as_posix()}`: {type(exc).__name__}: {exc}"
+                f"Failed reading aggregated report `{resolved_report_path.as_posix()}`: {type(exc).__name__}: {exc}"
             )
     else:
         errors.append(
             f"Missing aggregated report `{report_path.as_posix()}`. Run the top-1 evaluation aggregation first or pass --report <path>."
         )
 
-    if traces_path.exists():
+    if resolved_traces_path.exists():
+        if resolved_traces_path.as_posix() != traces_path.as_posix():
+            errors.append(
+                f"trace_fallback: requested={traces_path.as_posix()} resolved={resolved_traces_path.as_posix()}"
+            )
         try:
-            if traces_path.suffix.lower() == ".jsonl":
-                trace_payload = _read_jsonl(traces_path)
+            if resolved_traces_path.suffix.lower() == ".jsonl":
+                trace_payload = _read_jsonl(resolved_traces_path)
             else:
-                loaded = _read_json(traces_path)
+                loaded = _read_json(resolved_traces_path)
                 trace_payload = _as_list(loaded)
         except Exception as exc:
-            errors.append(f"Failed reading traces `{traces_path.as_posix()}`: {type(exc).__name__}: {exc}")
+            errors.append(f"Failed reading traces `{resolved_traces_path.as_posix()}`: {type(exc).__name__}: {exc}")
     else:
         errors.append(
             f"Missing traces `{traces_path.as_posix()}`. Provide --traces <path> for richer evidence summaries."
@@ -476,13 +512,13 @@ def build_review_packet(
     if report_payload is not None and not normalized:
         errors.append(
             "Aggregated report was loaded but no case list was found. Expected one of: "
-            "top1_cases/cases/items/entries/recommendations/results."
+            "top1_cases/cases/items/entries/recommendations/results/rows."
         )
 
     selected = _sample_cases(normalized, sample_size=sample_size, seed=seed)
     auto_scored_requirements = _extract_auto_scored_requirements(report_payload)
     if not auto_scored_requirements:
-        auto_scored_requirements = ["RQ-EVAL-004", "RQ-EVAL-005", "RQ-EVAL-007", "RQ-NFR-006"]
+        auto_scored_requirements = ["RQ-EVAL-007", "RQ-EVAL-008", "RQ-EVAL-010", "RQ-NFR-006"]
 
     scenario_set = "top1-sample-" + generated_at[:10]
     csv_rows = [row.to_csv_row(review_date=generated_at[:10], scenario_set=scenario_set) for row in selected]
@@ -537,8 +573,8 @@ def build_review_packet(
         "selected_count": len(selected),
         "error_count": len(errors),
         "errors": errors,
-        "report": report_path.as_posix(),
-        "traces": traces_path.as_posix(),
+        "report": resolved_report_path.as_posix(),
+        "traces": resolved_traces_path.as_posix(),
         "output_md": output_md.as_posix(),
         "output_csv": output_csv.as_posix(),
         "seed": seed,

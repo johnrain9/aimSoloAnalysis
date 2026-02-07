@@ -12,11 +12,20 @@ import math
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-DEFAULT_INPUT = "artifacts/top1_session_traces.jsonl"
-DEFAULT_REPORT = "artifacts/eval_top1_quality_report.json"
+from tools.top1_artifact_contract import (
+    DEFAULT_TOP1_SCORECARD_PATH,
+    DEFAULT_TOP1_TRACE_PATH,
+    LEGACY_BATCH_REPORT_PATH,
+    LEGACY_SCORECARD_INPUT_PATH,
+)
+
+DEFAULT_INPUT = DEFAULT_TOP1_TRACE_PATH.as_posix()
+DEFAULT_REPORT = DEFAULT_TOP1_SCORECARD_PATH.as_posix()
 ROUND_DIGITS = 4
 MALFORMED_EXAMPLE_LIMIT = 20
 TOP_EXAMPLE_LIMIT = 20
+AUTO_SCORED_REQUIREMENTS = ["RQ-EVAL-007", "RQ-EVAL-008", "RQ-EVAL-010", "RQ-NFR-006"]
+HUMAN_REVIEWED_REQUIREMENTS = ["RQ-EVAL-011", "RQ-EVAL-012", "RQ-NFR-007"]
 
 
 def _round(value: Any) -> Any:
@@ -107,8 +116,19 @@ def _extract_gain_s(record: Dict[str, Any]) -> Optional[float]:
 
 def _normalize_row(record: Dict[str, Any], line_number: int) -> Dict[str, Any]:
     trace_id = _first_non_empty(record, ["trace_id", "session_id", "run_id", "id"], default=f"line-{line_number}")
+    case_id = _first_non_empty(record, ["case_id", "file_id", "scenario_id", "id"], default=str(trace_id))
     rule_id = _first_non_empty(record, ["rule_id", "rule", "top1_rule_id"], default="UNKNOWN")
     risk_tier = _first_non_empty(record, ["risk_tier", "risk", "tier"], default="UNKNOWN")
+    recommendation_text = _first_non_empty(
+        record,
+        ["recommendation_text", "recommendation", "action", "title"],
+        default=f"Investigate rule {rule_id}.",
+    )
+    evidence_summary = _first_non_empty(
+        record,
+        ["evidence_summary", "evidence", "detail"],
+        default="",
+    )
     reason = _first_non_empty(
         record,
         ["failure_reason", "fail_reason", "reason", "top1_failure_reason"],
@@ -122,11 +142,14 @@ def _normalize_row(record: Dict[str, Any], line_number: int) -> Dict[str, Any]:
 
     return {
         "trace_id": str(trace_id),
+        "case_id": str(case_id),
         "line_number": line_number,
         "top1_pass": top1_pass,
         "failure_reason": normalized_reason,
         "rule_id": str(rule_id),
         "risk_tier": str(risk_tier),
+        "recommendation_text": str(recommendation_text),
+        "evidence_summary": str(evidence_summary),
         "gain_s": _extract_gain_s(record),
     }
 
@@ -216,6 +239,73 @@ def _gate(name: str, ok: bool, details: str) -> Dict[str, Any]:
     return {"gate": name, "status": "pass" if ok else "fail", "details": details}
 
 
+def _coerce_record(record: Dict[str, Any]) -> Dict[str, Any]:
+    coerced = dict(record)
+    status = str(record.get("status") or "").strip().lower()
+
+    if "top1_pass" not in coerced and status:
+        if status == "pass":
+            coerced["top1_pass"] = True
+        elif status in {"fail", "failed", "error", "not_ready", "blocked"}:
+            coerced["top1_pass"] = False
+
+    if not coerced.get("failure_reason"):
+        reason = _first_non_empty(record, ["detail", "error", "failure_reason"], default="")
+        if reason:
+            coerced["failure_reason"] = reason
+
+    if not coerced.get("rule_id") and record.get("top1_rule_id") is not None:
+        coerced["rule_id"] = record.get("top1_rule_id")
+    if not coerced.get("risk_tier") and record.get("top1_risk_tier") is not None:
+        coerced["risk_tier"] = record.get("top1_risk_tier")
+    if not coerced.get("trace_id"):
+        if record.get("file_id"):
+            coerced["trace_id"] = record.get("file_id")
+        elif record.get("session_id") is not None and record.get("run_id") is not None:
+            coerced["trace_id"] = f"session-{record.get('session_id')}-run-{record.get('run_id')}"
+    if not coerced.get("case_id"):
+        coerced["case_id"] = _first_non_empty(record, ["file_id", "trace_id"], default="")
+
+    gain_trace = record.get("top1_gain_trace")
+    if coerced.get("expected_gain_s") is None and isinstance(gain_trace, dict):
+        value = gain_trace.get("final_expected_gain_s")
+        if value is None:
+            value = gain_trace.get("expected_gain_s")
+        if value is not None:
+            coerced["expected_gain_s"] = value
+
+    return coerced
+
+
+def _parse_records(records: List[Any]) -> Dict[str, Any]:
+    rows: List[Dict[str, Any]] = []
+    malformed_examples: List[Dict[str, Any]] = []
+    malformed_count = 0
+    total_lines = 0
+    for line_number, payload in enumerate(records, start=1):
+        total_lines += 1
+        try:
+            if not isinstance(payload, dict):
+                raise ValueError("trace row is not a JSON object")
+            rows.append(_normalize_row(_coerce_record(payload), line_number))
+        except Exception as exc:
+            malformed_count += 1
+            if len(malformed_examples) < MALFORMED_EXAMPLE_LIMIT:
+                malformed_examples.append(
+                    {
+                        "line_number": line_number,
+                        "error": f"{type(exc).__name__}: {exc}",
+                        "snippet": _safe_snippet(json.dumps(payload, sort_keys=True, ensure_ascii=False)),
+                    }
+                )
+    return {
+        "total_lines": total_lines,
+        "rows": rows,
+        "malformed_count": malformed_count,
+        "malformed_examples": malformed_examples,
+    }
+
+
 def _parse_jsonl(path: Path) -> Dict[str, Any]:
     rows: List[Dict[str, Any]] = []
     malformed_examples: List[Dict[str, Any]] = []
@@ -231,7 +321,7 @@ def _parse_jsonl(path: Path) -> Dict[str, Any]:
                 payload = json.loads(line)
                 if not isinstance(payload, dict):
                     raise ValueError("trace line is not a JSON object")
-                rows.append(_normalize_row(payload, line_number))
+                rows.append(_normalize_row(_coerce_record(payload), line_number))
             except Exception as exc:
                 malformed_count += 1
                 if len(malformed_examples) < MALFORMED_EXAMPLE_LIMIT:
@@ -251,6 +341,85 @@ def _parse_jsonl(path: Path) -> Dict[str, Any]:
     }
 
 
+def _parse_json(path: Path) -> Dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    records: List[Any]
+    if isinstance(payload, list):
+        records = payload
+    elif isinstance(payload, dict):
+        for key in ("entries", "rows", "top1_cases", "traces", "items", "results"):
+            value = payload.get(key)
+            if isinstance(value, list):
+                records = value
+                break
+        else:
+            records = []
+    else:
+        records = []
+    return _parse_records(records)
+
+
+def _resolve_input_path(input_path: Path) -> Path:
+    if input_path.exists():
+        return input_path
+
+    requested = input_path.as_posix()
+    default_requested = requested == DEFAULT_INPUT
+    if default_requested:
+        fallback_candidates = [Path(LEGACY_SCORECARD_INPUT_PATH), Path(LEGACY_BATCH_REPORT_PATH)]
+        for candidate in fallback_candidates:
+            if candidate.exists():
+                return candidate
+    return input_path
+
+
+def _build_top1_cases(rows: List[Dict[str, Any]], outlier_gain_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    outlier_ids = {str(row.get("trace_id")) for row in outlier_gain_list}
+    cases: List[Dict[str, Any]] = []
+    for row in rows:
+        top1_pass = row.get("top1_pass")
+        status = "pass" if top1_pass is True else "fail" if top1_pass is False else "unknown"
+        failure_reason = row.get("failure_reason") or ""
+        cases.append(
+            {
+                "case_id": row.get("case_id") or row.get("trace_id"),
+                "trace_id": row.get("trace_id"),
+                "status": status,
+                "top1_pass": top1_pass,
+                "failure_reason": failure_reason,
+                "gate_reasons": [] if top1_pass is True else [failure_reason],
+                "rule_id": row.get("rule_id"),
+                "risk_tier": row.get("risk_tier"),
+                "expected_gain_s": row.get("gain_s"),
+                "outlier_score": 1.0 if str(row.get("trace_id")) in outlier_ids else 0.0,
+                "recommendation_text": row.get("recommendation_text"),
+                "evidence_summary": row.get("evidence_summary"),
+            }
+        )
+    return cases
+
+
+def _requirement_modes(*, hard_status: str) -> List[Dict[str, str]]:
+    modes: List[Dict[str, str]] = []
+    for requirement in AUTO_SCORED_REQUIREMENTS:
+        modes.append(
+            {
+                "requirement_id": requirement,
+                "evaluation_mode": "auto_scored",
+                "status": hard_status,
+            }
+        )
+    for requirement in HUMAN_REVIEWED_REQUIREMENTS:
+        modes.append(
+            {
+                "requirement_id": requirement,
+                "evaluation_mode": "human_reviewed",
+                "status": "pending_review",
+            }
+        )
+    return modes
+
+
 def build_report(*, input_path: Path, report_path: Path) -> Dict[str, Any]:
     errors: List[str] = []
     rows: List[Dict[str, Any]] = []
@@ -258,13 +427,32 @@ def build_report(*, input_path: Path, report_path: Path) -> Dict[str, Any]:
     malformed_examples: List[Dict[str, Any]] = []
     total_lines = 0
 
-    input_exists = input_path.exists()
+    resolved_input_path = _resolve_input_path(input_path)
+    input_exists = resolved_input_path.exists()
+    if input_exists and resolved_input_path.as_posix() != input_path.as_posix():
+        errors.append(
+            f"input_fallback: requested={input_path.as_posix()} resolved={resolved_input_path.as_posix()}"
+        )
     if input_exists:
-        parsed = _parse_jsonl(input_path)
-        rows = parsed["rows"]
-        malformed_count = parsed["malformed_count"]
-        malformed_examples = parsed["malformed_examples"]
-        total_lines = parsed["total_lines"]
+        try:
+            if resolved_input_path.suffix.lower() == ".jsonl":
+                parsed = _parse_jsonl(resolved_input_path)
+            else:
+                parsed = _parse_json(resolved_input_path)
+            rows = parsed["rows"]
+            malformed_count = parsed["malformed_count"]
+            malformed_examples = parsed["malformed_examples"]
+            total_lines = parsed["total_lines"]
+        except Exception as exc:
+            errors.append(f"input_parse_error: {type(exc).__name__}: {exc}")
+            malformed_count = 1
+            malformed_examples = [
+                {
+                    "line_number": 1,
+                    "error": f"{type(exc).__name__}: {exc}",
+                    "snippet": resolved_input_path.as_posix(),
+                }
+            ]
     else:
         errors.append(f"input_missing: {input_path.as_posix()}")
 
@@ -313,18 +501,25 @@ def build_report(*, input_path: Path, report_path: Path) -> Dict[str, Any]:
 
     failed_gates = [gate for gate in gates if gate["status"] == "fail"]
     hard_status = "pass" if not failed_gates else "fail"
+    outlier_gain_list = _outlier_gain_list(rows)
+    top1_cases = _build_top1_cases(rows, outlier_gain_list)
 
     report = {
         "schema_version": "1",
         "harness": "top1_quality_eval",
         "scope": "top1",
         "status": hard_status,
-        "input_path": input_path.as_posix(),
+        "input_path": resolved_input_path.as_posix(),
         "report_path": report_path.as_posix(),
         "summary": {
             "total_lines": total_lines,
             "valid_rows": len(rows),
             "malformed_lines": malformed_count,
+        },
+        "requirements": {
+            "auto_scored": AUTO_SCORED_REQUIREMENTS,
+            "human_reviewed": HUMAN_REVIEWED_REQUIREMENTS,
+            "evaluation_modes": _requirement_modes(hard_status=hard_status),
         },
         "hard_gates": {
             "status": hard_status,
@@ -342,9 +537,10 @@ def build_report(*, input_path: Path, report_path: Path) -> Dict[str, Any]:
             "rule_distribution": _sorted_distribution(rule_counts, "rule_id"),
             "risk_tier_distribution": _sorted_distribution(risk_counts, "risk_tier"),
             "rule_risk_distribution": _sorted_distribution(rule_risk_counts, "rule_risk"),
-            "outlier_gain_list": _outlier_gain_list(rows),
+            "outlier_gain_list": outlier_gain_list,
             "worst_20_examples": _worst_examples(rows),
         },
+        "top1_cases": top1_cases,
         "malformed_examples": malformed_examples,
         "errors": errors,
     }
@@ -359,7 +555,11 @@ def _resolve_exit_code(report: Dict[str, Any]) -> int:
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Evaluate top-1 decision traces and emit JSON scorecard.")
-    parser.add_argument("--input", default=DEFAULT_INPUT, help="Input JSONL trace artifact path.")
+    parser.add_argument(
+        "--input",
+        default=DEFAULT_INPUT,
+        help="Input trace artifact path (JSONL canonical; legacy JSON report also supported).",
+    )
     parser.add_argument("--report-path", default=DEFAULT_REPORT, help="Output JSON report path.")
     args = parser.parse_args(argv)
 

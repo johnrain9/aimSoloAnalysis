@@ -70,6 +70,7 @@ def test_build_report_has_hard_and_soft_sections():
     report = eval_top1_batch._build_report(
         root="test_data",
         report_path="artifacts/eval_top1_batch_report.json",
+        trace_path="artifacts/top1_traces.jsonl",
         rows=[
             {"status": "pass"},
             {"status": "fail"},
@@ -83,6 +84,7 @@ def test_build_report_has_hard_and_soft_sections():
     assert report["schema_version"] == "1"
     assert report["harness"] == "eval_top1_batch"
     assert report["status"] == "fail"
+    assert report["trace_path"] == "artifacts/top1_traces.jsonl"
     assert report["top1_only"] is True
     assert report["hard_checks"]["harness_status"] == "fail"
     assert report["hard_checks"]["hard_failures"] == 1
@@ -103,3 +105,31 @@ def test_resolve_exit_code_harness_only():
 
     assert eval_top1_batch._resolve_exit_code(pass_report) == 0
     assert eval_top1_batch._resolve_exit_code(fail_report) == 2
+
+
+def test_trace_row_contract_for_scorecard_and_review_packet():
+    entry = {
+        "file_id": "session/a.csv",
+        "file_path": "test_data/session/a.csv",
+        "session_id": 7,
+        "run_id": 11,
+        "status": "fail",
+        "detail": "missing metrics",
+        "top1_rule_id": "line_inconsistency",
+        "top1_corner_id": "T3",
+        "top1_phase": "mid",
+        "top1_risk_tier": "Experimental",
+        "top1_gate_decision": "blocked",
+        "top1_gain_trace": {"final_expected_gain_s": 0.12},
+    }
+
+    trace = eval_top1_batch._trace_row_from_entry(entry)
+
+    assert trace["trace_id"] == "session-7-run-11"
+    assert trace["case_id"] == "session/a.csv"
+    assert trace["top1_pass"] is False
+    assert trace["failure_reason"] == "missing metrics"
+    assert trace["rule_id"] == "line_inconsistency"
+    assert trace["risk_tier"] == "Experimental"
+    assert trace["gate_decision"] == "blocked"
+    assert trace["expected_gain_s"] == 0.12

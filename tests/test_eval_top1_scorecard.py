@@ -49,6 +49,12 @@ def test_build_report_top1_schema_and_deterministic_fields(tmp_path: Path):
     assert report["harness"] == "top1_quality_eval"
     assert report["scope"] == "top1"
     assert report["status"] == "pass"
+    assert report["requirements"]["auto_scored"] == [
+        "RQ-EVAL-007",
+        "RQ-EVAL-008",
+        "RQ-EVAL-010",
+        "RQ-NFR-006",
+    ]
 
     assert report["summary"] == {
         "total_lines": 4,
@@ -89,6 +95,8 @@ def test_build_report_top1_schema_and_deterministic_fields(tmp_path: Path):
     assert worst[2]["trace_id"] == "t-fail-1"
 
     assert isinstance(report["soft_indicators"]["outlier_gain_list"], list)
+    assert len(report["top1_cases"]) == 4
+    assert report["top1_cases"][0]["case_id"] == "t-pass-1"
 
 
 def test_missing_input_emits_structured_failure_report(tmp_path: Path):
@@ -152,3 +160,44 @@ def test_partial_parse_failures_reported_without_hiding_valid_rows(tmp_path: Pat
         {"reason": "risk_missing", "count": 1}
     ]
     assert report["hard_gates"]["status"] == "fail"
+
+
+def test_scorecard_accepts_legacy_batch_json_report_shape(tmp_path: Path):
+    input_path = tmp_path / "legacy_batch_report.json"
+    report_path = tmp_path / "scorecard.json"
+
+    input_path.write_text(
+        json.dumps(
+            {
+                "entries": [
+                    {
+                        "file_id": "a.csv",
+                        "session_id": 1,
+                        "run_id": 2,
+                        "status": "pass",
+                        "top1_rule_id": "RULE_A",
+                        "top1_risk_tier": "Primary",
+                        "top1_gain_trace": {"final_expected_gain_s": 0.22},
+                    },
+                    {
+                        "file_id": "b.csv",
+                        "session_id": 3,
+                        "run_id": 4,
+                        "status": "fail",
+                        "detail": "gate blocked",
+                        "top1_rule_id": "RULE_B",
+                        "top1_risk_tier": "Blocked",
+                        "top1_gain_trace": {"final_expected_gain_s": -0.04},
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = eval_top1_scorecard.build_report(input_path=input_path, report_path=report_path)
+
+    assert report["status"] == "pass"
+    assert report["summary"]["valid_rows"] == 2
+    assert report["soft_indicators"]["top1_counts"] == {"pass": 1, "fail": 1, "unknown": 0}
+    assert report["top1_cases"][1]["failure_reason"] == "gate blocked"

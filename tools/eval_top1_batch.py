@@ -21,9 +21,14 @@ if str(ROOT) not in sys.path:
 from analytics.trackside.pipeline import generate_trackside_insights
 from ingest.csv.parser import parse_csv
 from ingest.csv.save import save_to_db
+from tools.top1_artifact_contract import (
+    DEFAULT_TOP1_TRACE_PATH,
+    LEGACY_BATCH_REPORT_PATH,
+)
 
 
-REPORT_DEFAULT = "artifacts/eval_top1_batch_report.json"
+REPORT_DEFAULT = LEGACY_BATCH_REPORT_PATH.as_posix()
+TRACE_DEFAULT = DEFAULT_TOP1_TRACE_PATH.as_posix()
 ROOT_DEFAULT = "test_data"
 
 _TOP1_REQUIRED_FIELDS = ("rule_id", "corner_id", "phase", "risk_tier")
@@ -33,6 +38,14 @@ _BLOCKING_GATE_DECISIONS = {"blocked", "fail", "failed", "reject", "rejected", "
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def _write_jsonl(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        for row in rows:
+            handle.write(json.dumps(row, sort_keys=True))
+            handle.write("\n")
 
 
 def _normalize_path(path: Path) -> str:
@@ -180,6 +193,7 @@ def _build_report(
     *,
     root: str,
     report_path: str,
+    trace_path: str,
     rows: Sequence[Dict[str, Any]],
     harness_errors: Sequence[str],
     hard_failures: int,
@@ -195,6 +209,7 @@ def _build_report(
         "status": "pass" if hard_failures == 0 else "fail",
         "root": root,
         "report_path": report_path,
+        "trace_path": trace_path,
         "top1_only": True,
         "hard_checks": {
             "harness_status": "pass" if hard_failures == 0 else "fail",
@@ -218,16 +233,83 @@ def _resolve_exit_code(report: Dict[str, Any]) -> int:
     return 0
 
 
-def main() -> int:
+def _extract_expected_gain_s(gain_trace: Any) -> Optional[float]:
+    if not isinstance(gain_trace, dict):
+        return None
+    candidate = gain_trace.get("final_expected_gain_s")
+    if candidate is None:
+        candidate = gain_trace.get("expected_gain_s")
+    try:
+        if candidate is None:
+            return None
+        return float(candidate)
+    except (TypeError, ValueError):
+        return None
+
+
+def _trace_id_for_entry(entry: Dict[str, Any]) -> str:
+    session_id = entry.get("session_id")
+    run_id = entry.get("run_id")
+    file_id = entry.get("file_id")
+    if session_id is not None and run_id is not None:
+        return f"session-{session_id}-run-{run_id}"
+    if file_id:
+        return str(file_id)
+    return "unknown-trace"
+
+
+def _trace_row_from_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
+    status = str(entry.get("status") or "").lower()
+    top1_pass = True if status == "pass" else False if status in {"fail", "not_ready", "error"} else None
+    failure_reason = ""
+    if top1_pass is not True:
+        failure_reason = str(entry.get("detail") or entry.get("error") or status or "unknown_failure")
+
+    gain_trace = entry.get("top1_gain_trace")
+    return {
+        "trace_id": _trace_id_for_entry(entry),
+        "case_id": entry.get("file_id") or _trace_id_for_entry(entry),
+        "file_id": entry.get("file_id"),
+        "file_path": entry.get("file_path"),
+        "session_id": entry.get("session_id"),
+        "run_id": entry.get("run_id"),
+        "status": status or "unknown",
+        "top1_pass": top1_pass,
+        "failure_reason": failure_reason,
+        "rule_id": entry.get("top1_rule_id"),
+        "corner_id": entry.get("top1_corner_id"),
+        "phase": entry.get("top1_phase"),
+        "risk_tier": entry.get("top1_risk_tier"),
+        "gate_decision": entry.get("top1_gate_decision"),
+        "gain_trace": gain_trace,
+        "expected_gain_s": _extract_expected_gain_s(gain_trace),
+    }
+
+
+def _build_trace_rows(rows: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return [_trace_row_from_entry(row) for row in rows]
+
+
+def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description="Run top-1 batch evaluation across CSV files and emit a JSON artifact."
     )
     parser.add_argument("--root", default=ROOT_DEFAULT, help="Directory to recursively scan for CSV files.")
-    parser.add_argument("--report-path", default=REPORT_DEFAULT, help="JSON artifact output path.")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--report-path",
+        default=REPORT_DEFAULT,
+        help="JSON summary output path (legacy-compatible).",
+    )
+    parser.add_argument(
+        "--trace-path",
+        default=TRACE_DEFAULT,
+        help="JSONL trace output path for scorecard/review-packet default chain.",
+    )
+    args = parser.parse_args(argv)
 
     root = Path(args.root)
     report_path = Path(args.report_path)
+    trace_path = Path(args.trace_path)
     rows: List[Dict[str, Any]] = []
     harness_errors: List[str] = []
     hard_failures = 0
@@ -293,12 +375,20 @@ def main() -> int:
     report = _build_report(
         root=_normalize_path(root),
         report_path=_normalize_path(report_path),
+        trace_path=_normalize_path(trace_path),
         rows=rows,
         harness_errors=harness_errors,
         hard_failures=hard_failures,
     )
+    trace_rows = _build_trace_rows(rows)
     _write_json(report_path, report)
-    print(json.dumps({"status": report["status"], "report_path": report["report_path"]}, sort_keys=True))
+    _write_jsonl(trace_path, trace_rows)
+    print(
+        json.dumps(
+            {"status": report["status"], "report_path": report["report_path"], "trace_path": report["trace_path"]},
+            sort_keys=True,
+        )
+    )
     return _resolve_exit_code(report)
 
 
