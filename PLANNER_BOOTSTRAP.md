@@ -12,6 +12,10 @@ Outputs:
 - `PROJECT_BOOTSTRAP.md` (human-readable snapshot)
 - `artifacts/project_bootstrap.json` (machine-readable snapshot)
 
+Cost model:
+- The script runs locally in PowerShell and does not call Codex.
+- Token usage only occurs when Codex reads the small snapshot files.
+
 ## Standard Planner Startup
 1. Run the bootstrap command.
 2. Read `PROJECT_BOOTSTRAP.md`.
@@ -34,3 +38,4 @@ Outputs:
 ## Notes
 - Treat bootstrap as a fast cache; refresh whenever in doubt.
 - Use "likely closed gaps" in bootstrap as hints, then update baseline docs explicitly when confirmed.
+- Default recency is git-based for speed; pass `-UseFilesystemScan` only when you need timestamp-based discovery beyond git history.

@@ -1,21 +1,28 @@
 {
-  "generated_at": "2026-02-06T21:33:23-07:00",
+  "generated_at": "2026-02-06T21:36:11-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
     "branch": "master",
-    "head": "c4b8271",
+    "head": "54914bb",
     "dirty": true,
     "status": [
+      " M PLANNER_BOOTSTRAP.md",
       " M aimsolo.db",
       " M api/__pycache__/app.cpython-310.pyc",
       " M api/__pycache__/units.cpython-310.pyc",
       " M storage/__pycache__/db.cpython-310.pyc",
+      " M tools/update_bootstrap.ps1",
       "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc"
     ]
   },
   "recent_commits": [
+    {
+      "hash": "54914bb",
+      "date": "2026-02-06",
+      "subject": "chore(planner): refresh bootstrap snapshot"
+    },
     {
       "hash": "c4b8271",
       "date": "2026-02-06",
@@ -74,24 +81,28 @@
   ],
   "recent_files": [
     {
-      "path": "artifacts\\project_bootstrap.json",
-      "last_write": "2026-02-06 21:32:28"
+      "path": "PLANNER_BOOTSTRAP.md",
+      "last_write": "2026-02-06 21:36:08"
     },
     {
-      "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-06 21:32:28"
+      "path": "aimsolo.db",
+      "last_write": "2026-02-06 20:06:04"
     },
     {
       "path": "tools\\update_bootstrap.ps1",
-      "last_write": "2026-02-06 21:32:25"
+      "last_write": "2026-02-06 21:36:03"
+    },
+    {
+      "path": "PROJECT_BOOTSTRAP.md",
+      "last_write": "2026-02-06 21:33:23"
+    },
+    {
+      "path": "artifacts\\project_bootstrap.json",
+      "last_write": "2026-02-06 21:33:23"
     },
     {
       "path": "AGENTS.md",
       "last_write": "2026-02-06 21:31:20"
-    },
-    {
-      "path": "PLANNER_BOOTSTRAP.md",
-      "last_write": "2026-02-06 21:31:15"
     },
     {
       "path": "skills\\planner-orchestrator\\SKILL.md",
@@ -130,48 +141,44 @@
       "last_write": "2026-02-06 20:37:58"
     },
     {
-      "path": "aimsolo.db",
-      "last_write": "2026-02-06 20:06:04"
+      "path": "IMPERIAL_CONVERSION_PLAN.md",
+      "last_write": "2026-02-05 11:02:33"
+    },
+    {
+      "path": "INSIGHT_COPY_TEMPLATES.md",
+      "last_write": "2026-02-05 11:04:47"
+    },
+    {
+      "path": "INSIGHT_LEAN_PROXY.md",
+      "last_write": "2026-02-05 10:59:24"
+    },
+    {
+      "path": "INSIGHT_LIGHT_BRAKE_THROTTLE.md",
+      "last_write": "2026-02-05 11:00:54"
+    },
+    {
+      "path": "INSIGHT_SYNTHESIS_ALGORITHM.md",
+      "last_write": "2026-02-05 10:54:21"
+    },
+    {
+      "path": "INSIGHT_SYNTHESIS_OUTLINE.md",
+      "last_write": "2026-02-05 10:42:58"
     },
     {
       "path": "LINE_STDDEV_RESEARCH.md",
       "last_write": "2026-02-05 16:02:33"
     },
     {
-      "path": "tools\\eval_trends.py",
-      "last_write": "2026-02-05 15:54:01"
+      "path": "ML_DATA_COLLECTION_PLAN.md",
+      "last_write": "2026-02-05 12:06:53"
     },
     {
-      "path": "tests\\fixtures\\trend_eval_baseline.json",
-      "last_write": "2026-02-05 15:53:20"
+      "path": "RULES_SIGNALS_SYNTHESIS_CHECKLIST.md",
+      "last_write": "2026-02-05 11:05:35"
     },
     {
-      "path": "analytics\\trackside\\pipeline.py",
-      "last_write": "2026-02-05 15:52:42"
-    },
-    {
-      "path": "analytics\\trackside\\config.py",
-      "last_write": "2026-02-05 15:52:19"
-    },
-    {
-      "path": "tests\\fixtures\\trend_eval_manifest.json",
-      "last_write": "2026-02-05 15:47:07"
-    },
-    {
-      "path": "test_data\\HPR_Full_09292024\\21.csv",
-      "last_write": "2026-02-05 15:45:26"
-    },
-    {
-      "path": "test_data\\HPR_Full_09292024\\2.csv",
-      "last_write": "2026-02-05 15:45:26"
-    },
-    {
-      "path": "test_data\\HPR_Full_09292024\\22.csv",
-      "last_write": "2026-02-05 15:45:25"
-    },
-    {
-      "path": "test_data\\HPR_Full_09292024\\4.csv",
-      "last_write": "2026-02-05 15:45:25"
+      "path": "TASKS.md",
+      "last_write": "2026-02-05 10:42:19"
     }
   ],
   "likely_closed_gaps": [

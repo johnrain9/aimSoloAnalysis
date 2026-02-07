@@ -2,7 +2,8 @@ param(
     [int]$RecentCommitCount = 12,
     [int]$RecentFileCount = 25,
     [string]$OutputMarkdown = "PROJECT_BOOTSTRAP.md",
-    [string]$OutputJson = "artifacts/project_bootstrap.json"
+    [string]$OutputJson = "artifacts/project_bootstrap.json",
+    [switch]$UseFilesystemScan
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,6 +29,77 @@ function Read-PatternLines {
         return @()
     }
     return @(Select-String -Path $Path -Pattern $Pattern | ForEach-Object { $_.Line.Trim() -replace "^- ", "" })
+}
+
+function Is-ExcludedPath {
+    param([string]$Path)
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return $true
+    }
+    $normalized = $Path -replace "/", "\"
+    return ($normalized -match "(^|\\)(\.git|\.worktrees|__pycache__|\.pytest_cache)(\\|$)")
+}
+
+function Get-RecentPathsFromGit {
+    param(
+        [int]$CommitCount,
+        [int]$MaxFileCount,
+        [string[]]$StatusLines
+    )
+
+    $candidatePaths = New-Object System.Collections.Generic.List[string]
+
+    foreach ($line in $StatusLines) {
+        if ([string]::IsNullOrWhiteSpace($line)) {
+            continue
+        }
+        $raw = if ($line.Length -gt 3) { $line.Substring(3).Trim() } else { "" }
+        if ($raw -match " -> ") {
+            $raw = ($raw -split " -> ", 2)[1]
+        }
+        if ((-not [string]::IsNullOrWhiteSpace($raw)) -and (-not (Is-ExcludedPath -Path $raw))) {
+            $candidatePaths.Add($raw)
+        }
+    }
+
+    $logNameLines = @(Get-GitLines @("log", "--name-only", "--pretty=format:", "-n", "$CommitCount"))
+    foreach ($line in $logNameLines) {
+        $path = $line.Trim()
+        if ((-not [string]::IsNullOrWhiteSpace($path)) -and (-not (Is-ExcludedPath -Path $path))) {
+            $candidatePaths.Add($path)
+        }
+    }
+
+    $seen = @{}
+    $ordered = @()
+    foreach ($path in $candidatePaths) {
+        if ($seen.ContainsKey($path)) {
+            continue
+        }
+        $seen[$path] = $true
+        $ordered += $path
+    }
+
+    return @($ordered | Select-Object -First $MaxFileCount)
+}
+
+function Get-RecentFilesFromFilesystem {
+    param(
+        [string]$RootPath,
+        [int]$MaxFileCount
+    )
+
+    return @(Get-ChildItem -Recurse -File |
+        Where-Object { -not (Is-ExcludedPath -Path $_.FullName) } |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First $MaxFileCount |
+        ForEach-Object {
+            $relativePath = $_.FullName.Substring($RootPath.Length).TrimStart("\", "/")
+            [pscustomobject]@{
+                path = $relativePath
+                last_write = $_.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")
+            }
+        })
 }
 
 $repoRoot = (Resolve-Path ".").Path
@@ -60,18 +132,24 @@ foreach ($line in $commitLines) {
     }
 }
 
-$excludePattern = "\\.git\\|\\.worktrees\\|__pycache__|\\.pytest_cache"
-$recentFiles = Get-ChildItem -Recurse -File |
-    Where-Object { $_.FullName -notmatch $excludePattern } |
-    Sort-Object LastWriteTime -Descending |
-    Select-Object -First $RecentFileCount |
-    ForEach-Object {
-        $relativePath = $_.FullName.Substring($repoRoot.Length).TrimStart("\", "/")
-        [pscustomobject]@{
-            path = $relativePath
-            last_write = $_.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")
-        }
+$recentFiles = @()
+$recentPaths = @(Get-RecentPathsFromGit -CommitCount $RecentCommitCount -MaxFileCount $RecentFileCount -StatusLines $statusLines)
+foreach ($path in $recentPaths) {
+    $normalized = $path -replace "/", "\"
+    $fullPath = Join-Path -Path $repoRoot -ChildPath $normalized
+    $lastWrite = "(missing)"
+    if (Test-Path -Path $fullPath) {
+        $lastWrite = (Get-Item -Path $fullPath).LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")
     }
+    $recentFiles += [pscustomobject]@{
+        path = $normalized
+        last_write = $lastWrite
+    }
+}
+
+if ($UseFilesystemScan -or $recentFiles.Count -eq 0) {
+    $recentFiles = Get-RecentFilesFromFilesystem -RootPath $repoRoot -MaxFileCount $RecentFileCount
+}
 
 $openTaskItems = Read-PatternLines -Path "TASKS.md" -Pattern "^- \[(todo|in-progress)\]"
 $gapLines = Read-PatternLines -Path "REQUIREMENTS_BASELINE.md" -Pattern "^- GAP-"
