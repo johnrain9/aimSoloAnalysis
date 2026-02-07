@@ -162,6 +162,131 @@ def test_rank_insights_enforces_top_n_primary_cap_and_conflict_suppression():
     assert primary_count <= 2
 
 
+def test_rank_insights_attaches_top1_quality_gate_and_gain_trace():
+    insights = [
+        {
+            "rule_id": "line_inconsistency",
+            "corner_id": "T1",
+            "segment_id": "T1",
+            "phase": "mid",
+            "time_gain_s": 0.22,
+            "expected_gain_s": 0.22,
+            "confidence": 0.82,
+            "risk_tier": "Primary",
+            "risk_reason": "Stable context.",
+            "success_check": "Reduce line_stddev_delta_m to <= +0.30 m for 3 laps.",
+            "evidence": {"line_stddev_m": 1.8},
+        },
+        {
+            "rule_id": "entry_speed",
+            "corner_id": "T2",
+            "segment_id": "T2",
+            "phase": "entry",
+            "time_gain_s": 0.18,
+            "expected_gain_s": 0.18,
+            "confidence": 0.75,
+            "risk_tier": "Primary",
+            "success_check": "Recover entry speed delta by +1.0 km/h.",
+            "evidence": {"entry_speed_delta_kmh": -4.0},
+        },
+        {
+            "rule_id": "exit_speed",
+            "corner_id": "T3",
+            "segment_id": "T3",
+            "phase": "exit",
+            "time_gain_s": 0.12,
+            "expected_gain_s": 0.12,
+            "confidence": 0.7,
+            "risk_tier": "Primary",
+            "success_check": "Recover exit speed delta by +1.0 km/h.",
+            "evidence": {"exit_speed_delta_kmh": -3.5},
+        },
+    ]
+
+    ranked = rank_insights(
+        insights,
+        min_count=1,
+        max_count=3,
+        min_confidence=0.0,
+        max_per_corner=3,
+        max_primary_focus=2,
+    )
+
+    assert len(ranked) == 3
+    top = ranked[0]
+    assert top["quality_gate"]["scope"] == "top_1"
+    assert top["quality_gate"]["decision"] == "pass"
+    assert top["quality_gate"]["tier_before"] == "Primary"
+    assert top["quality_gate"]["tier_after"] == "Primary"
+    assert top["gain_trace"]["raw_inputs"]["rule_id"] == "line_inconsistency"
+    assert top["gain_trace"]["final_expected_gain_s"] == top["expected_gain_s"]
+    assert "quality_gate" not in ranked[1]
+    assert "gain_trace" not in ranked[1]
+
+
+def test_rank_insights_top1_gate_fail_downgrades_conservatively():
+    insights = [
+        {
+            "rule_id": "line_inconsistency",
+            "corner_id": "T1",
+            "segment_id": "T1",
+            "phase": "mid",
+            "time_gain_s": 0.3,
+            "expected_gain_s": 0.3,
+            "confidence": 0.85,
+            "risk_tier": "Primary",
+            "risk_reason": "Stable context and strong evidence.",
+            "success_check": "Reduce line_stddev_delta_m to <= +0.30 m for 3 laps.",
+            "evidence": {},
+        },
+        {
+            "rule_id": "entry_speed",
+            "corner_id": "T2",
+            "segment_id": "T2",
+            "phase": "entry",
+            "time_gain_s": 0.21,
+            "expected_gain_s": 0.21,
+            "confidence": 0.8,
+            "risk_tier": "Primary",
+            "success_check": "Recover entry speed delta by +1.0 km/h.",
+            "evidence": {"entry_speed_delta_kmh": -3.8},
+        },
+        {
+            "rule_id": "exit_speed",
+            "corner_id": "T3",
+            "segment_id": "T3",
+            "phase": "exit",
+            "time_gain_s": 0.18,
+            "expected_gain_s": 0.18,
+            "confidence": 0.78,
+            "risk_tier": "Primary",
+            "success_check": "Recover exit speed delta by +1.0 km/h.",
+            "evidence": {"exit_speed_delta_kmh": -3.2},
+        },
+    ]
+
+    ranked = rank_insights(
+        insights,
+        min_count=1,
+        max_count=3,
+        min_confidence=0.0,
+        max_per_corner=3,
+        max_primary_focus=2,
+    )
+
+    assert len(ranked) == 3
+    assert [item["rule_id"] for item in ranked] == ["line_inconsistency", "entry_speed", "exit_speed"]
+
+    top = ranked[0]
+    assert top["quality_gate"]["decision"] == "fail"
+    reason_codes = {reason["code"] for reason in top["quality_gate"]["reasons"]}
+    assert "missing_required_evidence" in reason_codes
+    assert top["risk_tier"] == "Blocked"
+    assert top["quality_gate"]["tier_after"] == "Blocked"
+    assert "Top-1 quality gate failed" in top["risk_reason"]
+    assert top["is_primary_focus"] is False
+
+
 def test_insights_endpoint_exposes_contract_fields(monkeypatch, tmp_path):
     db_path = tmp_path / "test.db"
     db_path.write_text("", encoding="utf-8")
@@ -208,6 +333,21 @@ def test_insights_endpoint_exposes_contract_fields(monkeypatch, tmp_path):
                 "corner_id": "T1",
                 "evidence": {"line_stddev_m": 1.8},
                 "comparison": "Lap 4 vs best Lap 2",
+                "quality_gate": {
+                    "scope": "top_1",
+                    "decision": "pass",
+                    "severity": "none",
+                    "checks": [],
+                    "reasons": [],
+                    "tier_before": "Primary",
+                    "tier_after": "Primary",
+                },
+                "gain_trace": {
+                    "raw_inputs": {"rule_id": "line_inconsistency"},
+                    "transformations": [],
+                    "confidence_weighting": {"confidence": 0.8, "weighted_gain_s": 0.168},
+                    "final_expected_gain_s": 0.21,
+                },
             }
         ],
     )
@@ -222,3 +362,5 @@ def test_insights_endpoint_exposes_contract_fields(monkeypatch, tmp_path):
     assert "data_quality_note" in item
     assert "uncertainty_note" in item
     assert item["is_primary_focus"] is True
+    assert item["quality_gate"]["decision"] == "pass"
+    assert item["gain_trace"]["final_expected_gain_s"] == 0.21

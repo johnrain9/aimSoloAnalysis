@@ -711,6 +711,8 @@ def get_insights(session_id: str) -> Dict[str, Any]:
                 "corner_id": insight.get("corner_id"),
                 "evidence": convert_evidence(insight.get("evidence") or {}),
                 "comparison": insight.get("comparison"),
+                "quality_gate": insight.get("quality_gate"),
+                "gain_trace": insight.get("gain_trace"),
             }
         )
 
