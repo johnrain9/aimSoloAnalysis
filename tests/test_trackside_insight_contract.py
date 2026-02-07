@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 from analytics.trackside.rank import rank_insights
 from analytics.trackside.synthesis import synthesize_insights
@@ -90,6 +91,21 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
         assert insight["operational_action"]
         assert insight["causal_reason"]
         assert insight["success_check"]
+        metric_token = re.compile(r"\bkm/h\b|\bm/s\b|_kmh\b|_stddev_m\b|\b\d+(?:\.\d+)?\s*m\b")
+        rider_text = [
+            insight["detail"],
+            insight["operational_action"],
+            insight["causal_reason"],
+            insight["success_check"],
+            insight["risk_reason"],
+            insight["data_quality_note"],
+        ]
+        rider_text.extend(insight.get("actions") or [])
+        rider_text.extend(insight.get("options") or [])
+        protocol = insight.get("experimental_protocol") or {}
+        rider_text.extend(str(value) for value in protocol.values() if isinstance(value, str))
+        for text in rider_text:
+            assert not metric_token.search(text)
 
     experimental = next(item for item in insights if item["rule_id"] == "late_throttle_pickup")
     assert experimental["risk_tier"] == "Experimental"

@@ -1,10 +1,11 @@
+import re
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from api import app as api_app
-from api.units import KMH_TO_MPH, MPS_TO_MPH, M_TO_FT, convert_compare_payload
+from api.units import KMH_TO_MPH, MPS_TO_MPH, M_TO_FT, convert_compare_payload, convert_rider_text
 from domain.run_data import RunData
 
 
@@ -76,6 +77,19 @@ def test_unit_convert_evidence_converts_meter_kmh_mps_fields():
     assert converted["segment_time_delta_s"] == pytest.approx(0.2)
 
 
+def test_unit_convert_rider_text_converts_mixed_metric_tokens():
+    converted = convert_rider_text(
+        "Improve entry_speed_delta_kmh by +2.0 km/h; shorten pickup by 6 m; "
+        "keep stability within 10-15 m; sensor drift 1.5 m/s."
+    )
+
+    assert "entry speed delta" in converted
+    assert "+1.2 mph" in converted
+    assert "20 ft" in converted
+    assert "33-49 ft" in converted
+    assert "3.4 mph" in converted
+
+
 def test_unit_insights_payload_is_imperial_and_explicit(monkeypatch, tmp_path):
     _mock_db(monkeypatch, tmp_path)
     _mock_common_session(monkeypatch)
@@ -135,6 +149,79 @@ def test_unit_insights_payload_is_imperial_and_explicit(monkeypatch, tmp_path):
     assert track_map["segments"][0]["start_m"] == pytest.approx(7.0 * M_TO_FT)
     assert track_map["segments"][0]["apex_m"] == pytest.approx(8.0 * M_TO_FT)
     assert track_map["segments"][0]["end_m"] == pytest.approx(9.0 * M_TO_FT)
+
+
+def test_unit_insights_payload_normalizes_rider_facing_text(monkeypatch, tmp_path):
+    _mock_db(monkeypatch, tmp_path)
+    _mock_common_session(monkeypatch)
+    monkeypatch.setattr(
+        api_app,
+        "generate_trackside_insights",
+        lambda _db_path, _session_id: [
+            {
+                "rule_id": "entry_speed",
+                "title": "Keep Entry Speed Up",
+                "phase": "entry",
+                "operational_action": "Move brake marker 10-15 m later.",
+                "causal_reason": "Because entry speed is down by 4.0 km/h, this segment starts slower than reference.",
+                "risk_tier": "Primary",
+                "risk_reason": "Stable context.",
+                "data_quality_note": "gps accuracy fair (1.5 m); 8 satellites",
+                "uncertainty_note": "Medium confidence from current telemetry quality.",
+                "success_check": (
+                    "Improve entry_speed_delta_kmh by at least +2.0 km/h without increasing "
+                    "line_stddev_m over the next 2 laps."
+                ),
+                "expected_gain_s": 0.12,
+                "experimental_protocol": {
+                    "expected_gain_s": 0.12,
+                    "risk": "May reduce stability if over-applied.",
+                    "bounds": "Change one variable only; keep adjustment within 10-15 m.",
+                    "abort_criteria": "Abort immediately if line variance rises >0.3 m.",
+                },
+                "is_primary_focus": True,
+                "confidence": 0.7,
+                "confidence_label": "medium",
+                "time_gain_s": 0.12,
+                "detail": "Pickup delay is 6 m (or 0.06 s) and speed sensor drift is 1.5 m/s.",
+                "actions": ["Shift brake marker by 10-15 m and hold line."],
+                "options": ["Option A: apex ~50 m, exit 95.0 km/h, variance 1.2 m"],
+                "segment_id": "T1",
+                "corner_id": "T1",
+                "comparison": "Lap 2 vs Lap 1",
+                "evidence": {
+                    "brake_point_delta_m": 10.0,
+                    "entry_speed_delta_kmh": 90.0,
+                },
+            }
+        ],
+    )
+    monkeypatch.setattr(api_app, "generate_trackside_map", lambda _db_path, _session_id: None)
+
+    response = api_app.get_insights("123")
+    item = response["items"][0]
+
+    metric_token = re.compile(r"\bkm/h\b|\bm/s\b|_kmh\b|_stddev_m\b|\b\d+(?:\.\d+)?\s*m\b")
+    text_fields = [
+        item["detail"],
+        item["operational_action"],
+        item["causal_reason"],
+        item["success_check"],
+        item["data_quality_note"],
+        item["actions"][0],
+        item["options"][0],
+        item["experimental_protocol"]["bounds"],
+        item["experimental_protocol"]["abort_criteria"],
+    ]
+    for text in text_fields:
+        assert isinstance(text, str)
+        assert not metric_token.search(text)
+
+    assert "33-49 ft" in item["operational_action"]
+    assert "2.5 mph" in item["causal_reason"]
+    assert "+1.2 mph" in item["success_check"]
+    assert "4.9 ft" in item["data_quality_note"]
+    assert "20 ft" in item["detail"]
 
 
 def test_unit_compare_payload_conversion_and_contract():

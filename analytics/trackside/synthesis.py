@@ -9,6 +9,14 @@ _M_TO_FT = 3.28084
 _KMH_TO_MPH = 0.621371
 
 
+def _to_ft(value_m: float) -> float:
+    return value_m * _M_TO_FT
+
+
+def _to_mph(value_kmh: float) -> float:
+    return value_kmh * _KMH_TO_MPH
+
+
 @dataclass(frozen=True)
 class Insight:
     rule_id: str
@@ -844,25 +852,43 @@ def _causal_reason(rule_id: str, evidence: Dict[str, Any], phase: str) -> str:
     if rule_id == "line_inconsistency":
         line_std = _get_float(evidence, "line_stddev_m")
         if line_std is not None:
-            return f"Because line variance is elevated ({line_std:.2f} m), timing and speed consistency drop through {phase}."
+            return (
+                f"Because line variance is elevated ({_to_ft(line_std):.1f} ft), "
+                f"timing and speed consistency drop through {phase}."
+            )
     if rule_id in {"early_braking", "entry_speed"}:
         entry_delta = _get_float(evidence, "entry_speed_delta_kmh")
         brake_delta = _get_float(evidence, "brake_point_delta_m")
         if entry_delta is not None:
-            return f"Because entry speed is down by {abs(entry_delta):.1f} km/h, this segment starts slower than reference."
+            return (
+                f"Because entry speed is down by {abs(_to_mph(entry_delta)):.1f} mph, "
+                "this segment starts slower than reference."
+            )
         if brake_delta is not None:
-            return f"Because braking starts {abs(brake_delta):.1f} m earlier, speed is shed too soon before apex."
+            return (
+                f"Because braking starts {abs(_to_ft(brake_delta)):.1f} ft earlier, "
+                "speed is shed too soon before apex."
+            )
     if rule_id == "corner_speed_loss":
         min_delta = _get_float(evidence, "min_speed_delta_kmh")
         if min_delta is not None:
-            return f"Because apex minimum speed is lower by {abs(min_delta):.1f} km/h, mid-corner time is being lost."
+            return (
+                f"Because apex minimum speed is lower by {abs(_to_mph(min_delta)):.1f} mph, "
+                "mid-corner time is being lost."
+            )
     if rule_id in {"late_throttle_pickup", "exit_speed"}:
         pickup_delta = _get_float(evidence, "pickup_delta_m")
         exit_delta = _get_float(evidence, "exit_speed_delta_kmh")
         if pickup_delta is not None:
-            return f"Because throttle pickup is delayed by {pickup_delta:.1f} m, exit drive starts late."
+            return (
+                f"Because throttle pickup is delayed by {abs(_to_ft(pickup_delta)):.1f} ft, "
+                "exit drive starts late."
+            )
         if exit_delta is not None:
-            return f"Because exit speed is down by {abs(exit_delta):.1f} km/h, acceleration phase is underperforming."
+            return (
+                f"Because exit speed is down by {abs(_to_mph(exit_delta)):.1f} mph, "
+                "acceleration phase is underperforming."
+            )
     if rule_id == "neutral_throttle":
         neutral_s = _get_float(evidence, "neutral_throttle_s")
         if neutral_s is not None:
@@ -908,11 +934,11 @@ def _data_quality_note(quality: Dict[str, Any]) -> str:
     if gps_accuracy is None:
         notes.append("gps accuracy unknown")
     elif gps_accuracy <= 1.0:
-        notes.append(f"gps accuracy good ({gps_accuracy:.1f} m)")
+        notes.append(f"gps accuracy good ({_to_ft(gps_accuracy):.1f} ft)")
     elif gps_accuracy <= 2.0:
-        notes.append(f"gps accuracy fair ({gps_accuracy:.1f} m)")
+        notes.append(f"gps accuracy fair ({_to_ft(gps_accuracy):.1f} ft)")
     else:
-        notes.append(f"gps accuracy weak ({gps_accuracy:.1f} m)")
+        notes.append(f"gps accuracy weak ({_to_ft(gps_accuracy):.1f} ft)")
     if satellites is None:
         notes.append("satellite count unavailable")
     elif satellites >= 10:
@@ -946,17 +972,17 @@ def _success_check(
     evidence: Dict[str, Any],
 ) -> str:
     if rule_id == "line_inconsistency":
-        return "Reduce line_stddev_delta_m to <= +0.30 m for 3 consecutive laps in this segment."
+        return "Reduce line variance delta to <= +1.0 ft for 3 consecutive laps in this segment."
     if rule_id in {"entry_speed", "early_braking"}:
-        return "Improve entry_speed_delta_kmh by at least +2.0 km/h without increasing line_stddev_m over the next 2 laps."
+        return "Improve entry speed delta by at least +1.2 mph without increasing line variance over the next 2 laps."
     if rule_id == "corner_speed_loss":
-        return "Improve min_speed_delta_kmh by at least +2.0 km/h while keeping apex_delta_m within 4.0 m."
+        return "Improve apex minimum speed delta by at least +1.2 mph while keeping apex location within 13 ft."
     if rule_id in {"late_throttle_pickup", "exit_speed"}:
-        return "Cut pickup delay by >= 6 m (or 0.06 s) and improve exit_speed_delta_kmh by >= +2.0 km/h."
+        return "Cut pickup delay by >= 20 ft (or 0.06 s) and improve exit speed delta by >= +1.2 mph."
     if rule_id == "neutral_throttle":
-        return "Reduce neutral_throttle_s below 0.8 s (or neutral_throttle_dist_m below 12 m) next session."
+        return "Reduce neutral throttle below 0.8 s (or below 39 ft) next session."
     if rule_id == "steering_smoothness":
-        return "Bring yaw_rms_ratio to <= 1.10 while improving min_speed_delta_kmh by >= +1.0 km/h."
+        return "Bring yaw_rms_ratio to <= 1.10 while improving apex minimum speed delta by >= +0.6 mph."
     return f"Show a measurable {phase} improvement in this corner over the next 2-3 laps."
 
 
@@ -971,7 +997,7 @@ def _experimental_protocol(
         "expected_gain_s": round(expected_gain_s, 3),
         "risk": "May reduce stability or consistency if over-applied.",
         "bounds": "Change one variable only; run 2 laps; keep adjustment within ~10-15 ft / gentle input change.",
-        "abort_criteria": "Abort immediately if line variance rises >0.3 m, confidence drops, or the bike feels unstable.",
+        "abort_criteria": "Abort immediately if line variance rises >1.0 ft, confidence drops, or the bike feels unstable.",
     }
 
 

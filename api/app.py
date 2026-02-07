@@ -15,7 +15,13 @@ from analytics.trackside.pipeline import (
     generate_trackside_map,
     generate_compare_map,
 )
-from api.units import convert_compare_payload, convert_evidence, convert_map_payload, imperial_unit_contract
+from api.units import (
+    convert_compare_payload,
+    convert_evidence,
+    convert_map_payload,
+    convert_rider_text,
+    imperial_unit_contract,
+)
 from domain.run_data import RunData
 from ingest.csv.parser import parse_csv
 from ingest.csv.save import save_to_db
@@ -688,29 +694,29 @@ def get_insights(session_id: str) -> Dict[str, Any]:
             {
                 "id": insight.get("rule_id"),
                 "rule_id": insight.get("rule_id"),
-                "title": insight.get("title"),
+                "title": convert_rider_text(insight.get("title")),
                 "phase": insight.get("phase"),
-                "operational_action": insight.get("operational_action"),
-                "causal_reason": insight.get("causal_reason"),
+                "operational_action": convert_rider_text(insight.get("operational_action")),
+                "causal_reason": convert_rider_text(insight.get("causal_reason")),
                 "risk_tier": insight.get("risk_tier"),
-                "risk_reason": insight.get("risk_reason"),
-                "data_quality_note": insight.get("data_quality_note"),
-                "uncertainty_note": insight.get("uncertainty_note"),
-                "success_check": insight.get("success_check"),
+                "risk_reason": convert_rider_text(insight.get("risk_reason")),
+                "data_quality_note": convert_rider_text(insight.get("data_quality_note")),
+                "uncertainty_note": convert_rider_text(insight.get("uncertainty_note")),
+                "success_check": convert_rider_text(insight.get("success_check")),
                 "expected_gain_s": insight.get("expected_gain_s"),
-                "experimental_protocol": insight.get("experimental_protocol"),
+                "experimental_protocol": convert_rider_text(insight.get("experimental_protocol")),
                 "is_primary_focus": bool(insight.get("is_primary_focus")),
                 "confidence": insight.get("confidence"),
                 "confidence_label": insight.get("confidence_label"),
                 "gain": _format_delta(insight.get("time_gain_s")) or "",
                 "time_gain_s": insight.get("time_gain_s"),
-                "detail": insight.get("detail"),
-                "actions": insight.get("actions") or [],
-                "options": insight.get("options") or [],
+                "detail": convert_rider_text(insight.get("detail")),
+                "actions": convert_rider_text(insight.get("actions") or []),
+                "options": convert_rider_text(insight.get("options") or []),
                 "segment_id": insight.get("segment_id"),
                 "corner_id": insight.get("corner_id"),
                 "evidence": convert_evidence(insight.get("evidence") or {}),
-                "comparison": insight.get("comparison"),
+                "comparison": convert_rider_text(insight.get("comparison")),
                 "quality_gate": insight.get("quality_gate"),
                 "gain_trace": insight.get("gain_trace"),
             }
