@@ -1,0 +1,67 @@
+{
+  "requirements": {
+    "auto_scored": ["RQ-EVAL-004", "RQ-EVAL-005", "RQ-EVAL-007", "RQ-NFR-006"]
+  },
+  "top1_cases": [
+    {
+      "case_id": "c1",
+      "recommendation_text": "Brake 5m later into T3.",
+      "evidence_summary": "Entry speed is 6 km/h lower than reference.",
+      "gate_reasons": "confidence_below_threshold",
+      "risk_tier": "Experimental",
+      "status": "fail",
+      "outlier_score": 0.82,
+      "confidence": 0.45
+    },
+    {
+      "case_id": "c2",
+      "recommendation_text": "Open throttle 8m earlier at T7 exit.",
+      "evidence_summary": "Exit speed delta +4.2 km/h available.",
+      "gate_reasons": "",
+      "risk_tier": "Primary",
+      "status": "pass",
+      "outlier_score": 0.18,
+      "confidence": 0.81
+    },
+    {
+      "case_id": "c3",
+      "recommendation_text": "Tighten line at T1 apex by 0.4m.",
+      "evidence_summary": "Line stddev elevated by 0.6m vs reference.",
+      "gate_reasons": "unsafe_context",
+      "risk_tier": "Blocked",
+      "status": "fail",
+      "outlier_score": 0.61,
+      "confidence": 0.31
+    },
+    {
+      "case_id": "c4",
+      "recommendation_text": "Carry +3 km/h through T4 mid-corner.",
+      "evidence_summary": "Min speed stable and below reference by 3.1 km/h.",
+      "gate_reasons": "",
+      "risk_tier": "Primary",
+      "status": "pass",
+      "outlier_score": 0.57,
+      "confidence": 0.77
+    },
+    {
+      "case_id": "c5",
+      "recommendation_text": "Delay turn-in at T8 by 2m.",
+      "evidence_summary": "Apex arrives early relative to target line.",
+      "gate_reasons": "",
+      "risk_tier": "Experimental",
+      "status": "pass",
+      "outlier_score": 0.52,
+      "confidence": 0.63
+    },
+    {
+      "case_id": "c6",
+      "recommendation_text": "Maintain current marker at T2.",
+      "evidence_summary": "No significant delta; baseline control sample.",
+      "gate_reasons": "",
+      "risk_tier": "Primary",
+      "status": "pass",
+      "outlier_score": 0.05,
+      "confidence": 0.90
+    }
+  ]
+}

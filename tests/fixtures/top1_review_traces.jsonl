@@ -1,0 +1,6 @@
+{"case_id":"c1","trace_id":"t1","evidence_summary":"trace: unstable brake release into T3"}
+{"case_id":"c2","trace_id":"t2","evidence_summary":"trace: clean exit drive"}
+{"case_id":"c3","trace_id":"t3","evidence_summary":"trace: high lean instability"}
+{"case_id":"c4","trace_id":"t4","evidence_summary":"trace: repeatable mid-corner speed"}
+{"case_id":"c5","trace_id":"t5","evidence_summary":"trace: late apex window"}
+{"case_id":"c6","trace_id":"t6","evidence_summary":"trace: control sample stable"}
