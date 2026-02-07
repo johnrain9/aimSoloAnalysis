@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+from analytics.trackside.corner_identity import rider_corner_label
+
 _M_TO_FT = 3.28084
 _KMH_TO_MPH = 0.621371
 
@@ -35,6 +37,7 @@ class Insight:
     actions: List[str]
     options: List[str]
     corner_id: Optional[str]
+    corner_label: Optional[str]
     segment_id: Optional[str]
     time_gain_s: float
     confidence: float
@@ -60,6 +63,7 @@ class Insight:
             "actions": list(self.actions),
             "options": list(self.options),
             "corner_id": self.corner_id,
+            "corner_label": self.corner_label,
             "segment_id": self.segment_id,
             "time_gain_s": self.time_gain_s,
             "confidence": self.confidence,
@@ -268,6 +272,12 @@ def synthesize_insights(
                 evidence=evidence,
             )
 
+        corner_label = rider_corner_label(
+            segment.get("corner_label") or segment.get("corner_id"),
+            fallback_internal_id=segment_id,
+            apex_m=metrics.get("apex_dist_m"),
+        )
+
         insights.append(
             Insight(
                 rule_id=primary_id,
@@ -285,7 +295,8 @@ def synthesize_insights(
                 experimental_protocol=experimental_protocol,
                 actions=actions,
                 options=options,
-                corner_id=_as_str(segment.get("corner_id")),
+                corner_id=corner_label,
+                corner_label=corner_label,
                 segment_id=_as_str(segment.get("segment_id")),
                 time_gain_s=applied_gain_s,
                 confidence=round(confidence, 3),

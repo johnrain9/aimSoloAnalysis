@@ -18,6 +18,7 @@ from analytics.deltas import (
 from analytics.reference import LapCandidate, select_reference_laps, filter_valid_laps
 from analytics.segments import Segment, detect_segments, label_laps_with_reference
 from analytics.segment_metrics import compute_segment_metrics
+from analytics.trackside.corner_identity import rider_corner_label
 from analytics.trackside.rank import rank_insights
 from analytics.trackside.config import TREND_FILTERS
 from analytics.trackside.signals import generate_signals
@@ -126,7 +127,7 @@ def generate_trackside_insights(
 
     reference_segments = labeled_laps[reference_index]
     target_segments = labeled_laps[target_index]
-    segment_defs = _segment_definitions(reference_segments)
+    segment_defs, corner_labels = _segment_definitions(reference_segments)
     if not segment_defs:
         return []
 
@@ -164,6 +165,7 @@ def generate_trackside_insights(
         reference_metrics,
         target_metrics,
         line_trends=line_trends,
+        corner_labels=corner_labels,
     )
     comparison_label = _comparison_label(reference_lap, target_lap)
     signals = generate_signals(segments_payload, comparison_label=comparison_label)
@@ -240,7 +242,7 @@ def generate_trackside_map(
         lap_ids=None,
     )
     reference_segments = labeled_laps[reference_index] if labeled_laps else []
-    segment_defs = _segment_definitions(reference_segments)
+    segment_defs, corner_labels = _segment_definitions(reference_segments)
 
     ref_slice = _slice_run_data(run_data, reference_lap.start_time_s, reference_lap.end_time_s)
     ref_points = _track_polyline(ref_slice, max_points=max_points)
@@ -252,7 +254,12 @@ def generate_trackside_map(
     segments = [
         {
             "id": seg.name,
-            "label": seg.name,
+            "label": corner_labels.get(seg.name)
+            or rider_corner_label(
+                None,
+                fallback_internal_id=seg.name,
+                apex_m=seg.apex_m,
+            ),
             "start_m": seg.start_m,
             "apex_m": seg.apex_m,
             "end_m": seg.end_m,
@@ -705,10 +712,19 @@ def _rebase_distance(values: Optional[Sequence[Optional[float]]]) -> Optional[Li
     return [None if v is None else v - base for v in values]
 
 
-def _segment_definitions(segments: Sequence[Segment]) -> List[SegmentDefinition]:
+def _segment_definitions(
+    segments: Sequence[Segment],
+) -> Tuple[List[SegmentDefinition], Dict[str, str]]:
     definitions: List[SegmentDefinition] = []
+    corner_labels: Dict[str, str] = {}
     for idx, segment in enumerate(segments, start=1):
         name = segment.turn_id or segment.label or f"T{idx}"
+        corner_labels[name] = rider_corner_label(
+            segment.label,
+            fallback_internal_id=name,
+            apex_m=segment.apex_m,
+            turn_sign=segment.sign,
+        )
         definitions.append(
             SegmentDefinition(
                 name=name,
@@ -717,7 +733,7 @@ def _segment_definitions(segments: Sequence[Segment]) -> List[SegmentDefinition]
                 end_m=segment.end_m,
             )
         )
-    return definitions
+    return definitions, corner_labels
 
 
 def _build_segments_payload(
@@ -727,6 +743,7 @@ def _build_segments_payload(
     target_metrics: Dict[str, Dict[str, object]],
     *,
     line_trends: Optional[Dict[str, Dict[str, object]]] = None,
+    corner_labels: Optional[Dict[str, str]] = None,
 ) -> List[Dict[str, object]]:
     payload: List[Dict[str, object]] = []
     for segment_def, delta in zip(segment_defs, segment_deltas):
@@ -736,8 +753,15 @@ def _build_segments_payload(
 
         if "segment_id" not in target and "segment_id" not in reference:
             target["segment_id"] = seg_id
-        if "corner_id" not in target and "corner_id" not in reference:
-            target["corner_id"] = seg_id
+
+        corner_label = rider_corner_label(
+            target.get("corner_id")
+            or reference.get("corner_id")
+            or (corner_labels or {}).get(seg_id),
+            fallback_internal_id=seg_id,
+            apex_m=segment_def.apex_m,
+        )
+        target["corner_id"] = corner_label
 
         _apply_speed_deltas(target, delta)
 
@@ -751,7 +775,8 @@ def _build_segments_payload(
         payload.append(
             {
                 "segment_id": seg_id,
-                "corner_id": target.get("corner_id") or reference.get("corner_id") or seg_id,
+                "corner_id": corner_label,
+                "corner_label": corner_label,
                 "target": target,
                 "reference": reference,
                 "quality": _segment_quality(target),

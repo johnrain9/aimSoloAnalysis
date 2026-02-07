@@ -114,6 +114,88 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
     assert {"expected_gain_s", "risk", "bounds", "abort_criteria"}.issubset(set(protocol.keys()))
 
 
+def test_synthesize_insight_corner_identity_normalizes_internal_ids():
+    segments = [
+        {
+            "segment_id": "HPR Full:CW:T7",
+            "corner_id": "HPR Full:CW:T7",
+            "target": {
+                "line_stddev_m": 1.7,
+                "line_stddev_delta_m": 0.7,
+                "entry_speed_kmh": 94.0,
+                "min_speed_kmh": 71.0,
+                "segment_time_s": 21.0,
+                "apex_dist_m": 125.0,
+            },
+            "reference": {
+                "line_stddev_m": 1.0,
+                "entry_speed_kmh": 97.0,
+                "min_speed_kmh": 73.0,
+                "segment_time_s": 20.8,
+                "apex_dist_m": 123.0,
+            },
+            "quality": {"gps_accuracy_m": 1.0, "satellites": 10},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "line_inconsistency",
+            "segment_id": "HPR Full:CW:T7",
+            "corner_id": "HPR Full:CW:T7",
+            "time_gain_s": 0.2,
+            "confidence": 0.75,
+            "evidence": {"line_stddev_m": 1.7, "line_stddev_delta_m": 0.7},
+            "comparison": "Lap 5 vs best Lap 2",
+        }
+    ]
+
+    insights = synthesize_insights(segments, signals, comparison_label="Lap 5 vs best Lap 2")
+    assert len(insights) == 1
+    assert insights[0]["corner_id"] == "T7"
+    assert insights[0]["corner_label"] == "T7"
+    assert ":" not in insights[0]["corner_id"]
+
+
+def test_synthesize_insight_corner_identity_uses_deterministic_human_fallback():
+    segments = [
+        {
+            "segment_id": "segment_internal_9",
+            "target": {
+                "line_stddev_m": 1.9,
+                "line_stddev_delta_m": 0.8,
+                "entry_speed_kmh": 92.0,
+                "min_speed_kmh": 69.0,
+                "segment_time_s": 20.9,
+                "apex_dist_m": 123.4,
+            },
+            "reference": {
+                "line_stddev_m": 1.1,
+                "entry_speed_kmh": 95.0,
+                "min_speed_kmh": 72.0,
+                "segment_time_s": 20.7,
+                "apex_dist_m": 121.0,
+            },
+            "quality": {"gps_accuracy_m": 1.1, "satellites": 9},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "line_inconsistency",
+            "segment_id": "segment_internal_9",
+            "time_gain_s": 0.19,
+            "confidence": 0.72,
+            "evidence": {"line_stddev_m": 1.9, "line_stddev_delta_m": 0.8},
+            "comparison": "Lap 6 vs best Lap 2",
+        }
+    ]
+
+    insights = synthesize_insights(segments, signals, comparison_label="Lap 6 vs best Lap 2")
+    assert len(insights) == 1
+    assert insights[0]["corner_id"] == "corner near 123 m"
+    assert insights[0]["corner_label"] == "corner near 123 m"
+    assert "segment_internal_9" not in insights[0]["corner_id"]
+
+
 def test_rank_insights_enforces_top_n_primary_cap_and_conflict_suppression():
     insights = [
         {
@@ -345,9 +427,9 @@ def test_insights_endpoint_exposes_contract_fields(monkeypatch, tmp_path):
                 "detail": "Detail",
                 "actions": ["Action"],
                 "options": [],
-                "segment_id": "T1",
-                "corner_id": "T1",
-                "evidence": {"line_stddev_m": 1.8},
+                "segment_id": "Test Track:CW:T1",
+                "corner_id": "Test Track:CW:T1",
+                "evidence": {"line_stddev_m": 1.8, "apex_dist_m": 52.0},
                 "comparison": "Lap 4 vs best Lap 2",
                 "quality_gate": {
                     "scope": "top_1",
@@ -380,3 +462,6 @@ def test_insights_endpoint_exposes_contract_fields(monkeypatch, tmp_path):
     assert item["is_primary_focus"] is True
     assert item["quality_gate"]["decision"] == "pass"
     assert item["gain_trace"]["final_expected_gain_s"] == 0.21
+    assert item["segment_id"] == "Test Track:CW:T1"
+    assert item["corner_id"] == "T1"
+    assert item["corner_label"] == "T1"

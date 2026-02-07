@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from analytics.reference import LapCandidate, select_reference_laps, filter_valid_laps
 from analytics.segments import detect_segments
+from analytics.trackside.corner_identity import rider_corner_label
 from analytics.trackside.pipeline import (
     generate_trackside_insights,
     generate_trackside_map,
@@ -690,6 +691,14 @@ def get_insights(session_id: str) -> Dict[str, Any]:
 
     items = []
     for insight in ranked:
+        evidence = insight.get("evidence") or {}
+        if not isinstance(evidence, dict):
+            evidence = {}
+        corner_label = rider_corner_label(
+            insight.get("corner_label") or insight.get("corner_id"),
+            fallback_internal_id=insight.get("segment_id"),
+            apex_m=evidence.get("apex_dist_m"),
+        )
         items.append(
             {
                 "id": insight.get("rule_id"),
@@ -714,8 +723,9 @@ def get_insights(session_id: str) -> Dict[str, Any]:
                 "actions": convert_rider_text(insight.get("actions") or []),
                 "options": convert_rider_text(insight.get("options") or []),
                 "segment_id": insight.get("segment_id"),
-                "corner_id": insight.get("corner_id"),
-                "evidence": convert_evidence(insight.get("evidence") or {}),
+                "corner_id": corner_label,
+                "corner_label": corner_label,
+                "evidence": convert_evidence(evidence),
                 "comparison": convert_rider_text(insight.get("comparison")),
                 "quality_gate": insight.get("quality_gate"),
                 "gain_trace": insight.get("gain_trace"),
