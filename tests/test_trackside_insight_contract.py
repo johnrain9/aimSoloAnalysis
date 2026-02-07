@@ -235,6 +235,53 @@ def test_synthesize_insight_corner_identity_uses_deterministic_human_fallback():
     assert "segment_internal_9" not in insights[0]["corner_id"]
 
 
+def test_synthesize_enforces_did_vs_should_because_copy_policy():
+    segments = [
+        {
+            "segment_id": "T3",
+            "corner_id": "T3",
+            "target": {
+                "line_stddev_m": 1.9,
+                "entry_speed_kmh": 93.0,
+                "min_speed_kmh": 69.0,
+                "apex_dist_m": 54.0,
+                "segment_time_s": 21.4,
+            },
+            "reference": {
+                "line_stddev_m": 1.0,
+                "entry_speed_kmh": 97.0,
+                "min_speed_kmh": 72.0,
+                "apex_dist_m": 53.0,
+                "segment_time_s": 21.0,
+            },
+            "quality": {"gps_accuracy_m": 1.0, "satellites": 10, "imu_present": True},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "line_inconsistency",
+            "segment_id": "T3",
+            "corner_id": "T3",
+            "time_gain_s": 0.18,
+            "confidence": 0.8,
+            "evidence": {"line_stddev_m": 1.9, "line_stddev_delta_m": 0.9},
+            "comparison": "Lap 8 vs best Lap 3",
+        }
+    ]
+
+    insights = synthesize_insights(segments, signals, comparison_label="Lap 8 vs best Lap 3")
+    assert len(insights) == 1
+    item = insights[0]
+
+    assert "At T3 (mid phase)" in item["detail"]
+    assert "ft wider than reference" in item["detail"]
+    assert "because" in item["detail"].lower()
+    assert item["causal_reason"].startswith("Because ")
+    assert "next 3 laps" in item["success_check"]
+    assert "be consistent" not in item["operational_action"].lower()
+    assert "stay consistent" not in item["operational_action"].lower()
+
+
 def test_rank_insights_enforces_top_n_primary_cap_and_conflict_suppression():
     insights = [
         {

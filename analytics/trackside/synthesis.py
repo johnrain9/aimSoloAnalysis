@@ -255,7 +255,25 @@ def synthesize_insights(
         confidence = _confidence_from(primary_signal, quality)
         confidence_label = _confidence_label(confidence)
         applied_gain_s = round(_time_gain(primary_signal, time_gain_s), 4)
-        operational_action = _operational_action(actions, primary_id, phase)
+        corner_label = rider_corner_label(
+            segment.get("corner_label") or segment.get("corner_id"),
+            fallback_internal_id=segment_id,
+            apex_m=metrics.get("apex_dist_m"),
+        )
+        detail = _policy_detail_copy(
+            detail=detail,
+            rule_id=primary_id,
+            phase=phase,
+            corner_label=corner_label,
+            evidence=evidence,
+            metrics=metrics,
+        )
+        operational_action = _operational_action(
+            actions,
+            primary_id,
+            phase,
+            corner_label=corner_label,
+        )
         causal_reason = _causal_reason(primary_id, evidence, phase)
         data_quality_note = _data_quality_note(quality)
         uncertainty_note = _uncertainty_note(confidence, quality, evidence)
@@ -293,12 +311,6 @@ def synthesize_insights(
                 phase=phase,
                 evidence=evidence,
             )
-
-        corner_label = rider_corner_label(
-            segment.get("corner_label") or segment.get("corner_id"),
-            fallback_internal_id=segment_id,
-            apex_m=metrics.get("apex_dist_m"),
-        )
 
         insights.append(
             Insight(
@@ -923,10 +935,135 @@ def _coalesce(*values: Optional[float]) -> Optional[float]:
     return None
 
 
-def _operational_action(actions: List[str], rule_id: str, phase: str) -> str:
+def _operational_action(
+    actions: List[str],
+    rule_id: str,
+    phase: str,
+    *,
+    corner_label: Optional[str],
+) -> str:
     if actions:
-        return actions[0]
-    return f"Use one repeatable {phase} marker in this corner and keep inputs smooth."
+        candidate = actions[0]
+    else:
+        corner = corner_label or "this corner"
+        candidate = f"At {corner}, use one repeatable {phase} marker and keep inputs smooth."
+    return _sanitize_recommendation(candidate, phase=phase, corner_label=corner_label)
+
+
+def _sanitize_recommendation(text: str, *, phase: str, corner_label: Optional[str]) -> str:
+    normalized = " ".join((text or "").split()).strip()
+    lowered = normalized.lower().rstrip(".")
+    banned = {"be consistent", "stay consistent", "be more consistent", "be smoother"}
+    if lowered in banned:
+        corner = corner_label or "this corner"
+        return f"At {corner}, repeat one {phase} marker for the next 2 laps with no extra corrections."
+    if "consistent" in lowered and len(lowered.split()) <= 4:
+        corner = corner_label or "this corner"
+        return f"At {corner}, pick one turn-in and apex marker and repeat them for the next 2 laps."
+    return normalized
+
+
+def _policy_detail_copy(
+    *,
+    detail: str,
+    rule_id: str,
+    phase: str,
+    corner_label: Optional[str],
+    evidence: Dict[str, Any],
+    metrics: Dict[str, Optional[float]],
+) -> str:
+    prefix = f"At {corner_label or 'this corner'} ({phase} phase)"
+    policy_line: Optional[str] = None
+
+    if rule_id == "line_inconsistency":
+        spread_delta_m = _coalesce(_get_float(evidence, "line_stddev_delta_m"), metrics.get("line_stddev_delta_m"))
+        if spread_delta_m is not None:
+            spread_ft = abs(_to_ft(spread_delta_m))
+            target_ft = max(1.0, min(3.0, spread_ft * 0.5))
+            policy_line = (
+                f"{prefix}, line spread is about {spread_ft:.1f} ft wider than reference; "
+                f"repeat one turn-in and apex marker to cut spread by about {target_ft:.1f} ft "
+                "because extra corrections delay stable drive."
+            )
+    elif rule_id in {"entry_speed", "early_braking"}:
+        entry_delta = _coalesce(_get_float(evidence, "entry_speed_delta_kmh"), metrics.get("entry_speed_delta_kmh"))
+        brake_delta = _coalesce(_get_float(evidence, "brake_point_delta_m"), metrics.get("brake_point_delta_m"))
+        if entry_delta is not None:
+            entry_mph = abs(_to_mph(entry_delta))
+            target_mph = max(0.8, min(2.0, entry_mph * 0.4))
+            policy_line = (
+                f"{prefix}, entry speed is {entry_mph:.1f} mph lower than reference; "
+                f"carry about {target_mph:.1f} mph more to apex with a cleaner release "
+                "because early speed loss extends the slow phase."
+            )
+        elif brake_delta is not None:
+            brake_ft = abs(_to_ft(brake_delta))
+            target_ft = max(5.0, min(15.0, brake_ft * 0.5))
+            policy_line = (
+                f"{prefix}, braking begins about {brake_ft:.1f} ft earlier than reference; "
+                f"move release later by about {target_ft:.1f} ft "
+                "because shedding speed too soon slows the approach."
+            )
+    elif rule_id == "corner_speed_loss":
+        min_delta = _coalesce(_get_float(evidence, "min_speed_delta_kmh"), metrics.get("min_speed_delta_kmh"))
+        if min_delta is not None:
+            min_mph = abs(_to_mph(min_delta))
+            target_mph = max(0.6, min(1.8, min_mph * 0.4))
+            policy_line = (
+                f"{prefix}, apex minimum speed is {min_mph:.1f} mph lower than reference; "
+                f"hold {target_mph:.1f}-{target_mph + 0.6:.1f} mph more at max lean "
+                "because reduced scrub protects mid-corner time."
+            )
+    elif rule_id in {"late_throttle_pickup", "exit_speed"}:
+        pickup_delta = _coalesce(_get_float(evidence, "pickup_delta_m"), metrics.get("pickup_delta_m"))
+        exit_delta = _coalesce(_get_float(evidence, "exit_speed_delta_kmh"), metrics.get("exit_speed_delta_kmh"))
+        if pickup_delta is not None:
+            pickup_ft = abs(_to_ft(pickup_delta))
+            target_ft = max(8.0, min(25.0, pickup_ft * 0.5))
+            policy_line = (
+                f"{prefix}, throttle pickup starts about {pickup_ft:.1f} ft later than reference; "
+                f"begin drive roughly {target_ft:.1f} ft earlier "
+                "because delayed pickup compresses exit acceleration."
+            )
+        elif exit_delta is not None:
+            exit_mph = abs(_to_mph(exit_delta))
+            target_mph = max(0.8, min(2.0, exit_mph * 0.4))
+            policy_line = (
+                f"{prefix}, exit speed is {exit_mph:.1f} mph lower than reference; "
+                f"recover about {target_mph:.1f} mph with earlier progressive roll-on "
+                "because weak drive leaves time on exit."
+            )
+    elif rule_id == "neutral_throttle":
+        neutral_s = _coalesce(_get_float(evidence, "neutral_throttle_s"), metrics.get("neutral_throttle_s"))
+        if neutral_s is not None:
+            target_s = max(0.2, min(0.8, neutral_s * 0.5))
+            policy_line = (
+                f"{prefix}, neutral throttle lasts about {neutral_s:.2f} s; "
+                f"cut it by roughly {target_s:.2f} s with an earlier decision to brake or drive "
+                "because coasting delays both decel control and exit acceleration."
+            )
+    elif rule_id == "steering_smoothness":
+        yaw_ratio = _coalesce(_get_float(evidence, "yaw_rms_ratio"), metrics.get("yaw_rms_ratio"))
+        if yaw_ratio is not None:
+            target_ratio = max(1.05, min(1.20, yaw_ratio - 0.10))
+            policy_line = (
+                f"{prefix}, steering activity is about {yaw_ratio:.2f}x reference; "
+                f"settle it closer to {target_ratio:.2f}x with one cleaner steering input "
+                "because excess corrections scrub speed at apex."
+            )
+
+    if not policy_line:
+        policy_line = (
+            f"{prefix}, telemetry evidence is partial; treat this as a test for the next 2 laps and "
+            "confirm whether the suggested marker change improves pace before scaling the adjustment."
+        )
+
+    legacy = " ".join((detail or "").split()).strip()
+    if not legacy:
+        return policy_line
+    if legacy.startswith(policy_line):
+        return legacy
+    return f"{policy_line} {legacy}"
 
 
 def _did_vs_should_sections(

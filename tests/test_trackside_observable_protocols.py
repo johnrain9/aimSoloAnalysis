@@ -149,3 +149,36 @@ def test_synthesize_handles_missing_evidence_without_crash():
     assert protocol["risk"]
     assert protocol["bounds"]
     assert protocol["abort_criteria"]
+
+
+def test_synthesize_uses_explicit_uncertainty_when_evidence_is_partial():
+    segments = [
+        {
+            "segment_id": "T5",
+            "corner_id": "T5",
+            "target": {"segment_time_delta_s": 0.10},
+            "reference": {},
+            "quality": {"gps_accuracy_m": 2.6, "satellites": 6},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "line_inconsistency",
+            "segment_id": "T5",
+            "corner_id": "T5",
+            "time_gain_s": 0.10,
+            "confidence": 0.4,
+            "evidence": {},
+        }
+    ]
+
+    insights = synthesis_module.synthesize_insights(
+        segments,
+        signals,
+        comparison_label="Lap 9 vs best Lap 4",
+    )
+    assert len(insights) == 1
+    item = insights[0]
+    assert "telemetry evidence is partial" in item["detail"].lower()
+    assert "next 2 laps" in item["detail"].lower()
+    assert "be consistent" not in item["operational_action"].lower()
