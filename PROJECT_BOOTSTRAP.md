@@ -1,12 +1,12 @@
 # Project Bootstrap Snapshot
 
-Generated: 2026-02-06T21:32:28-07:00
+Generated: 2026-02-06T21:33:23-07:00
 Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_bootstrap.ps1`.
 
 ## Repo State
 - Root: `C:\Users\Paul\ai\aimSoloAnalysis`
 - Branch: `master`
-- HEAD: `be3d5c9`
+- HEAD: `c4b8271`
 - Dirty: `True`
 
 ### Working Tree Changes
@@ -14,20 +14,14 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - ` M api/__pycache__/app.cpython-310.pyc`
 - ` M api/__pycache__/units.cpython-310.pyc`
 - ` M storage/__pycache__/db.cpython-310.pyc`
-- `?? AGENTS.md`
-- `?? PLANNER_BOOTSTRAP.md`
-- `?? PROJECT_BOOTSTRAP.md`
-- `?? artifacts/`
-- `?? skills/`
 - `?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc`
-- `?? tools/update_bootstrap.ps1`
 
 ## Recently Modified Files
+- `artifacts\project_bootstrap.json` (2026-02-06 21:32:28)
+- `PROJECT_BOOTSTRAP.md` (2026-02-06 21:32:28)
 - `tools\update_bootstrap.ps1` (2026-02-06 21:32:25)
-- `artifacts\project_bootstrap.json` (2026-02-06 21:32:02)
-- `PROJECT_BOOTSTRAP.md` (2026-02-06 21:32:02)
 - `AGENTS.md` (2026-02-06 21:31:20)
 - `PLANNER_BOOTSTRAP.md` (2026-02-06 21:31:15)
 - `skills\planner-orchestrator\SKILL.md` (2026-02-06 21:30:13)
@@ -52,6 +46,7 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `test_data\HPR_Full_09292024\4.csv` (2026-02-05 15:45:25)
 
 ## Recent Commits
+- `c4b8271` 2026-02-06 - chore(planner): add planner skill and bootstrap state cache
 - `be3d5c9` 2026-02-06 - fix(api): honor explicit compare lap query params
 - `995028b` 2026-02-06 - fix(api): keep import run-meta lookup on open connection
 - `8a8ee59` 2026-02-06 - Fix SQLite upsert helpers to return correct IDs on conflicts

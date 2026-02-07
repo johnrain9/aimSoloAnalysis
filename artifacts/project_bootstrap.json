@@ -1,27 +1,26 @@
 {
-  "generated_at": "2026-02-06T21:32:28-07:00",
+  "generated_at": "2026-02-06T21:33:23-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
     "branch": "master",
-    "head": "be3d5c9",
+    "head": "c4b8271",
     "dirty": true,
     "status": [
       " M aimsolo.db",
       " M api/__pycache__/app.cpython-310.pyc",
       " M api/__pycache__/units.cpython-310.pyc",
       " M storage/__pycache__/db.cpython-310.pyc",
-      "?? AGENTS.md",
-      "?? PLANNER_BOOTSTRAP.md",
-      "?? PROJECT_BOOTSTRAP.md",
-      "?? artifacts/",
-      "?? skills/",
       "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
-      "?? tools/update_bootstrap.ps1"
+      "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc"
     ]
   },
   "recent_commits": [
+    {
+      "hash": "c4b8271",
+      "date": "2026-02-06",
+      "subject": "chore(planner): add planner skill and bootstrap state cache"
+    },
     {
       "hash": "be3d5c9",
       "date": "2026-02-06",
@@ -75,16 +74,16 @@
   ],
   "recent_files": [
     {
-      "path": "tools\\update_bootstrap.ps1",
-      "last_write": "2026-02-06 21:32:25"
-    },
-    {
       "path": "artifacts\\project_bootstrap.json",
-      "last_write": "2026-02-06 21:32:02"
+      "last_write": "2026-02-06 21:32:28"
     },
     {
       "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-06 21:32:02"
+      "last_write": "2026-02-06 21:32:28"
+    },
+    {
+      "path": "tools\\update_bootstrap.ps1",
+      "last_write": "2026-02-06 21:32:25"
     },
     {
       "path": "AGENTS.md",
