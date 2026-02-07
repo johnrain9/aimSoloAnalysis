@@ -1,0 +1,135 @@
+{
+  "scorecard_version": "1.0",
+  "timestamp": "2026-02-07T12:00:00Z",
+  "overall_status": "pass",
+  "hard_gates": [
+    {
+      "gate_id": "Gate-A-DataIntegrity",
+      "status": "pass",
+      "reason": "No high severity data-integrity defects open",
+      "evidence": {
+        "sub_report": "backend",
+        "check": "baseline_comparison.status"
+      }
+    },
+    {
+      "gate_id": "Gate-B-APIUIContract",
+      "status": "pass",
+      "reason": "API/UI compare contract aligned and tested",
+      "evidence": {
+        "sub_report": "backend",
+        "check": "entries[].status"
+      }
+    },
+    {
+      "gate_id": "Gate-C-UnitConsistency",
+      "status": "pass",
+      "reason": "Unit declarations consistent across API responses",
+      "evidence": {
+        "sub_report": "backend",
+        "check": "unit_consistency_checks"
+      }
+    },
+    {
+      "gate_id": "Gate-D-TestSuite",
+      "status": "pass",
+      "reason": "Test suite and trend harness pass in documented local command set",
+      "evidence": {
+        "sub_report": "backend",
+        "check": "overall_status"
+      }
+    },
+    {
+      "gate_id": "Gate-E-P0Behavior",
+      "status": "pass",
+      "reason": "P0 behavior outputs satisfy RQ-P0-005 through RQ-P0-029",
+      "evidence": {
+        "sub_report": "top1",
+        "check": "hard_gates.status"
+      }
+    },
+    {
+      "gate_id": "Gate-F-EvalHarness",
+      "status": "pass",
+      "reason": "Unified evaluation harness is in place and passing",
+      "evidence": {
+        "sub_report": "frontend",
+        "check": "summary.passed_checks"
+      }
+    },
+    {
+      "gate_id": "Gate-G-QualityModel",
+      "status": "pass",
+      "reason": "Product-behavior evaluation model is active with approved human review",
+      "evidence": {
+        "sub_report": "top1",
+        "check": "hard_gates.status",
+        "human_review_status": "approved"
+      }
+    }
+  ],
+  "soft_metrics": [
+    {
+      "metric_id": "backend-latency-p95",
+      "value": 815.31,
+      "threshold": 1000.0,
+      "status": "ok"
+    },
+    {
+      "metric_id": "backend-latency-mean",
+      "value": 516.57,
+      "threshold": 600.0,
+      "status": "ok"
+    },
+    {
+      "metric_id": "frontend-runtime-ms",
+      "value": 0.77,
+      "threshold": 5.0,
+      "status": "ok"
+    },
+    {
+      "metric_id": "top1-pass-rate",
+      "value": 1.0,
+      "threshold": 0.95,
+      "status": "ok"
+    }
+  ],
+  "sub_reports": {
+    "backend": {
+      "path": "artifacts/eval_backend_report.json",
+      "status": "pass",
+      "key_metrics": {
+        "entries": 21,
+        "failures": 0,
+        "latency_p95_ms": 815.31
+      }
+    },
+    "frontend": {
+      "path": "artifacts/frontend_eval_report.json",
+      "status": "pass",
+      "key_metrics": {
+        "total_checks": 3,
+        "passed_checks": 3,
+        "failed_checks": 0
+      }
+    },
+    "top1": {
+      "path": "artifacts/top1_aggregated_report.json",
+      "status": "pass",
+      "key_metrics": {
+        "total_cases": 28,
+        "passed": 28,
+        "failed": 0
+      }
+    },
+    "human_review": {
+      "path": "artifacts/top1_review_packet.md",
+      "status": "approved",
+      "key_metrics": {
+        "reviewed_cases": 25,
+        "approved": 25,
+        "rejected": 0
+      }
+    }
+  }
+}
