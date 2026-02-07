@@ -1,25 +1,21 @@
 # Project Bootstrap Snapshot
 
-Generated: 2026-02-06T22:22:46-07:00
+Generated: 2026-02-06T22:23:22-07:00
 Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_bootstrap.ps1`.
 
 ## Repo State
 - Root: `C:\Users\Paul\ai\aimSoloAnalysis`
 - Branch: `master`
-- HEAD: `f5dabf3`
+- HEAD: `11d436e`
 - Dirty: `True`
 
 ### Working Tree Changes
-- ` M PROJECT_BOOTSTRAP.md`
-- ` M REQUIREMENTS_BASELINE.md`
-- ` M TASKS.md`
 - ` M aimsolo.db`
 - ` M analytics/trackside/__pycache__/pipeline.cpython-310.pyc`
 - ` M analytics/trackside/__pycache__/rank.cpython-310.pyc`
 - ` M analytics/trackside/__pycache__/synthesis.cpython-310.pyc`
 - ` M api/__pycache__/app.cpython-310.pyc`
 - ` M api/__pycache__/units.cpython-310.pyc`
-- ` M artifacts/project_bootstrap.json`
 - ` M ingest/csv/__pycache__/save.cpython-310.pyc`
 - ` M storage/__pycache__/db.cpython-310.pyc`
 - `?? .claude/`
@@ -37,14 +33,14 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `?? tools/__pycache__/`
 
 ## Recently Modified Files
-- `PROJECT_BOOTSTRAP.md` (2026-02-06 22:19:25)
-- `REQUIREMENTS_BASELINE.md` (2026-02-06 22:22:32)
-- `TASKS.md` (2026-02-06 22:22:41)
 - `aimsolo.db` (2026-02-06 21:50:39)
-- `artifacts\project_bootstrap.json` (2026-02-06 22:19:25)
 - `.claude\` (2026-02-06 22:10:48)
 - `artifacts\eval_backend_report.json` (2026-02-06 21:53:00)
 - `artifacts\frontend_eval_report.json` (2026-02-06 21:52:43)
+- `PROJECT_BOOTSTRAP.md` (2026-02-06 22:22:47)
+- `REQUIREMENTS_BASELINE.md` (2026-02-06 22:22:32)
+- `TASKS.md` (2026-02-06 22:22:41)
+- `artifacts\project_bootstrap.json` (2026-02-06 22:22:47)
 - `TASK_PROMPTS_TONIGHT_TOP1.md` (2026-02-06 22:12:03)
 - `analytics\trackside\pipeline.py` (2026-02-06 21:48:03)
 - `analytics\trackside\rank.py` (2026-02-06 21:48:03)
@@ -64,6 +60,7 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `tools\update_bootstrap.ps1` (2026-02-06 21:36:03)
 
 ## Recent Commits
+- `11d436e` 2026-02-06 - chore(requirements): tighten p0 rider-facing behavior contract
 - `f5dabf3` 2026-02-06 - chore(planner): add tonight top1 quality task pack
 - `b6c0579` 2026-02-06 - chore(planner): refresh bootstrap after handoff integration
 - `a1f4445` 2026-02-06 - chore(planner): ingest handoffs and refresh baseline
@@ -75,7 +72,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `a7da7c0` 2026-02-06 - chore(planner): update baseline and tasks after units merge
 - `a8ec07b` 2026-02-06 - fix(api): normalize units contract across insights/compare/map
 - `0f37b66` 2026-02-06 - chore(planner): optimize bootstrap recency and document cost model
-- `54914bb` 2026-02-06 - chore(planner): refresh bootstrap snapshot
 
 ## Requirement Gap Snapshot
 ### Active Gaps

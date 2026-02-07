@@ -1,21 +1,17 @@
 {
-  "generated_at": "2026-02-06T22:22:46-07:00",
+  "generated_at": "2026-02-06T22:23:22-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
     "branch": "master",
-    "head": "f5dabf3",
+    "head": "11d436e",
     "dirty": true,
     "status": [
-      " M PROJECT_BOOTSTRAP.md",
-      " M REQUIREMENTS_BASELINE.md",
-      " M TASKS.md",
       " M aimsolo.db",
       " M analytics/trackside/__pycache__/pipeline.cpython-310.pyc",
       " M analytics/trackside/__pycache__/rank.cpython-310.pyc",
       " M analytics/trackside/__pycache__/synthesis.cpython-310.pyc",
       " M api/__pycache__/app.cpython-310.pyc",
       " M api/__pycache__/units.cpython-310.pyc",
-      " M artifacts/project_bootstrap.json",
       " M ingest/csv/__pycache__/save.cpython-310.pyc",
       " M storage/__pycache__/db.cpython-310.pyc",
       "?? .claude/",
@@ -34,6 +30,11 @@
     ]
   },
   "recent_commits": [
+    {
+      "hash": "11d436e",
+      "date": "2026-02-06",
+      "subject": "chore(requirements): tighten p0 rider-facing behavior contract"
+    },
     {
       "hash": "f5dabf3",
       "date": "2026-02-06",
@@ -88,33 +89,12 @@
       "hash": "0f37b66",
       "date": "2026-02-06",
       "subject": "chore(planner): optimize bootstrap recency and document cost model"
-    },
-    {
-      "hash": "54914bb",
-      "date": "2026-02-06",
-      "subject": "chore(planner): refresh bootstrap snapshot"
     }
   ],
   "recent_files": [
     {
-      "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-06 22:19:25"
-    },
-    {
-      "path": "REQUIREMENTS_BASELINE.md",
-      "last_write": "2026-02-06 22:22:32"
-    },
-    {
-      "path": "TASKS.md",
-      "last_write": "2026-02-06 22:22:41"
-    },
-    {
       "path": "aimsolo.db",
       "last_write": "2026-02-06 21:50:39"
-    },
-    {
-      "path": "artifacts\\project_bootstrap.json",
-      "last_write": "2026-02-06 22:19:25"
     },
     {
       "path": ".claude\\",
@@ -127,6 +107,22 @@
     {
       "path": "artifacts\\frontend_eval_report.json",
       "last_write": "2026-02-06 21:52:43"
+    },
+    {
+      "path": "PROJECT_BOOTSTRAP.md",
+      "last_write": "2026-02-06 22:22:47"
+    },
+    {
+      "path": "REQUIREMENTS_BASELINE.md",
+      "last_write": "2026-02-06 22:22:32"
+    },
+    {
+      "path": "TASKS.md",
+      "last_write": "2026-02-06 22:22:41"
+    },
+    {
+      "path": "artifacts\\project_bootstrap.json",
+      "last_write": "2026-02-06 22:22:47"
     },
     {
       "path": "TASK_PROMPTS_TONIGHT_TOP1.md",
