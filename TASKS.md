@@ -1,7 +1,15 @@
 # Tasks (Aim Solo Analysis)
 
 Date: 2026-02-07
-Status key: [done] [in-progress] [todo]
+Status key: [done] [in-progress] [blocked] [todo]
+
+## Planner Task Metadata (Required For New Tasks)
+- `class`: `T|I|V`
+- `depends_on`: list of task IDs, commit hashes, and/or `TA vX.Y`
+- `ta_version_required`: required TA version for execution (`none` only when not applicable)
+- `blocking_reason`: required when status is `[blocked]`
+- Rule: `I` cannot start before required `T` is complete and TA is frozen.
+- Rule: `V` depends on TA and/or completed implementation tasks.
 
 ## Docs & Planning
 - [done] Architecture overview (ARCHITECTURE.md)
@@ -73,9 +81,23 @@ Status key: [done] [in-progress] [todo]
 ## Evaluation Harness
 - [done] Backend eval harness with baseline/latency/failure JSON report (`tools/eval_backend.py`)
 - [done] Frontend eval harness with flow/semantics JSON report (`tools/eval_frontend.py`)
-- [todo] Unified scorecard + release gating workflow combining backend/frontend checks
+- [done] TASK-SCORECARD-01: Define unified scorecard contract TA v1.0 (FROZEN)
+- [done] TASK-SCORECARD-02: Implement unified scorecard builder per TA v1.0
+  - class: `I`
+  - depends_on: `TA v1.0`, `TASK-EVAL-02`, `TASK-EVAL-03`, `TASK-EVAL-09`, `TASK-EVAL-10`, `TASK-EVAL-11`, `TASK-EVAL-12`
+  - ta_version_required: `TA v1.0`
+  - prompt: `artifacts/prompts/TASK-SCORECARD-02-prompt.md`
+  - commit: `568eade`
+- [done] TASK-SCORECARD-03: Add end-to-end release gate workflow test
+  - class: `V`
+  - depends_on: `TA v1.0`, `TASK-SCORECARD-02`
+  - ta_version_required: `TA v1.0`
+  - prompt: `artifacts/prompts/TASK-SCORECARD-03-prompt.md`
+  - commit: `5b1c8f5`
 - [todo] Product-behavior assertion suite + golden scenario drift checks
-- [todo] Human coach review workflow integrated into evaluation status
+  - class: `V`
+  - depends_on: `TA v1.0`, `TASK-P0-03`, `TASK-P0-04`, `TASK-P0-05`, `TASK-P0-06`, `TASK-P0-07`, `TASK-P0-08`
+  - ta_version_required: `TA v1.0`
 
 ## Tonight Focus: Top-1 Recommendation Quality
 - [done] TASK-P0-03: Top-1 quality gates + gain root-cause trace (keep rec 2/3 behavior unchanged)
@@ -85,8 +107,8 @@ Status key: [done] [in-progress] [todo]
 - [done] TASK-EVAL-12: Align top-1 artifact path contracts so default no-arg chain works end-to-end (batch -> scorecard -> review packet)
 
 ## P0 Requirement Updates (Newly Added/Strengthened)
-- [todo] TASK-P0-04: Unit-consistent rider-facing coaching copy (RQ-P0-007, RQ-P0-024)
-- [todo] TASK-P0-05: Rider-recognizable corner identity and fallback phrasing (RQ-P0-006, RQ-P0-026)
-- [todo] TASK-P0-06: Rider-observable success checks and change-type-specific experimental protocols (RQ-P0-017, RQ-P0-018, RQ-P0-029)
-- [todo] TASK-P0-07: Make top-1 insight visually dominant in UI and evaluate explicitly (RQ-P0-025)
-- [todo] TASK-P0-08: Session recurrence narration + late-session fatigue-aware weighting (RQ-P0-027, RQ-P0-028)
+- [done] TASK-P0-04: Unit-consistent rider-facing coaching copy (RQ-P0-007, RQ-P0-024)
+- [done] TASK-P0-05: Rider-recognizable corner identity and fallback phrasing (RQ-P0-006, RQ-P0-026)
+- [done] TASK-P0-06: Rider-observable success checks and change-type-specific experimental protocols (RQ-P0-017, RQ-P0-018, RQ-P0-029)
+- [done] TASK-P0-07: Make top-1 insight visually dominant in UI and evaluate explicitly (RQ-P0-025)
+- [done] TASK-P0-08: Session recurrence narration + late-session fatigue-aware weighting (RQ-P0-027, RQ-P0-028)

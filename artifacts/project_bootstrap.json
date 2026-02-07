@@ -1,33 +1,25 @@
 {
-  "generated_at": "2026-02-06T23:06:52-07:00",
+  "generated_at": "2026-02-07T13:50:24-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
-    "branch": "master",
-    "head": "2a4eb84",
+    "branch": "feature/scorecard-e2e-test",
+    "head": "5b1c8f5",
     "dirty": true,
     "status": [
-      " M REQUIREMENTS_BASELINE.md",
+      " M PROJECT_BOOTSTRAP.md",
       " M TASKS.md",
-      " M aimsolo.db",
       " M analytics/trackside/__pycache__/pipeline.cpython-310.pyc",
       " M analytics/trackside/__pycache__/rank.cpython-310.pyc",
       " M analytics/trackside/__pycache__/synthesis.cpython-310.pyc",
       " M api/__pycache__/app.cpython-310.pyc",
       " M api/__pycache__/units.cpython-310.pyc",
+      " M artifacts/project_bootstrap.json",
       " M ingest/csv/__pycache__/save.cpython-310.pyc",
       " M storage/__pycache__/db.cpython-310.pyc",
-      "?? .claude/",
+      " M tests/__pycache__/test_line_trends.cpython-310-pytest-9.0.2.pyc",
       "?? analytics/__pycache__/metrics_writer.cpython-310.pyc",
-      "?? artifacts/eval_backend_report.json",
-      "?? artifacts/eval_top1_batch_report.json",
-      "?? artifacts/eval_top1_quality_report.json",
-      "?? artifacts/frontend_eval_report.json",
-      "?? artifacts/top1_aggregated_report.json",
-      "?? artifacts/top1_review_packet.csv",
-      "?? artifacts/top1_review_packet.md",
-      "?? artifacts/top1_review_packet_fixture.csv",
-      "?? artifacts/top1_review_packet_fixture.md",
-      "?? artifacts/top1_traces.jsonl",
+      "?? analytics/trackside/__pycache__/corner_identity.cpython-310.pyc",
+      "?? artifacts/unified_scorecard.json",
       "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
@@ -36,13 +28,62 @@
       "?? tests/__pycache__/test_eval_top1_batch.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_eval_top1_scorecard.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_metrics_persistence_ingestion.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_release_gate_workflow.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_review_packet.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_trackside_corner_identity.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_trackside_insight_contract.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_trackside_observable_protocols.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_unified_scorecard.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc",
       "?? tools/__pycache__/"
     ]
   },
   "recent_commits": [
+    {
+      "hash": "5b1c8f5",
+      "date": "2026-02-07",
+      "subject": "test(eval): add end-to-end release gate workflow verification"
+    },
+    {
+      "hash": "568eade",
+      "date": "2026-02-07",
+      "subject": "feat(eval): implement unified scorecard builder per TA v1.0"
+    },
+    {
+      "hash": "b1b2e69",
+      "date": "2026-02-07",
+      "subject": "feat(eval): define unified scorecard contract TA v1.0"
+    },
+    {
+      "hash": "251fb92",
+      "date": "2026-02-06",
+      "subject": "feat(ui): enforce visually dominant top1 insight"
+    },
+    {
+      "hash": "4d67af7",
+      "date": "2026-02-06",
+      "subject": "feat(trackside): add recurrence narration and fatigue-aware weighting"
+    },
+    {
+      "hash": "4953eaf",
+      "date": "2026-02-06",
+      "subject": "feat(trackside): add rider-observable success checks and typed protocols"
+    },
+    {
+      "hash": "30a2fd9",
+      "date": "2026-02-06",
+      "subject": "feat(trackside): add rider-recognizable corner identity labels"
+    },
+    {
+      "hash": "7254690",
+      "date": "2026-02-06",
+      "subject": "fix(trackside): enforce unit-consistent rider-facing coaching copy"
+    },
+    {
+      "hash": "2b7b289",
+      "date": "2026-02-06",
+      "subject": "chore(planner): mark task-eval-12 complete and refresh bootstrap"
+    },
     {
       "hash": "2a4eb84",
       "date": "2026-02-06",
@@ -57,153 +98,108 @@
       "hash": "4185a60",
       "date": "2026-02-06",
       "subject": "chore(planner): integrate top1 handoffs and update requirement gaps"
-    },
-    {
-      "hash": "fcc061f",
-      "date": "2026-02-06",
-      "subject": "feat(eval): add deterministic top1 coach review packet"
-    },
-    {
-      "hash": "2cb36f1",
-      "date": "2026-02-06",
-      "subject": "feat(eval): add top1 decision trace scorecard"
-    },
-    {
-      "hash": "d1dd2e2",
-      "date": "2026-02-06",
-      "subject": "feat(eval): add top-1 batch evaluation harness"
-    },
-    {
-      "hash": "ee27d45",
-      "date": "2026-02-06",
-      "subject": "feat(trackside): add top-1 quality gate trace and decisions"
-    },
-    {
-      "hash": "b8e11bd",
-      "date": "2026-02-06",
-      "subject": "chore(planner): refresh bootstrap after requirements update"
-    },
-    {
-      "hash": "11d436e",
-      "date": "2026-02-06",
-      "subject": "chore(requirements): tighten p0 rider-facing behavior contract"
-    },
-    {
-      "hash": "f5dabf3",
-      "date": "2026-02-06",
-      "subject": "chore(planner): add tonight top1 quality task pack"
-    },
-    {
-      "hash": "b6c0579",
-      "date": "2026-02-06",
-      "subject": "chore(planner): refresh bootstrap after handoff integration"
-    },
-    {
-      "hash": "a1f4445",
-      "date": "2026-02-06",
-      "subject": "chore(planner): ingest handoffs and refresh baseline"
     }
   ],
   "recent_files": [
     {
-      "path": "REQUIREMENTS_BASELINE.md",
-      "last_write": "2026-02-06 23:06:43"
+      "path": "PROJECT_BOOTSTRAP.md",
+      "last_write": "2026-02-07 13:49:29"
     },
     {
       "path": "TASKS.md",
-      "last_write": "2026-02-06 23:06:34"
+      "last_write": "2026-02-07 13:50:20"
     },
     {
-      "path": "aimsolo.db",
-      "last_write": "2026-02-06 21:50:39"
+      "path": "artifacts\\project_bootstrap.json",
+      "last_write": "2026-02-07 13:49:29"
     },
     {
-      "path": ".claude\\",
-      "last_write": "2026-02-06 22:38:17"
+      "path": "artifacts\\unified_scorecard.json",
+      "last_write": "2026-02-07 13:42:24"
     },
     {
-      "path": "artifacts\\eval_backend_report.json",
-      "last_write": "2026-02-06 21:53:00"
+      "path": "docs\\release_gate_workflow.md",
+      "last_write": "2026-02-07 13:46:58"
     },
     {
-      "path": "artifacts\\eval_top1_batch_report.json",
-      "last_write": "2026-02-06 23:06:06"
+      "path": "tests\\test_release_gate_workflow.py",
+      "last_write": "2026-02-07 13:47:21"
     },
     {
-      "path": "artifacts\\eval_top1_quality_report.json",
-      "last_write": "2026-02-06 22:27:37"
+      "path": "tests\\test_unified_scorecard.py",
+      "last_write": "2026-02-07 13:42:12"
     },
     {
-      "path": "artifacts\\frontend_eval_report.json",
-      "last_write": "2026-02-06 21:52:43"
+      "path": "tools\\unified_scorecard.py",
+      "last_write": "2026-02-07 13:42:12"
     },
     {
-      "path": "artifacts\\top1_aggregated_report.json",
-      "last_write": "2026-02-06 23:06:09"
+      "path": "docs\\TA_SCORECARD_v1.0.md",
+      "last_write": "2026-02-07 13:42:08"
     },
     {
-      "path": "artifacts\\top1_review_packet.csv",
-      "last_write": "2026-02-06 23:06:12"
+      "path": "docs\\examples\\scorecard_example_blocked.json",
+      "last_write": "2026-02-07 13:09:46"
     },
     {
-      "path": "artifacts\\top1_review_packet.md",
-      "last_write": "2026-02-06 23:06:12"
+      "path": "docs\\examples\\scorecard_example_fail.json",
+      "last_write": "2026-02-07 13:09:29"
     },
     {
-      "path": "artifacts\\top1_review_packet_fixture.csv",
-      "last_write": "2026-02-06 22:27:50"
+      "path": "docs\\examples\\scorecard_example_pass.json",
+      "last_write": "2026-02-07 13:09:13"
     },
     {
-      "path": "artifacts\\top1_review_packet_fixture.md",
-      "last_write": "2026-02-06 22:27:50"
+      "path": "tests\\test_eval_frontend.py",
+      "last_write": "2026-02-06 23:43:44"
     },
     {
-      "path": "artifacts\\top1_traces.jsonl",
-      "last_write": "2026-02-06 23:06:06"
+      "path": "tools\\eval_frontend.py",
+      "last_write": "2026-02-06 23:43:44"
     },
     {
-      "path": "docs\\top1_review_packet_workflow.md",
-      "last_write": "2026-02-06 23:05:36"
+      "path": "ui\\app.js",
+      "last_write": "2026-02-06 23:43:44"
     },
     {
-      "path": "tests\\test_eval_top1_batch.py",
-      "last_write": "2026-02-06 23:05:36"
+      "path": "ui\\index.html",
+      "last_write": "2026-02-06 23:43:44"
     },
     {
-      "path": "tests\\test_eval_top1_scorecard.py",
-      "last_write": "2026-02-06 23:05:36"
+      "path": "ui\\styles.css",
+      "last_write": "2026-02-06 23:43:44"
     },
     {
-      "path": "tests\\test_review_packet.py",
-      "last_write": "2026-02-06 23:05:36"
+      "path": "analytics\\trackside\\pipeline.py",
+      "last_write": "2026-02-06 23:43:40"
     },
     {
-      "path": "tools\\build_top1_review_packet.py",
-      "last_write": "2026-02-06 23:05:36"
+      "path": "analytics\\trackside\\synthesis.py",
+      "last_write": "2026-02-06 23:43:40"
     },
     {
-      "path": "tools\\eval_top1_batch.py",
-      "last_write": "2026-02-06 23:05:36"
+      "path": "tests\\test_line_trends.py",
+      "last_write": "2026-02-06 23:43:40"
     },
     {
-      "path": "tools\\eval_top1_scorecard.py",
-      "last_write": "2026-02-06 23:05:36"
+      "path": "tests\\test_trackside_observable_protocols.py",
+      "last_write": "2026-02-06 23:42:49"
     },
     {
-      "path": "tools\\top1_artifact_contract.py",
-      "last_write": "2026-02-06 23:05:36"
+      "path": "analytics\\trackside\\corner_identity.py",
+      "last_write": "2026-02-06 23:42:20"
     },
     {
-      "path": "PLANNER_PROMPT_TEMPLATE.md",
-      "last_write": "2026-02-06 22:33:51"
+      "path": "api\\app.py",
+      "last_write": "2026-02-06 23:42:42"
     },
     {
-      "path": "TASK_PROMPTS_TONIGHT_TOP1.md",
-      "last_write": "2026-02-06 22:33:57"
+      "path": "tests\\test_trackside_corner_identity.py",
+      "last_write": "2026-02-06 23:42:20"
     },
     {
-      "path": "TASK_PROMPTS_WAVE2.md",
-      "last_write": "2026-02-06 22:34:09"
+      "path": "tests\\test_trackside_insight_contract.py",
+      "last_write": "2026-02-06 23:42:20"
     }
   ],
   "likely_closed_gaps": [],
@@ -228,14 +224,7 @@
     "[todo] Validate CRC16 trailer and timebase mapping",
     "[todo] Map hCHS fields to data types + sample rates",
     "[todo] Ingestion time benchmark",
-    "[todo] Unified scorecard + release gating workflow combining backend/frontend checks",
-    "[todo] Product-behavior assertion suite + golden scenario drift checks",
-    "[todo] Human coach review workflow integrated into evaluation status",
-    "[todo] TASK-P0-04: Unit-consistent rider-facing coaching copy (RQ-P0-007, RQ-P0-024)",
-    "[todo] TASK-P0-05: Rider-recognizable corner identity and fallback phrasing (RQ-P0-006, RQ-P0-026)",
-    "[todo] TASK-P0-06: Rider-observable success checks and change-type-specific experimental protocols (RQ-P0-017, RQ-P0-018, RQ-P0-029)",
-    "[todo] TASK-P0-07: Make top-1 insight visually dominant in UI and evaluate explicitly (RQ-P0-025)",
-    "[todo] TASK-P0-08: Session recurrence narration + late-session fatigue-aware weighting (RQ-P0-027, RQ-P0-028)"
+    "[todo] Product-behavior assertion suite + golden scenario drift checks"
   ],
   "planner_entrypoints": [
     "PROJECT_BOOTSTRAP.md",
