@@ -1,0 +1,219 @@
+{
+  "generated_at": "2026-02-06T21:32:28-07:00",
+  "repo": {
+    "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
+    "branch": "master",
+    "head": "be3d5c9",
+    "dirty": true,
+    "status": [
+      " M aimsolo.db",
+      " M api/__pycache__/app.cpython-310.pyc",
+      " M api/__pycache__/units.cpython-310.pyc",
+      " M storage/__pycache__/db.cpython-310.pyc",
+      "?? AGENTS.md",
+      "?? PLANNER_BOOTSTRAP.md",
+      "?? PROJECT_BOOTSTRAP.md",
+      "?? artifacts/",
+      "?? skills/",
+      "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
+      "?? tools/update_bootstrap.ps1"
+    ]
+  },
+  "recent_commits": [
+    {
+      "hash": "be3d5c9",
+      "date": "2026-02-06",
+      "subject": "fix(api): honor explicit compare lap query params"
+    },
+    {
+      "hash": "995028b",
+      "date": "2026-02-06",
+      "subject": "fix(api): keep import run-meta lookup on open connection"
+    },
+    {
+      "hash": "8a8ee59",
+      "date": "2026-02-06",
+      "subject": "Fix SQLite upsert helpers to return correct IDs on conflicts"
+    },
+    {
+      "hash": "438ad5c",
+      "date": "2026-02-06",
+      "subject": "chore(planner): add fixed handoff schema for scalable agent intake"
+    },
+    {
+      "hash": "765609b",
+      "date": "2026-02-06",
+      "subject": "chore(planner): assign branch/workdir in delegation template and ignore worktrees"
+    },
+    {
+      "hash": "f006526",
+      "date": "2026-02-06",
+      "subject": "chore(planner): enforce per-task git commit discipline in prompt template"
+    },
+    {
+      "hash": "9855aac",
+      "date": "2026-02-06",
+      "subject": "Add planner prompt template and requirements baseline for P0"
+    },
+    {
+      "hash": "2800617",
+      "date": "2026-02-05",
+      "subject": "Update trend evaluation and data"
+    },
+    {
+      "hash": "e0b54da",
+      "date": "2026-02-04",
+      "subject": "Implement trackside pipeline, API wiring, and analytics docs"
+    },
+    {
+      "hash": "91d0944",
+      "date": "2026-02-04",
+      "subject": "plan"
+    }
+  ],
+  "recent_files": [
+    {
+      "path": "tools\\update_bootstrap.ps1",
+      "last_write": "2026-02-06 21:32:25"
+    },
+    {
+      "path": "artifacts\\project_bootstrap.json",
+      "last_write": "2026-02-06 21:32:02"
+    },
+    {
+      "path": "PROJECT_BOOTSTRAP.md",
+      "last_write": "2026-02-06 21:32:02"
+    },
+    {
+      "path": "AGENTS.md",
+      "last_write": "2026-02-06 21:31:20"
+    },
+    {
+      "path": "PLANNER_BOOTSTRAP.md",
+      "last_write": "2026-02-06 21:31:15"
+    },
+    {
+      "path": "skills\\planner-orchestrator\\SKILL.md",
+      "last_write": "2026-02-06 21:30:13"
+    },
+    {
+      "path": "api\\app.py",
+      "last_write": "2026-02-06 20:55:25"
+    },
+    {
+      "path": "tests\\test_compare_endpoint.py",
+      "last_write": "2026-02-06 20:55:25"
+    },
+    {
+      "path": "tests\\test_api_import.py",
+      "last_write": "2026-02-06 20:54:44"
+    },
+    {
+      "path": "storage\\db.py",
+      "last_write": "2026-02-06 20:53:08"
+    },
+    {
+      "path": "tests\\test_db_upsert_ids.py",
+      "last_write": "2026-02-06 20:53:08"
+    },
+    {
+      "path": "PLANNER_PROMPT_TEMPLATE.md",
+      "last_write": "2026-02-06 20:51:10"
+    },
+    {
+      "path": ".gitignore",
+      "last_write": "2026-02-06 20:46:53"
+    },
+    {
+      "path": "REQUIREMENTS_BASELINE.md",
+      "last_write": "2026-02-06 20:37:58"
+    },
+    {
+      "path": "aimsolo.db",
+      "last_write": "2026-02-06 20:06:04"
+    },
+    {
+      "path": "LINE_STDDEV_RESEARCH.md",
+      "last_write": "2026-02-05 16:02:33"
+    },
+    {
+      "path": "tools\\eval_trends.py",
+      "last_write": "2026-02-05 15:54:01"
+    },
+    {
+      "path": "tests\\fixtures\\trend_eval_baseline.json",
+      "last_write": "2026-02-05 15:53:20"
+    },
+    {
+      "path": "analytics\\trackside\\pipeline.py",
+      "last_write": "2026-02-05 15:52:42"
+    },
+    {
+      "path": "analytics\\trackside\\config.py",
+      "last_write": "2026-02-05 15:52:19"
+    },
+    {
+      "path": "tests\\fixtures\\trend_eval_manifest.json",
+      "last_write": "2026-02-05 15:47:07"
+    },
+    {
+      "path": "test_data\\HPR_Full_09292024\\21.csv",
+      "last_write": "2026-02-05 15:45:26"
+    },
+    {
+      "path": "test_data\\HPR_Full_09292024\\2.csv",
+      "last_write": "2026-02-05 15:45:26"
+    },
+    {
+      "path": "test_data\\HPR_Full_09292024\\22.csv",
+      "last_write": "2026-02-05 15:45:25"
+    },
+    {
+      "path": "test_data\\HPR_Full_09292024\\4.csv",
+      "last_write": "2026-02-05 15:45:25"
+    }
+  ],
+  "likely_closed_gaps": [
+    {
+      "id": "GAP-001",
+      "reason": "Recent commit subjects indicate upsert conflict-ID fix landed."
+    },
+    {
+      "id": "GAP-002",
+      "reason": "Recent commit subjects indicate /import connection-lifecycle bug fix landed."
+    },
+    {
+      "id": "GAP-003",
+      "reason": "Recent commit subjects indicate /compare explicit lap query support landed."
+    }
+  ],
+  "active_gaps": [
+    "GAP-004 (Medium): Units contract inconsistency (imperial flags with metric map payloads).",
+    "GAP-005 (Medium): Derived metrics writer exists but is not integrated into pipeline persistence path.",
+    "GAP-006 (Low): Channel blob persistence remains stubbed.",
+    "GAP-007 (High): No unified backend+frontend evaluation harness with a single scorecard and release gating.",
+    "GAP-008 (Medium): No formal human-in-the-loop qualitative review loop for coaching quality."
+  ],
+  "open_task_items": [
+    "[in-progress] XRK R&D notes (PROGRESS_AIMSOLO_XRK.txt) - continue in parallel",
+    "[todo] Store raw arrays (compressed blobs) for full channel fidelity",
+    "[todo] Persist derived metrics for trackside queries (use metrics_writer.py)",
+    "[todo] Add lean-angle proxy (from lateral accel + GPS radius) with quality gating",
+    "[todo] Add synthesis layer to reconcile conflicting insights (phase inference + suppression + actionable templates)",
+    "[todo] Add light brake/throttle detection (turn/lean dependent) to synthesis",
+    "[todo] Convert insight outputs to imperial units (mph, ft) for UI/evidence",
+    "[todo] Decode hGPS 56-byte record format",
+    "[todo] Validate CRC16 trailer and timebase mapping",
+    "[todo] Map hCHS fields to data types + sample rates",
+    "[todo] Ingestion time benchmark"
+  ],
+  "planner_entrypoints": [
+    "PROJECT_BOOTSTRAP.md",
+    "REQUIREMENTS_BASELINE.md",
+    "TASKS.md",
+    "PLANNER_PROMPT_TEMPLATE.md",
+    "skills/planner-orchestrator/SKILL.md"
+  ]
+}
