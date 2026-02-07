@@ -481,6 +481,35 @@ def _build_summary_cards(durations: list[float]) -> list[Dict[str, Any]]:
     return cards
 
 
+def _did_vs_should_payload(insight: Dict[str, Any]) -> Dict[str, str]:
+    did = str(insight.get("did") or insight.get("detail") or "").strip()
+    should = str(insight.get("should") or insight.get("operational_action") or "").strip()
+    because = str(insight.get("because") or insight.get("causal_reason") or "").strip()
+    success_check = str(insight.get("success_check") or "").strip()
+
+    if not did:
+        did = "Current telemetry indicates a controllable issue in this segment, but marker context is unavailable."
+    if not should:
+        should = (
+            "Use one repeatable marker and one small input change; avoid exact-distance targets in this run."
+        )
+    if not because:
+        because = (
+            "Evidence is partial, so this fallback keeps the recommendation deterministic without fabricated precision."
+        )
+    if not success_check:
+        success_check = (
+            "Run 2 controlled laps with one change only and confirm rider feel improves before escalating."
+        )
+
+    return {
+        "did": did,
+        "should": should,
+        "because": because,
+        "success_check": success_check,
+    }
+
+
 def _sector_times_for_lap(run_data: Optional[RunData], lap: Dict[str, Any]) -> list[str]:
     if run_data is None:
         return ["--", "--", "--"]
@@ -694,6 +723,7 @@ def get_insights(session_id: str) -> Dict[str, Any]:
         evidence = insight.get("evidence") or {}
         if not isinstance(evidence, dict):
             evidence = {}
+        did_vs_should = _did_vs_should_payload(insight)
         corner_label = rider_corner_label(
             insight.get("corner_label") or insight.get("corner_id"),
             fallback_internal_id=insight.get("segment_id"),
@@ -705,13 +735,17 @@ def get_insights(session_id: str) -> Dict[str, Any]:
                 "rule_id": insight.get("rule_id"),
                 "title": convert_rider_text(insight.get("title")),
                 "phase": insight.get("phase"),
+                "did": convert_rider_text(did_vs_should["did"]),
+                "should": convert_rider_text(did_vs_should["should"]),
+                "because": convert_rider_text(did_vs_should["because"]),
                 "operational_action": convert_rider_text(insight.get("operational_action")),
                 "causal_reason": convert_rider_text(insight.get("causal_reason")),
                 "risk_tier": insight.get("risk_tier"),
                 "risk_reason": convert_rider_text(insight.get("risk_reason")),
                 "data_quality_note": convert_rider_text(insight.get("data_quality_note")),
                 "uncertainty_note": convert_rider_text(insight.get("uncertainty_note")),
-                "success_check": convert_rider_text(insight.get("success_check")),
+                "success_check": convert_rider_text(did_vs_should["success_check"]),
+                "did_vs_should": convert_rider_text(did_vs_should),
                 "expected_gain_s": insight.get("expected_gain_s"),
                 "experimental_protocol": convert_rider_text(insight.get("experimental_protocol")),
                 "is_primary_focus": bool(insight.get("is_primary_focus")),

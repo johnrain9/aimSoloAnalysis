@@ -24,6 +24,9 @@ class Insight:
     rule_id: str
     title: str
     detail: str
+    did: str
+    should: str
+    because: str
     phase: str
     operational_action: str
     causal_reason: str
@@ -50,6 +53,9 @@ class Insight:
             "rule_id": self.rule_id,
             "title": self.title,
             "detail": self.detail,
+            "did": self.did,
+            "should": self.should,
+            "because": self.because,
             "phase": self.phase,
             "operational_action": self.operational_action,
             "causal_reason": self.causal_reason,
@@ -269,6 +275,14 @@ def synthesize_insights(
             metrics=metrics,
             evidence=evidence,
         )
+        did, should, because = _did_vs_should_sections(
+            primary_id=primary_id,
+            phase=phase,
+            detail=detail,
+            operational_action=operational_action,
+            causal_reason=causal_reason,
+            evidence=evidence,
+        )
         expected_gain_s = applied_gain_s if applied_gain_s > 0 else 0.01
         experimental_protocol = None
         if risk_tier == "Experimental":
@@ -291,6 +305,9 @@ def synthesize_insights(
                 rule_id=primary_id,
                 title=title,
                 detail=detail,
+                did=did,
+                should=should,
+                because=because,
                 phase=phase,
                 operational_action=operational_action,
                 causal_reason=causal_reason,
@@ -910,6 +927,69 @@ def _operational_action(actions: List[str], rule_id: str, phase: str) -> str:
     if actions:
         return actions[0]
     return f"Use one repeatable {phase} marker in this corner and keep inputs smooth."
+
+
+def _did_vs_should_sections(
+    *,
+    primary_id: str,
+    phase: str,
+    detail: str,
+    operational_action: str,
+    causal_reason: str,
+    evidence: Dict[str, Any],
+) -> Tuple[str, str, str]:
+    marker_context_ok = _marker_context_available(primary_id, evidence)
+    did = (detail or "").strip()
+    should = (operational_action or "").strip()
+    because = (causal_reason or "").strip()
+
+    if not did:
+        did = f"Current telemetry shows a controllable {phase} issue, but marker context is unavailable."
+    if not should:
+        should = (
+            f"Use one repeatable {phase} marker and make a single smooth change until marker context is available."
+        )
+    if not because:
+        because = (
+            "Available evidence still indicates this is the dominant controllable source of lost time."
+        )
+
+    if marker_context_ok:
+        return did, should, because
+
+    return (
+        f"{did} Marker context is unavailable in this sample.",
+        "Use one repeatable marker and one small input change; avoid exact-distance targets in this run.",
+        "Evidence is partial, so this fallback keeps the recommendation deterministic without fabricated precision.",
+    )
+
+
+def _marker_context_available(primary_id: str, evidence: Dict[str, Any]) -> bool:
+    if primary_id in {"entry_speed", "early_braking"}:
+        return (
+            _get_float(evidence, "entry_speed_delta_kmh") is not None
+            or _get_float(evidence, "brake_point_delta_m") is not None
+        )
+    if primary_id in {"late_throttle_pickup", "exit_speed"}:
+        return (
+            _get_float(evidence, "pickup_delta_m") is not None
+            or _get_float(evidence, "pickup_delta_s") is not None
+            or _get_float(evidence, "exit_speed_delta_kmh") is not None
+        )
+    if primary_id in {"line_inconsistency", "corner_speed_loss", "steering_smoothness"}:
+        return (
+            _get_float(evidence, "line_stddev_m") is not None
+            or _get_float(evidence, "line_stddev_delta_m") is not None
+            or _get_float(evidence, "min_speed_delta_kmh") is not None
+            or _get_float(evidence, "apex_delta_m") is not None
+            or _get_float(evidence, "yaw_rms_ratio") is not None
+        )
+    if primary_id == "neutral_throttle":
+        return (
+            _get_float(evidence, "neutral_throttle_s") is not None
+            or _get_float(evidence, "neutral_throttle_dist_m") is not None
+        )
+    return bool(evidence)
 
 
 def _causal_reason(rule_id: str, evidence: Dict[str, Any], phase: str) -> str:

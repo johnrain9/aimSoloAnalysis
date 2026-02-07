@@ -75,6 +75,9 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
 
     required = {
         "phase",
+        "did",
+        "should",
+        "because",
         "operational_action",
         "causal_reason",
         "risk_tier",
@@ -88,12 +91,18 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
         assert required.issubset(set(insight.keys()))
         assert insight["phase"] in {"entry", "mid", "exit"}
         assert insight["risk_tier"] in {"Primary", "Experimental", "Blocked"}
+        assert insight["did"]
+        assert insight["should"]
+        assert insight["because"]
         assert insight["operational_action"]
         assert insight["causal_reason"]
         assert insight["success_check"]
         metric_token = re.compile(r"\bkm/h\b|\bm/s\b|_kmh\b|_stddev_m\b|\b\d+(?:\.\d+)?\s*m\b")
         rider_text = [
             insight["detail"],
+            insight["did"],
+            insight["should"],
+            insight["because"],
             insight["operational_action"],
             insight["causal_reason"],
             insight["success_check"],
@@ -112,6 +121,36 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
     protocol = experimental["experimental_protocol"]
     assert isinstance(protocol, dict)
     assert {"expected_gain_s", "risk", "bounds", "abort_criteria"}.issubset(set(protocol.keys()))
+
+
+def test_synthesize_did_vs_should_fallback_when_marker_context_missing():
+    segments = [
+        {
+            "segment_id": "T3",
+            "corner_id": "T3",
+            "target": {"segment_time_s": 18.4},
+            "reference": {"segment_time_s": 18.2},
+            "quality": {"gps_accuracy_m": 1.2, "satellites": 10},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "entry_speed",
+            "segment_id": "T3",
+            "corner_id": "T3",
+            "time_gain_s": 0.11,
+            "confidence": 0.66,
+            "evidence": {},
+            "comparison": "Lap 7 vs best Lap 2",
+        }
+    ]
+
+    insights = synthesize_insights(segments, signals, comparison_label="Lap 7 vs best Lap 2")
+    assert len(insights) == 1
+    item = insights[0]
+    assert "Marker context is unavailable in this sample." in item["did"]
+    assert "avoid exact-distance targets" in item["should"]
+    assert "without fabricated precision" in item["because"]
 
 
 def test_synthesize_insight_corner_identity_normalizes_internal_ids():
@@ -455,8 +494,15 @@ def test_insights_endpoint_exposes_contract_fields(monkeypatch, tmp_path):
     item = response["items"][0]
 
     assert item["phase"] == "mid"
+    assert item["did"]
+    assert item["should"]
+    assert item["because"]
     assert item["risk_tier"] == "Primary"
     assert item["success_check"]
+    assert item["did_vs_should"]["did"] == item["did"]
+    assert item["did_vs_should"]["should"] == item["should"]
+    assert item["did_vs_should"]["because"] == item["because"]
+    assert item["did_vs_should"]["success_check"] == item["success_check"]
     assert "data_quality_note" in item
     assert "uncertainty_note" in item
     assert item["is_primary_focus"] is True
