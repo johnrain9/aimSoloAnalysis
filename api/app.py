@@ -15,7 +15,7 @@ from analytics.trackside.pipeline import (
     generate_trackside_map,
     generate_compare_map,
 )
-from api.units import convert_compare_payload, convert_evidence
+from api.units import convert_compare_payload, convert_evidence, convert_map_payload, imperial_unit_contract
 from domain.run_data import RunData
 from ingest.csv.parser import parse_csv
 from ingest.csv.save import save_to_db
@@ -704,8 +704,7 @@ def get_insights(session_id: str) -> Dict[str, Any]:
         )
 
     if isinstance(track_map, dict):
-        track_map = dict(track_map)
-        track_map["units"] = "metric"
+        track_map = convert_map_payload(track_map)
 
     return {
         "session_id": session_id,
@@ -716,6 +715,7 @@ def get_insights(session_id: str) -> Dict[str, Any]:
         "rider_name": run_meta.get("rider_name"),
         "bike_name": run_meta.get("bike_name"),
         "units": "imperial",
+        "unit_contract": imperial_unit_contract(),
         "track_map": track_map,
         "items": items,
     }
@@ -819,6 +819,7 @@ def get_compare(
         "rider_name": run_meta.get("rider_name"),
         "bike_name": run_meta.get("bike_name"),
         "units": "imperial",
+        "unit_contract": imperial_unit_contract(),
         "comparison": {
             "reference_lap": reference["lap_index"],
             "target_lap": target["lap_index"],
@@ -866,5 +867,4 @@ def get_map(
     if not payload:
         return _build_not_ready(session_id, meta, "map data not ready")
     payload["session_id"] = session_id
-    payload["units"] = "metric"
-    return payload
+    return convert_map_payload(payload)

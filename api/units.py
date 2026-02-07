@@ -5,6 +5,7 @@ from typing import Any, Dict
 M_TO_FT = 3.28084
 KMH_TO_MPH = 0.621371
 MPS_TO_MPH = 2.23694
+_MAP_POINT_KEYS = {"points", "points_a", "points_b", "reference_points", "target_points"}
 
 
 def to_feet(value: float) -> float:
@@ -28,44 +29,46 @@ def _convert_value(value: Any, fn) -> Any:
         return value
 
 
+def imperial_unit_contract() -> Dict[str, str]:
+    return {
+        "system": "imperial",
+        "distance": "ft",
+        "speed": "mph",
+        "time": "s",
+    }
+
+
+def _convert_map_point(point: Any) -> Any:
+    if not isinstance(point, (list, tuple)):
+        return point
+    converted = list(point)
+    for idx in range(min(3, len(converted))):
+        converted[idx] = _convert_value(converted[idx], to_feet)
+    return converted
+
+
+def _convert_units_tree(value: Any, *, key: str | None = None) -> Any:
+    if isinstance(value, dict):
+        return {child_key: _convert_units_tree(child_value, key=child_key) for child_key, child_value in value.items()}
+    if isinstance(value, list):
+        if key in _MAP_POINT_KEYS:
+            return [_convert_map_point(item) for item in value]
+        return [_convert_units_tree(item, key=key) for item in value]
+    if key is None:
+        return value
+    if key.endswith("_m"):
+        return _convert_value(value, to_feet)
+    if key.endswith("_kmh"):
+        return _convert_value(value, to_mph_from_kmh)
+    if key.endswith("_mps"):
+        return _convert_value(value, to_mph_from_mps)
+    return value
+
+
 def convert_evidence(evidence: Dict[str, Any]) -> Dict[str, Any]:
     if not evidence:
         return {}
-    converted = dict(evidence)
-    meter_keys = {
-        "brake_point_delta_m",
-        "pickup_delta_m",
-        "neutral_throttle_dist_m",
-        "line_stddev_m",
-        "line_stddev_delta_m",
-        "apex_stddev_m",
-        "apex_recommend_m",
-        "apex_bias_m",
-        "apex_delta_m",
-        "decel_dist_m",
-        "gps_accuracy_m",
-    }
-    kmh_keys = {
-        "entry_speed_delta_kmh",
-        "min_speed_delta_kmh",
-        "exit_speed_delta_kmh",
-        "neutral_speed_delta_kmh",
-        "speed_noise_sigma_kmh",
-    }
-    mps_keys = {
-        "gps_speed_accuracy_mps",
-    }
-
-    for key in meter_keys:
-        if key in converted:
-            converted[key] = _convert_value(converted[key], to_feet)
-    for key in kmh_keys:
-        if key in converted:
-            converted[key] = _convert_value(converted[key], to_mph_from_kmh)
-    for key in mps_keys:
-        if key in converted:
-            converted[key] = _convert_value(converted[key], to_mph_from_mps)
-    return converted
+    return _convert_units_tree(dict(evidence))
 
 
 def convert_compare_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -73,17 +76,16 @@ def convert_compare_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         return payload
     converted = dict(payload)
     comparison = dict(converted.get("comparison") or {})
-    brake_points = comparison.get("brake_points")
-    if isinstance(brake_points, list):
-        updated = []
-        for point in brake_points:
-            if not isinstance(point, dict):
-                updated.append(point)
-                continue
-            updated_point = dict(point)
-            if "delta_m" in updated_point:
-                updated_point["delta_m"] = _convert_value(updated_point["delta_m"], to_feet)
-            updated.append(updated_point)
-        comparison["brake_points"] = updated
-        converted["comparison"] = comparison
+    converted["comparison"] = _convert_units_tree(comparison)
+    converted["units"] = "imperial"
+    converted["unit_contract"] = imperial_unit_contract()
+    return converted
+
+
+def convert_map_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+    if not payload:
+        return payload
+    converted = _convert_units_tree(dict(payload))
+    converted["units"] = "imperial"
+    converted["unit_contract"] = imperial_unit_contract()
     return converted
