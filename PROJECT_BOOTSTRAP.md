@@ -1,42 +1,30 @@
 # Project Bootstrap Snapshot
 
-Generated: 2026-02-06T21:49:36-07:00
+Generated: 2026-02-06T21:51:00-07:00
 Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_bootstrap.ps1`.
 
 ## Repo State
 - Root: `C:\Users\Paul\ai\aimSoloAnalysis`
 - Branch: `master`
-- HEAD: `395d812`
+- HEAD: `a1f4445`
 - Dirty: `True`
 
 ### Working Tree Changes
-- ` M REQUIREMENTS_BASELINE.md`
-- ` M TASKS.md`
-- ` M analytics/trackside/__pycache__/pipeline.cpython-310.pyc`
-- ` M analytics/trackside/__pycache__/rank.cpython-310.pyc`
-- ` M analytics/trackside/__pycache__/synthesis.cpython-310.pyc`
+- ` M aimsolo.db`
 - ` M api/__pycache__/app.cpython-310.pyc`
 - ` M api/__pycache__/units.cpython-310.pyc`
-- ` M ingest/csv/__pycache__/save.cpython-310.pyc`
 - ` M storage/__pycache__/db.cpython-310.pyc`
-- `?? analytics/__pycache__/metrics_writer.cpython-310.pyc`
-- `?? artifacts/eval_backend_report.json`
-- `?? artifacts/frontend_eval_report.json`
 - `?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc`
-- `?? tests/__pycache__/test_eval_backend.cpython-310-pytest-9.0.2.pyc`
-- `?? tests/__pycache__/test_eval_frontend.cpython-310-pytest-9.0.2.pyc`
-- `?? tests/__pycache__/test_metrics_persistence_ingestion.cpython-310-pytest-9.0.2.pyc`
-- `?? tests/__pycache__/test_trackside_insight_contract.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc`
-- `?? tools/__pycache__/`
 
 ## Recently Modified Files
+- `aimsolo.db` (2026-02-06 21:50:39)
+- `PROJECT_BOOTSTRAP.md` (2026-02-06 21:49:36)
 - `REQUIREMENTS_BASELINE.md` (2026-02-06 21:49:24)
 - `TASKS.md` (2026-02-06 21:49:31)
-- `artifacts\eval_backend_report.json` (2026-02-06 21:48:39)
-- `artifacts\frontend_eval_report.json` (2026-02-06 21:48:09)
+- `artifacts\project_bootstrap.json` (2026-02-06 21:49:36)
 - `analytics\trackside\pipeline.py` (2026-02-06 21:48:03)
 - `analytics\trackside\rank.py` (2026-02-06 21:48:03)
 - `analytics\trackside\synthesis.py` (2026-02-06 21:48:03)
@@ -48,9 +36,7 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `tools\eval_backend.py` (2026-02-06 21:47:56)
 - `ingest\csv\save.py` (2026-02-06 21:47:53)
 - `tests\test_metrics_persistence_ingestion.py` (2026-02-06 21:47:53)
-- `PROJECT_BOOTSTRAP.md` (2026-02-06 21:43:18)
 - `TASK_PROMPTS_WAVE2.md` (2026-02-06 21:43:12)
-- `artifacts\project_bootstrap.json` (2026-02-06 21:43:18)
 - `api\units.py` (2026-02-06 21:37:36)
 - `tests\test_units_contract.py` (2026-02-06 21:37:36)
 - `PLANNER_BOOTSTRAP.md` (2026-02-06 21:36:08)
@@ -60,6 +46,7 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `tests\test_compare_endpoint.py` (2026-02-06 20:55:25)
 
 ## Recent Commits
+- `a1f4445` 2026-02-06 - chore(planner): ingest handoffs and refresh baseline
 - `395d812` 2026-02-06 - feat(trackside): enforce p0 next-session insight contract
 - `f1fa416` 2026-02-06 - feat(eval): add frontend flow harness and JSON report
 - `2df0b3e` 2026-02-06 - feat(eval): add backend evaluation harness and JSON report
@@ -71,7 +58,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `54914bb` 2026-02-06 - chore(planner): refresh bootstrap snapshot
 - `c4b8271` 2026-02-06 - chore(planner): add planner skill and bootstrap state cache
 - `be3d5c9` 2026-02-06 - fix(api): honor explicit compare lap query params
-- `995028b` 2026-02-06 - fix(api): keep import run-meta lookup on open connection
 
 ## Requirement Gap Snapshot
 ### Active Gaps

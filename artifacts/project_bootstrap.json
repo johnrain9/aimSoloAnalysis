@@ -1,35 +1,27 @@
 {
-  "generated_at": "2026-02-06T21:49:36-07:00",
+  "generated_at": "2026-02-06T21:51:00-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
     "branch": "master",
-    "head": "395d812",
+    "head": "a1f4445",
     "dirty": true,
     "status": [
-      " M REQUIREMENTS_BASELINE.md",
-      " M TASKS.md",
-      " M analytics/trackside/__pycache__/pipeline.cpython-310.pyc",
-      " M analytics/trackside/__pycache__/rank.cpython-310.pyc",
-      " M analytics/trackside/__pycache__/synthesis.cpython-310.pyc",
+      " M aimsolo.db",
       " M api/__pycache__/app.cpython-310.pyc",
       " M api/__pycache__/units.cpython-310.pyc",
-      " M ingest/csv/__pycache__/save.cpython-310.pyc",
       " M storage/__pycache__/db.cpython-310.pyc",
-      "?? analytics/__pycache__/metrics_writer.cpython-310.pyc",
-      "?? artifacts/eval_backend_report.json",
-      "?? artifacts/frontend_eval_report.json",
       "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_eval_backend.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_eval_frontend.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_metrics_persistence_ingestion.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_trackside_insight_contract.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc",
-      "?? tools/__pycache__/"
+      "?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc"
     ]
   },
   "recent_commits": [
+    {
+      "hash": "a1f4445",
+      "date": "2026-02-06",
+      "subject": "chore(planner): ingest handoffs and refresh baseline"
+    },
     {
       "hash": "395d812",
       "date": "2026-02-06",
@@ -84,14 +76,17 @@
       "hash": "be3d5c9",
       "date": "2026-02-06",
       "subject": "fix(api): honor explicit compare lap query params"
-    },
-    {
-      "hash": "995028b",
-      "date": "2026-02-06",
-      "subject": "fix(api): keep import run-meta lookup on open connection"
     }
   ],
   "recent_files": [
+    {
+      "path": "aimsolo.db",
+      "last_write": "2026-02-06 21:50:39"
+    },
+    {
+      "path": "PROJECT_BOOTSTRAP.md",
+      "last_write": "2026-02-06 21:49:36"
+    },
     {
       "path": "REQUIREMENTS_BASELINE.md",
       "last_write": "2026-02-06 21:49:24"
@@ -101,12 +96,8 @@
       "last_write": "2026-02-06 21:49:31"
     },
     {
-      "path": "artifacts\\eval_backend_report.json",
-      "last_write": "2026-02-06 21:48:39"
-    },
-    {
-      "path": "artifacts\\frontend_eval_report.json",
-      "last_write": "2026-02-06 21:48:09"
+      "path": "artifacts\\project_bootstrap.json",
+      "last_write": "2026-02-06 21:49:36"
     },
     {
       "path": "analytics\\trackside\\pipeline.py",
@@ -153,16 +144,8 @@
       "last_write": "2026-02-06 21:47:53"
     },
     {
-      "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-06 21:43:18"
-    },
-    {
       "path": "TASK_PROMPTS_WAVE2.md",
       "last_write": "2026-02-06 21:43:12"
-    },
-    {
-      "path": "artifacts\\project_bootstrap.json",
-      "last_write": "2026-02-06 21:43:18"
     },
     {
       "path": "api\\units.py",
