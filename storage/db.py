@@ -56,11 +56,13 @@ def upsert_track(
         ON CONFLICT(name, direction) DO UPDATE SET
           location_text = COALESCE(excluded.location_text, tracks.location_text),
           length_m = COALESCE(excluded.length_m, tracks.length_m)
+        RETURNING track_id
         """,
         (name, direction, location_text, length_m),
     )
-    if cur.lastrowid:
-        return int(cur.lastrowid)
+    row = cur.fetchone()
+    if row:
+        return int(row["track_id"])
     row = conn.execute(
         "SELECT track_id FROM tracks WHERE name = ? AND direction = ?",
         (name, direction),
@@ -168,11 +170,13 @@ def upsert_run(
           rider_id = excluded.rider_id,
           bike_id = excluded.bike_id,
           comment = excluded.comment
+        RETURNING run_id
         """,
         (session_id, rider_id, bike_id, run_index, comment),
     )
-    if cur.lastrowid:
-        return int(cur.lastrowid)
+    row = cur.fetchone()
+    if row:
+        return int(row["run_id"])
     row = conn.execute(
         "SELECT run_id FROM runs WHERE session_id = ? AND run_index = ?",
         (session_id, run_index),
@@ -198,11 +202,13 @@ def upsert_lap(
           start_time_s = excluded.start_time_s,
           end_time_s = excluded.end_time_s,
           duration_s = excluded.duration_s
+        RETURNING lap_id
         """,
         (run_id, lap_index, start_time_s, end_time_s, duration_s),
     )
-    if cur.lastrowid:
-        return int(cur.lastrowid)
+    row = cur.fetchone()
+    if row:
+        return int(row["lap_id"])
     row = conn.execute(
         "SELECT lap_id FROM laps WHERE run_id = ? AND lap_index = ?",
         (run_id, lap_index),
@@ -226,11 +232,13 @@ def upsert_channel(
         VALUES (?, ?, ?, ?, ?)
         ON CONFLICT(run_id, name, unit, source_name) DO UPDATE SET
           norm_unit = COALESCE(excluded.norm_unit, channels.norm_unit)
+        RETURNING channel_id
         """,
         (run_id, name, unit, source_name, norm_unit),
     )
-    if cur.lastrowid:
-        return int(cur.lastrowid)
+    row = cur.fetchone()
+    if row:
+        return int(row["channel_id"])
     row = conn.execute(
         """
         SELECT channel_id FROM channels
