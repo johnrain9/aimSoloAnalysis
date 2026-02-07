@@ -1,23 +1,60 @@
 {
-  "generated_at": "2026-02-06T21:43:18-07:00",
+  "generated_at": "2026-02-06T21:49:36-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
     "branch": "master",
-    "head": "a7da7c0",
+    "head": "395d812",
     "dirty": true,
     "status": [
-      " M aimsolo.db",
+      " M REQUIREMENTS_BASELINE.md",
+      " M TASKS.md",
+      " M analytics/trackside/__pycache__/pipeline.cpython-310.pyc",
+      " M analytics/trackside/__pycache__/rank.cpython-310.pyc",
+      " M analytics/trackside/__pycache__/synthesis.cpython-310.pyc",
       " M api/__pycache__/app.cpython-310.pyc",
       " M api/__pycache__/units.cpython-310.pyc",
+      " M ingest/csv/__pycache__/save.cpython-310.pyc",
       " M storage/__pycache__/db.cpython-310.pyc",
-      "?? TASK_PROMPTS_WAVE2.md",
+      "?? analytics/__pycache__/metrics_writer.cpython-310.pyc",
+      "?? artifacts/eval_backend_report.json",
+      "?? artifacts/frontend_eval_report.json",
       "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc"
+      "?? tests/__pycache__/test_eval_backend.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_eval_frontend.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_metrics_persistence_ingestion.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_trackside_insight_contract.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc",
+      "?? tools/__pycache__/"
     ]
   },
   "recent_commits": [
+    {
+      "hash": "395d812",
+      "date": "2026-02-06",
+      "subject": "feat(trackside): enforce p0 next-session insight contract"
+    },
+    {
+      "hash": "f1fa416",
+      "date": "2026-02-06",
+      "subject": "feat(eval): add frontend flow harness and JSON report"
+    },
+    {
+      "hash": "2df0b3e",
+      "date": "2026-02-06",
+      "subject": "feat(eval): add backend evaluation harness and JSON report"
+    },
+    {
+      "hash": "6f62753",
+      "date": "2026-02-06",
+      "subject": "feat(analytics): persist derived metrics in ingestion path"
+    },
+    {
+      "hash": "f650d9e",
+      "date": "2026-02-06",
+      "subject": "chore(planner): add wave-2 prompt pack and refresh bootstrap"
+    },
     {
       "hash": "a7da7c0",
       "date": "2026-02-06",
@@ -52,61 +89,80 @@
       "hash": "995028b",
       "date": "2026-02-06",
       "subject": "fix(api): keep import run-meta lookup on open connection"
-    },
-    {
-      "hash": "8a8ee59",
-      "date": "2026-02-06",
-      "subject": "Fix SQLite upsert helpers to return correct IDs on conflicts"
-    },
-    {
-      "hash": "438ad5c",
-      "date": "2026-02-06",
-      "subject": "chore(planner): add fixed handoff schema for scalable agent intake"
-    },
-    {
-      "hash": "765609b",
-      "date": "2026-02-06",
-      "subject": "chore(planner): assign branch/workdir in delegation template and ignore worktrees"
-    },
-    {
-      "hash": "f006526",
-      "date": "2026-02-06",
-      "subject": "chore(planner): enforce per-task git commit discipline in prompt template"
-    },
-    {
-      "hash": "9855aac",
-      "date": "2026-02-06",
-      "subject": "Add planner prompt template and requirements baseline for P0"
     }
   ],
   "recent_files": [
     {
-      "path": "aimsolo.db",
-      "last_write": "2026-02-06 20:06:04"
+      "path": "REQUIREMENTS_BASELINE.md",
+      "last_write": "2026-02-06 21:49:24"
+    },
+    {
+      "path": "TASKS.md",
+      "last_write": "2026-02-06 21:49:31"
+    },
+    {
+      "path": "artifacts\\eval_backend_report.json",
+      "last_write": "2026-02-06 21:48:39"
+    },
+    {
+      "path": "artifacts\\frontend_eval_report.json",
+      "last_write": "2026-02-06 21:48:09"
+    },
+    {
+      "path": "analytics\\trackside\\pipeline.py",
+      "last_write": "2026-02-06 21:48:03"
+    },
+    {
+      "path": "analytics\\trackside\\rank.py",
+      "last_write": "2026-02-06 21:48:03"
+    },
+    {
+      "path": "analytics\\trackside\\synthesis.py",
+      "last_write": "2026-02-06 21:48:03"
+    },
+    {
+      "path": "api\\app.py",
+      "last_write": "2026-02-06 21:48:03"
+    },
+    {
+      "path": "tests\\test_trackside_insight_contract.py",
+      "last_write": "2026-02-06 21:48:03"
+    },
+    {
+      "path": "tests\\test_eval_frontend.py",
+      "last_write": "2026-02-06 21:47:59"
+    },
+    {
+      "path": "tools\\eval_frontend.py",
+      "last_write": "2026-02-06 21:47:59"
+    },
+    {
+      "path": "tests\\test_eval_backend.py",
+      "last_write": "2026-02-06 21:47:56"
+    },
+    {
+      "path": "tools\\eval_backend.py",
+      "last_write": "2026-02-06 21:47:56"
+    },
+    {
+      "path": "ingest\\csv\\save.py",
+      "last_write": "2026-02-06 21:47:53"
+    },
+    {
+      "path": "tests\\test_metrics_persistence_ingestion.py",
+      "last_write": "2026-02-06 21:47:53"
+    },
+    {
+      "path": "PROJECT_BOOTSTRAP.md",
+      "last_write": "2026-02-06 21:43:18"
     },
     {
       "path": "TASK_PROMPTS_WAVE2.md",
       "last_write": "2026-02-06 21:43:12"
     },
     {
-      "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-06 21:39:26"
-    },
-    {
-      "path": "REQUIREMENTS_BASELINE.md",
-      "last_write": "2026-02-06 21:39:22"
-    },
-    {
-      "path": "TASKS.md",
-      "last_write": "2026-02-06 21:38:56"
-    },
-    {
       "path": "artifacts\\project_bootstrap.json",
-      "last_write": "2026-02-06 21:39:26"
-    },
-    {
-      "path": "api\\app.py",
-      "last_write": "2026-02-06 21:37:36"
+      "last_write": "2026-02-06 21:43:18"
     },
     {
       "path": "api\\units.py",
@@ -135,46 +191,27 @@
     {
       "path": "tests\\test_compare_endpoint.py",
       "last_write": "2026-02-06 20:55:25"
-    },
-    {
-      "path": "tests\\test_api_import.py",
-      "last_write": "2026-02-06 20:54:44"
-    },
-    {
-      "path": "storage\\db.py",
-      "last_write": "2026-02-06 20:53:08"
-    },
-    {
-      "path": "tests\\test_db_upsert_ids.py",
-      "last_write": "2026-02-06 20:53:08"
-    },
-    {
-      "path": "PLANNER_PROMPT_TEMPLATE.md",
-      "last_write": "2026-02-06 20:51:10"
-    },
-    {
-      "path": ".gitignore",
-      "last_write": "2026-02-06 20:46:53"
     }
   ],
   "likely_closed_gaps": [],
   "active_gaps": [
-    "GAP-005 (Medium): Derived metrics writer exists but is not integrated into pipeline persistence path.",
     "GAP-006 (Low): Channel blob persistence remains stubbed.",
-    "GAP-007 (High): No unified backend+frontend evaluation harness with a single scorecard and release gating.",
-    "GAP-008 (Medium): No formal human-in-the-loop qualitative review loop for coaching quality."
+    "GAP-007 (High): Backend/frontend harnesses exist, but no unified scorecard + release-gating flow yet.",
+    "GAP-008 (Medium): No formal human-in-the-loop qualitative review loop for coaching quality.",
+    "GAP-009 (Medium): Backend baseline governance unresolved for known drift case (`HPR_Full_09292024-21`)."
   ],
   "open_task_items": [
     "[in-progress] XRK R&D notes (PROGRESS_AIMSOLO_XRK.txt) - continue in parallel",
     "[todo] Store raw arrays (compressed blobs) for full channel fidelity",
-    "[todo] Persist derived metrics for trackside queries (use metrics_writer.py)",
     "[todo] Add lean-angle proxy (from lateral accel + GPS radius) with quality gating",
-    "[todo] Add synthesis layer to reconcile conflicting insights (phase inference + suppression + actionable templates)",
     "[todo] Add light brake/throttle detection (turn/lean dependent) to synthesis",
     "[todo] Decode hGPS 56-byte record format",
     "[todo] Validate CRC16 trailer and timebase mapping",
     "[todo] Map hCHS fields to data types + sample rates",
-    "[todo] Ingestion time benchmark"
+    "[todo] Ingestion time benchmark",
+    "[todo] Unified scorecard + release gating workflow combining backend/frontend checks",
+    "[todo] Product-behavior assertion suite + golden scenario drift checks",
+    "[todo] Human coach review workflow integrated into evaluation status"
   ],
   "planner_entrypoints": [
     "PROJECT_BOOTSTRAP.md",

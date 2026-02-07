@@ -1,6 +1,6 @@
 # Tasks (Aim Solo Analysis)
 
-Date: 2026-02-05
+Date: 2026-02-07
 Status key: [done] [in-progress] [todo]
 
 ## Docs & Planning
@@ -38,9 +38,9 @@ Status key: [done] [in-progress] [todo]
 - [done] Derived metrics tables + analytics_version
 - [done] Build segment metric extraction (entry/apex/exit speeds, brake point proxy, throttle proxy, line variance)
 - [done] Compute per-lap segment metrics + deltas (wire deltas.py + segments.py + reference.py)
-- [todo] Persist derived metrics for trackside queries (use metrics_writer.py)
+- [done] Persist derived metrics for trackside queries (use metrics_writer.py)
 - [todo] Add lean-angle proxy (from lateral accel + GPS radius) with quality gating
-- [todo] Add synthesis layer to reconcile conflicting insights (phase inference + suppression + actionable templates)
+- [done] Add synthesis layer to reconcile conflicting insights (phase inference + suppression + actionable templates)
 - [todo] Add light brake/throttle detection (turn/lean dependent) to synthesis
 - [done] Convert insight outputs to imperial units (mph, ft) for UI/evidence
 
@@ -69,3 +69,10 @@ Status key: [done] [in-progress] [todo]
 - [done] CSV ingestion tests
 - [done] Insight rule sanity tests
 - [todo] Ingestion time benchmark
+
+## Evaluation Harness
+- [done] Backend eval harness with baseline/latency/failure JSON report (`tools/eval_backend.py`)
+- [done] Frontend eval harness with flow/semantics JSON report (`tools/eval_frontend.py`)
+- [todo] Unified scorecard + release gating workflow combining backend/frontend checks
+- [todo] Product-behavior assertion suite + golden scenario drift checks
+- [todo] Human coach review workflow integrated into evaluation status
