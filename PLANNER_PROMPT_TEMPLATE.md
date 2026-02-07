@@ -47,6 +47,15 @@ Use this template when delegating implementation work to another AI.
 - Report exact commands run and pass/fail summary.
 - If any test cannot run, state why and what remains unverified.
 
+## 6.1 Git Discipline (Required)
+- Commit each completed feature or bug fix as a separate commit.
+- Do not mix unrelated changes in one commit.
+- Commit message format:
+  - `feat(<area>): <summary>` for features
+  - `fix(<area>): <summary>` for bug fixes
+- Include requirement IDs in commit body (e.g., `Refs: RQ-API-004, RQ-UI-001`).
+- If runtime artifacts are modified during testing (db, caches), do not include them unless explicitly requested.
+
 ## 7) Deliverables
 - Code changes implementing scope.
 - Tests proving behavior.
@@ -66,6 +75,7 @@ Use this template when delegating implementation work to another AI.
 - [ ] Tests added/updated and run.
 - [ ] Diff is focused and reviewable.
 - [ ] Handoff response format fully completed.
+- [ ] One focused commit created for this task (or explicit reason if no commit requested).
 
 ## 10) Task Payload (Fill Before Sending)
 - Objective: `{{objective}}`
@@ -77,4 +87,3 @@ Use this template when delegating implementation work to another AI.
 - Suggested test commands:
   - `{{test_cmd_1}}`
   - `{{test_cmd_2}}`
-
