@@ -1,30 +1,51 @@
 # Project Bootstrap Snapshot
 
-Generated: 2026-02-06T21:51:00-07:00
+Generated: 2026-02-06T22:12:14-07:00
 Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_bootstrap.ps1`.
 
 ## Repo State
 - Root: `C:\Users\Paul\ai\aimSoloAnalysis`
 - Branch: `master`
-- HEAD: `a1f4445`
+- HEAD: `b6c0579`
 - Dirty: `True`
 
 ### Working Tree Changes
+- ` M PROJECT_BOOTSTRAP.md`
+- ` M TASKS.md`
 - ` M aimsolo.db`
+- ` M analytics/trackside/__pycache__/pipeline.cpython-310.pyc`
+- ` M analytics/trackside/__pycache__/rank.cpython-310.pyc`
+- ` M analytics/trackside/__pycache__/synthesis.cpython-310.pyc`
 - ` M api/__pycache__/app.cpython-310.pyc`
 - ` M api/__pycache__/units.cpython-310.pyc`
+- ` M artifacts/project_bootstrap.json`
+- ` M ingest/csv/__pycache__/save.cpython-310.pyc`
 - ` M storage/__pycache__/db.cpython-310.pyc`
+- `?? .claude/`
+- `?? TASK_PROMPTS_TONIGHT_TOP1.md`
+- `?? analytics/__pycache__/metrics_writer.cpython-310.pyc`
+- `?? artifacts/eval_backend_report.json`
+- `?? artifacts/frontend_eval_report.json`
 - `?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc`
+- `?? tests/__pycache__/test_eval_backend.cpython-310-pytest-9.0.2.pyc`
+- `?? tests/__pycache__/test_eval_frontend.cpython-310-pytest-9.0.2.pyc`
+- `?? tests/__pycache__/test_metrics_persistence_ingestion.cpython-310-pytest-9.0.2.pyc`
+- `?? tests/__pycache__/test_trackside_insight_contract.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc`
+- `?? tools/__pycache__/`
 
 ## Recently Modified Files
+- `PROJECT_BOOTSTRAP.md` (2026-02-06 22:10:12)
+- `TASKS.md` (2026-02-06 22:12:09)
 - `aimsolo.db` (2026-02-06 21:50:39)
-- `PROJECT_BOOTSTRAP.md` (2026-02-06 21:49:36)
+- `artifacts\project_bootstrap.json` (2026-02-06 22:10:12)
+- `.claude\` (2026-02-06 22:10:48)
+- `TASK_PROMPTS_TONIGHT_TOP1.md` (2026-02-06 22:12:03)
+- `artifacts\eval_backend_report.json` (2026-02-06 21:53:00)
+- `artifacts\frontend_eval_report.json` (2026-02-06 21:52:43)
 - `REQUIREMENTS_BASELINE.md` (2026-02-06 21:49:24)
-- `TASKS.md` (2026-02-06 21:49:31)
-- `artifacts\project_bootstrap.json` (2026-02-06 21:49:36)
 - `analytics\trackside\pipeline.py` (2026-02-06 21:48:03)
 - `analytics\trackside\rank.py` (2026-02-06 21:48:03)
 - `analytics\trackside\synthesis.py` (2026-02-06 21:48:03)
@@ -41,11 +62,9 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `tests\test_units_contract.py` (2026-02-06 21:37:36)
 - `PLANNER_BOOTSTRAP.md` (2026-02-06 21:36:08)
 - `tools\update_bootstrap.ps1` (2026-02-06 21:36:03)
-- `AGENTS.md` (2026-02-06 21:31:20)
-- `skills\planner-orchestrator\SKILL.md` (2026-02-06 21:30:13)
-- `tests\test_compare_endpoint.py` (2026-02-06 20:55:25)
 
 ## Recent Commits
+- `b6c0579` 2026-02-06 - chore(planner): refresh bootstrap after handoff integration
 - `a1f4445` 2026-02-06 - chore(planner): ingest handoffs and refresh baseline
 - `395d812` 2026-02-06 - feat(trackside): enforce p0 next-session insight contract
 - `f1fa416` 2026-02-06 - feat(eval): add frontend flow harness and JSON report
@@ -57,7 +76,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `0f37b66` 2026-02-06 - chore(planner): optimize bootstrap recency and document cost model
 - `54914bb` 2026-02-06 - chore(planner): refresh bootstrap snapshot
 - `c4b8271` 2026-02-06 - chore(planner): add planner skill and bootstrap state cache
-- `be3d5c9` 2026-02-06 - fix(api): honor explicit compare lap query params
 
 ## Requirement Gap Snapshot
 ### Active Gaps
@@ -78,6 +96,10 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - [todo] Unified scorecard + release gating workflow combining backend/frontend checks
 - [todo] Product-behavior assertion suite + golden scenario drift checks
 - [todo] Human coach review workflow integrated into evaluation status
+- [todo] TASK-P0-03: Top-1 quality gates + gain root-cause trace (keep rec 2/3 behavior unchanged)
+- [todo] TASK-EVAL-09: Batch top-1 trace runner over CSV corpus (`artifacts/top1_session_traces.jsonl`)
+- [todo] TASK-EVAL-10: Aggregate top-1 scorecard with hard/soft metrics + drift support (`artifacts/eval_top1_quality_report.json`)
+- [todo] TASK-EVAL-11: Deterministic coach review packet generator (`artifacts/top1_review_packet.md/.csv`)
 
 ## Planner Entrypoints
 - `PROJECT_BOOTSTRAP.md`

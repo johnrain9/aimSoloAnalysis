@@ -1,22 +1,44 @@
 {
-  "generated_at": "2026-02-06T21:51:00-07:00",
+  "generated_at": "2026-02-06T22:12:14-07:00",
   "repo": {
     "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
     "branch": "master",
-    "head": "a1f4445",
+    "head": "b6c0579",
     "dirty": true,
     "status": [
+      " M PROJECT_BOOTSTRAP.md",
+      " M TASKS.md",
       " M aimsolo.db",
+      " M analytics/trackside/__pycache__/pipeline.cpython-310.pyc",
+      " M analytics/trackside/__pycache__/rank.cpython-310.pyc",
+      " M analytics/trackside/__pycache__/synthesis.cpython-310.pyc",
       " M api/__pycache__/app.cpython-310.pyc",
       " M api/__pycache__/units.cpython-310.pyc",
+      " M artifacts/project_bootstrap.json",
+      " M ingest/csv/__pycache__/save.cpython-310.pyc",
       " M storage/__pycache__/db.cpython-310.pyc",
+      "?? .claude/",
+      "?? TASK_PROMPTS_TONIGHT_TOP1.md",
+      "?? analytics/__pycache__/metrics_writer.cpython-310.pyc",
+      "?? artifacts/eval_backend_report.json",
+      "?? artifacts/frontend_eval_report.json",
       "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
       "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc"
+      "?? tests/__pycache__/test_eval_backend.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_eval_frontend.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_metrics_persistence_ingestion.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_trackside_insight_contract.cpython-310-pytest-9.0.2.pyc",
+      "?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc",
+      "?? tools/__pycache__/"
     ]
   },
   "recent_commits": [
+    {
+      "hash": "b6c0579",
+      "date": "2026-02-06",
+      "subject": "chore(planner): refresh bootstrap after handoff integration"
+    },
     {
       "hash": "a1f4445",
       "date": "2026-02-06",
@@ -71,33 +93,44 @@
       "hash": "c4b8271",
       "date": "2026-02-06",
       "subject": "chore(planner): add planner skill and bootstrap state cache"
-    },
-    {
-      "hash": "be3d5c9",
-      "date": "2026-02-06",
-      "subject": "fix(api): honor explicit compare lap query params"
     }
   ],
   "recent_files": [
+    {
+      "path": "PROJECT_BOOTSTRAP.md",
+      "last_write": "2026-02-06 22:10:12"
+    },
+    {
+      "path": "TASKS.md",
+      "last_write": "2026-02-06 22:12:09"
+    },
     {
       "path": "aimsolo.db",
       "last_write": "2026-02-06 21:50:39"
     },
     {
-      "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-06 21:49:36"
+      "path": "artifacts\\project_bootstrap.json",
+      "last_write": "2026-02-06 22:10:12"
+    },
+    {
+      "path": ".claude\\",
+      "last_write": "2026-02-06 22:10:48"
+    },
+    {
+      "path": "TASK_PROMPTS_TONIGHT_TOP1.md",
+      "last_write": "2026-02-06 22:12:03"
+    },
+    {
+      "path": "artifacts\\eval_backend_report.json",
+      "last_write": "2026-02-06 21:53:00"
+    },
+    {
+      "path": "artifacts\\frontend_eval_report.json",
+      "last_write": "2026-02-06 21:52:43"
     },
     {
       "path": "REQUIREMENTS_BASELINE.md",
       "last_write": "2026-02-06 21:49:24"
-    },
-    {
-      "path": "TASKS.md",
-      "last_write": "2026-02-06 21:49:31"
-    },
-    {
-      "path": "artifacts\\project_bootstrap.json",
-      "last_write": "2026-02-06 21:49:36"
     },
     {
       "path": "analytics\\trackside\\pipeline.py",
@@ -162,18 +195,6 @@
     {
       "path": "tools\\update_bootstrap.ps1",
       "last_write": "2026-02-06 21:36:03"
-    },
-    {
-      "path": "AGENTS.md",
-      "last_write": "2026-02-06 21:31:20"
-    },
-    {
-      "path": "skills\\planner-orchestrator\\SKILL.md",
-      "last_write": "2026-02-06 21:30:13"
-    },
-    {
-      "path": "tests\\test_compare_endpoint.py",
-      "last_write": "2026-02-06 20:55:25"
     }
   ],
   "likely_closed_gaps": [],
@@ -194,7 +215,11 @@
     "[todo] Ingestion time benchmark",
     "[todo] Unified scorecard + release gating workflow combining backend/frontend checks",
     "[todo] Product-behavior assertion suite + golden scenario drift checks",
-    "[todo] Human coach review workflow integrated into evaluation status"
+    "[todo] Human coach review workflow integrated into evaluation status",
+    "[todo] TASK-P0-03: Top-1 quality gates + gain root-cause trace (keep rec 2/3 behavior unchanged)",
+    "[todo] TASK-EVAL-09: Batch top-1 trace runner over CSV corpus (`artifacts/top1_session_traces.jsonl`)",
+    "[todo] TASK-EVAL-10: Aggregate top-1 scorecard with hard/soft metrics + drift support (`artifacts/eval_top1_quality_report.json`)",
+    "[todo] TASK-EVAL-11: Deterministic coach review packet generator (`artifacts/top1_review_packet.md/.csv`)"
   ],
   "planner_entrypoints": [
     "PROJECT_BOOTSTRAP.md",

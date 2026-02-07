@@ -76,3 +76,9 @@ Status key: [done] [in-progress] [todo]
 - [todo] Unified scorecard + release gating workflow combining backend/frontend checks
 - [todo] Product-behavior assertion suite + golden scenario drift checks
 - [todo] Human coach review workflow integrated into evaluation status
+
+## Tonight Focus: Top-1 Recommendation Quality
+- [todo] TASK-P0-03: Top-1 quality gates + gain root-cause trace (keep rec 2/3 behavior unchanged)
+- [todo] TASK-EVAL-09: Batch top-1 trace runner over CSV corpus (`artifacts/top1_session_traces.jsonl`)
+- [todo] TASK-EVAL-10: Aggregate top-1 scorecard with hard/soft metrics + drift support (`artifacts/eval_top1_quality_report.json`)
+- [todo] TASK-EVAL-11: Deterministic coach review packet generator (`artifacts/top1_review_packet.md/.csv`)
