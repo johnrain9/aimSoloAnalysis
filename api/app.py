@@ -380,6 +380,10 @@ def _pick_reference_and_target(
     return reference, target
 
 
+def _find_lap_by_index(laps: list[Dict[str, Any]], lap_index: int) -> Optional[Dict[str, Any]]:
+    return next((lap for lap in laps if lap["lap_index"] == lap_index), None)
+
+
 def _filter_valid_lap_rows(
     run_data: RunData,
     laps: list[Dict[str, Any]],
@@ -718,7 +722,11 @@ def get_insights(session_id: str) -> Dict[str, Any]:
 
 
 @app.get("/compare/{session_id}")
-def get_compare(session_id: str) -> Dict[str, Any]:
+def get_compare(
+    session_id: str,
+    reference_lap: Optional[int] = Query(default=None),
+    target_lap: Optional[int] = Query(default=None),
+) -> Dict[str, Any]:
     session_int = _parse_session_id(session_id)
     if session_int is None or not DB_PATH.exists():
         return _build_error(session_id)
@@ -751,6 +759,19 @@ def get_compare(session_id: str) -> Dict[str, Any]:
     )
     if reference is None or target is None:
         return _build_not_ready(session_id, meta, "insufficient laps for reference/target selection")
+
+    if reference_lap is not None:
+        selected_reference = _find_lap_by_index(laps, reference_lap)
+        if selected_reference is None:
+            meta.update(run_meta)
+            return _build_not_ready(session_id, meta, f"reference_lap {reference_lap} is not available")
+        reference = selected_reference
+    if target_lap is not None:
+        selected_target = _find_lap_by_index(laps, target_lap)
+        if selected_target is None:
+            meta.update(run_meta)
+            return _build_not_ready(session_id, meta, f"target_lap {target_lap} is not available")
+        target = selected_target
 
     delta_by_segment: list[Dict[str, Any]] = []
     try:
