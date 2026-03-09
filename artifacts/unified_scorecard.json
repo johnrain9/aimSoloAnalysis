@@ -1,0 +1,95 @@
+{
+  "hard_gates": [
+    {
+      "evidence": {
+        "check": "baseline_comparison.status",
+        "sub_report": "backend"
+      },
+      "gate_id": "Gate-A-DataIntegrity",
+      "reason": "Data Integrity check not ready",
+      "status": "not_ready"
+    },
+    {
+      "evidence": {
+        "check": "entries[].status",
+        "sub_report": "backend"
+      },
+      "gate_id": "Gate-B-APIUIContract",
+      "reason": "API/UI Contract check not ready",
+      "status": "not_ready"
+    },
+    {
+      "evidence": {
+        "check": "unit_consistency_checks",
+        "sub_report": "backend"
+      },
+      "gate_id": "Gate-C-UnitConsistency",
+      "reason": "Unit Consistency check not ready",
+      "status": "not_ready"
+    },
+    {
+      "evidence": {
+        "check": "overall_status",
+        "sub_report": "backend"
+      },
+      "gate_id": "Gate-D-TestSuite",
+      "reason": "Test Suite check not ready",
+      "status": "not_ready"
+    },
+    {
+      "evidence": {
+        "check": "hard_gates.status",
+        "sub_report": "top1"
+      },
+      "gate_id": "Gate-E-P0Behavior",
+      "reason": "P0 Behavior check not ready",
+      "status": "not_ready"
+    },
+    {
+      "evidence": {
+        "check": "summary.passed_checks",
+        "sub_report": "frontend"
+      },
+      "gate_id": "Gate-F-EvalHarness",
+      "reason": "Eval Harness check not ready (frontend and backend)",
+      "status": "not_ready"
+    },
+    {
+      "evidence": {
+        "check": "hard_gates.status",
+        "human_review_status": "pending_review",
+        "sub_report": "top1"
+      },
+      "gate_id": "Gate-G-QualityModel",
+      "reason": "Quality Model check not ready (human review: pending_review)",
+      "status": "not_ready"
+    }
+  ],
+  "overall_status": "not_ready",
+  "scorecard_version": "1.0",
+  "soft_metrics": [],
+  "sub_reports": {
+    "backend": {
+      "path": "artifacts/eval_backend_report.json",
+      "status": "not_ready"
+    },
+    "frontend": {
+      "path": "artifacts/frontend_eval_report.json",
+      "status": "not_ready"
+    },
+    "human_review": {
+      "key_metrics": {
+        "approved": 0,
+        "rejected": 0,
+        "reviewed_cases": 0
+      },
+      "path": "artifacts/top1_review_packet.md",
+      "status": "pending_review"
+    },
+    "top1": {
+      "path": "artifacts/top1_aggregated_report.json",
+      "status": "not_ready"
+    }
+  },
+  "timestamp": "2026-02-07T20:42:24.935448Z"
+}

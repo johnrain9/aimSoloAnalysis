@@ -1,0 +1,51 @@
+  You are generating implementation tasks for a motorcycle coaching analysis system. The system is adding three new coaching modes to replace an older analytics
+  pipeline.
+
+  Read these files in order:
+  1. REQUIREMENTS_MODES.md — the requirements you are generating tasks for
+  2. docs/simplified_coaching_spec.md — the detailed spec for what each mode does and how rules work
+  3. docs/refactor_handoff_module_contracts.md — current module boundaries (so you know what exists)
+  4. TASKS.md — existing task format and style to match
+
+  Then generate a task list following these rules:
+
+  Task sizing: Each task should be one focused PR — implementable and testable independently. A task that takes more than ~2 hours of coding is too big; split it.
+
+  Task format: Match the style in TASKS.md. Each task needs:
+  - A task ID (use TASK-MODE-NN numbering)
+  - A clear title
+  - Which requirements it covers (cite RQ-* IDs)
+  - Acceptance criteria (what "done" looks like, including tests)
+  - Dependencies on other tasks (if any)
+  - Which existing code it reuses vs. what's new
+  - A category label: one of `Truth`, `Implementation`, or `Validation`
+    - **Truth**: defines contracts, data structures, config schemas, or spec decisions that other tasks depend on (e.g., Finding dataclass, threshold config
+  schema, mode output shapes)
+    - **Implementation**: writes the functional code that produces results (e.g., a rule function, a mode orchestrator, an API endpoint)
+    - **Validation**: tests, fixtures, and evaluation harnesses that verify correctness (e.g., per-rule test fixtures, mode integration tests, eval scripts)
+
+  And add this to the Task ordering section:
+
+  Within each layer, Truth tasks come first, then Implementation, then Validation.
+  Dependencies should flow: Truth → Implementation → Validation.
+
+  Task ordering: Arrange tasks so foundational work comes first. Suggested layering:
+  1. Shared infrastructure (data structures, config, session-max computation, in/out lap filtering)
+  2. Mode 1 (simplest, validates the data pipeline works)
+  3. Mode 2 (builds on same per-segment metrics)
+  4. Mode 3 rules (each rule or small group of rules can be its own task)
+  5. Mode 3 orchestration (apply all rules, sort, cap output)
+  6. API endpoints for new modes
+  7. UI rendering for new modes
+  8. Evaluation fixtures and tests per mode
+
+  Important constraints:
+  - The old analytics path (synthesis.py, signals.py, rank.py, baseline.py) stays untouched. New code goes in analytics/trackside/modes/.
+  - Ingestion and segmentation layers are reused, not rewritten.
+  - All detection thresholds must be in a config dict, not hardcoded.
+  - Each Mode 3 rule is a standalone function returning Finding | None.
+  - No reference lap or external baseline is needed for any mode.
+  - Available sensor data: GPS position, speed, acceleration/deceleration, lean angle, brake pressure. No throttle position sensor.
+
+  Output: A markdown task list ready to paste into a TASKS.md-style document. Group tasks by layer. Include a dependency graph summary at the end showing which
+  tasks block which.

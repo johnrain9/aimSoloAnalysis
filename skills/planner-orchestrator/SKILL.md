@@ -29,8 +29,14 @@ description: Consistent planning, delegation, requirement tracking, and integrat
    - Reasoning mode policy:
      - Use `gpt-codex5.3high` for ambiguous product-behavior logic, recommendation/risk/safety reasoning, or non-obvious root-cause work.
      - Use `gpt-codex5.3` (medium) for plumbing, schema/report wiring, deterministic harness/tooling, and straightforward API/UI contract updates.
-     - Default to medium when uncertain unless safety/behavior judgment is central to the task.
+   - Default to medium when uncertain unless safety/behavior judgment is central to the task.
    - Always assign branch + workdir.
+   - Require clean task isolation (clean branch/worktree, no unrelated local changes in scope).
+   - Include any required test environment preconditions explicitly in prompts (for this repo, default test command style should set `PYTHONPATH=.`).
+   - Always persist each finalized worker prompt to a timestamped file under `artifacts/prompts/` before sending it (for interruption recovery and audit trail).
+   - Include the task ID in the prompt filename (example: `artifacts/prompts/TASK-P0-09-prompt.md`).
+   - Default terminal output for delegation must be a copy-paste-ready `Planner-to-Worker Message` that references the saved prompt file.
+   - The `Planner-to-Worker Message` must explicitly include `Reasoning mode` and a one-line rationale.
    - Require one focused commit per task and the fixed `[TASK-HANDOFF-START]` schema.
 5. Intake Worker Results
    - Validate requirement coverage, tests, risks, and commit hash from worker handoff.
@@ -57,8 +63,15 @@ description: Consistent planning, delegation, requirement tracking, and integrat
   - requirement mapping
   - concrete worker prompts
   - integration order
+- For delegation responses in terminal, default to this concise `Planner-to-Worker Message` format:
+  - `Task: <TASK-ID>`
+  - `Prompt file: artifacts/prompts/<TASK-ID>-prompt.md`
+  - `Reasoning mode: <gpt-codex5.3|gpt-codex5.3high> — <one-line rationale>`
+  - `Execution rules:` (assigned branch/workdir only, minimal scope, one focused commit, required tests, exact handoff schema)
+  - Include explicit test env precondition when needed (for this repo: `PYTHONPATH=.`).
 - For each task prompt, enforce:
   - explicit `Reasoning mode` line directly above the prompt
+  - prompt is written to `artifacts/prompts/` before task handoff
   - minimal scope
   - no unrelated refactors
   - explicit test execution
