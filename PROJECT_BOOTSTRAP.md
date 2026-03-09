@@ -1,12 +1,12 @@
 # Project Bootstrap Snapshot
 
-Generated: 2026-02-07T13:50:24-07:00
+Generated: 2026-02-07T15:00:53-07:00
 Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_bootstrap.ps1`.
 
 ## Repo State
 - Root: `C:\Users\Paul\ai\aimSoloAnalysis`
-- Branch: `feature/scorecard-e2e-test`
-- HEAD: `5b1c8f5`
+- Branch: `feature/task-p0-12-evidence-plumbing`
+- HEAD: `9cd4e34`
 - Dirty: `True`
 
 ### Working Tree Changes
@@ -15,14 +15,22 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - ` M analytics/trackside/__pycache__/pipeline.cpython-310.pyc`
 - ` M analytics/trackside/__pycache__/rank.cpython-310.pyc`
 - ` M analytics/trackside/__pycache__/synthesis.cpython-310.pyc`
+- ` M analytics/trackside/pipeline.py`
+- ` M analytics/trackside/synthesis.py`
 - ` M api/__pycache__/app.cpython-310.pyc`
 - ` M api/__pycache__/units.cpython-310.pyc`
 - ` M artifacts/project_bootstrap.json`
 - ` M ingest/csv/__pycache__/save.cpython-310.pyc`
+- ` M skills/planner-orchestrator/SKILL.md`
 - ` M storage/__pycache__/db.cpython-310.pyc`
 - ` M tests/__pycache__/test_line_trends.cpython-310-pytest-9.0.2.pyc`
+- ` M tests/test_line_trends.py`
+- ` M tests/test_trackside_insight_contract.py`
+- `?? .idea/`
 - `?? analytics/__pycache__/metrics_writer.cpython-310.pyc`
 - `?? analytics/trackside/__pycache__/corner_identity.cpython-310.pyc`
+- `?? artifacts/frontend_eval_report.json`
+- `?? artifacts/prompts/`
 - `?? artifacts/unified_scorecard.json`
 - `?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc`
 - `?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc`
@@ -42,9 +50,17 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `?? tools/__pycache__/`
 
 ## Recently Modified Files
-- `PROJECT_BOOTSTRAP.md` (2026-02-07 13:49:29)
-- `TASKS.md` (2026-02-07 13:50:20)
-- `artifacts\project_bootstrap.json` (2026-02-07 13:49:29)
+- `PROJECT_BOOTSTRAP.md` (2026-02-07 14:58:50)
+- `TASKS.md` (2026-02-07 14:22:33)
+- `analytics\trackside\pipeline.py` (2026-02-07 14:59:47)
+- `analytics\trackside\synthesis.py` (2026-02-07 15:00:01)
+- `artifacts\project_bootstrap.json` (2026-02-07 14:58:50)
+- `skills\planner-orchestrator\SKILL.md` (2026-02-07 14:58:02)
+- `tests\test_line_trends.py` (2026-02-07 15:00:45)
+- `tests\test_trackside_insight_contract.py` (2026-02-07 15:00:36)
+- `.idea\` (2026-02-07 14:57:57)
+- `artifacts\frontend_eval_report.json` (2026-02-07 13:51:45)
+- `artifacts\prompts\` (2026-02-07 14:22:17)
 - `artifacts\unified_scorecard.json` (2026-02-07 13:42:24)
 - `docs\release_gate_workflow.md` (2026-02-07 13:46:58)
 - `tests\test_release_gate_workflow.py` (2026-02-07 13:47:21)
@@ -59,16 +75,9 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `ui\app.js` (2026-02-06 23:43:44)
 - `ui\index.html` (2026-02-06 23:43:44)
 - `ui\styles.css` (2026-02-06 23:43:44)
-- `analytics\trackside\pipeline.py` (2026-02-06 23:43:40)
-- `analytics\trackside\synthesis.py` (2026-02-06 23:43:40)
-- `tests\test_line_trends.py` (2026-02-06 23:43:40)
-- `tests\test_trackside_observable_protocols.py` (2026-02-06 23:42:49)
-- `analytics\trackside\corner_identity.py` (2026-02-06 23:42:20)
-- `api\app.py` (2026-02-06 23:42:42)
-- `tests\test_trackside_corner_identity.py` (2026-02-06 23:42:20)
-- `tests\test_trackside_insight_contract.py` (2026-02-06 23:42:20)
 
 ## Recent Commits
+- `9cd4e34` 2026-02-07 - chore(planner): reconcile TASK-SCORECARD-03 status and refresh bootstrap
 - `5b1c8f5` 2026-02-07 - test(eval): add end-to-end release gate workflow verification
 - `568eade` 2026-02-07 - feat(eval): implement unified scorecard builder per TA v1.0
 - `b1b2e69` 2026-02-07 - feat(eval): define unified scorecard contract TA v1.0
@@ -80,7 +89,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - `2b7b289` 2026-02-06 - chore(planner): mark task-eval-12 complete and refresh bootstrap
 - `2a4eb84` 2026-02-06 - fix(eval): align top1 artifact contracts for default chain
 - `6affae2` 2026-02-06 - chore(planner): add reasoning-mode guidance to prompts and skill
-- `4185a60` 2026-02-06 - chore(planner): integrate top1 handoffs and update requirement gaps
 
 ## Requirement Gap Snapshot
 ### Active Gaps
@@ -105,6 +113,12 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - [todo] Map hCHS fields to data types + sample rates
 - [todo] Ingestion time benchmark
 - [todo] Product-behavior assertion suite + golden scenario drift checks
+- [todo] TASK-P0-09: Upgrade coaching copy from consistency-only cues to explicit did-vs-should turn-in delta with causal rationale and concrete marker guidance (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-009, RQ-P0-010)
+- [todo] TASK-P0-10: Freeze top-insight did-vs-should payload contract (`did`, `should`, `because`, `success_check`) and null/fallback behavior (RQ-P0-007, RQ-P0-008, RQ-P0-010)
+- [todo] TASK-P0-11: Implement deterministic coaching copy policy for did-vs-should delta + causal rationale + measurable validation wording (ban vague-only consistency cues) (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-017)
+- [todo] TASK-P0-12: Ensure evidence plumbing always provides target/reference turn-in, rider average, and recent-lap turn-in history with graceful degradation (RQ-P0-007, RQ-P0-009, RQ-P0-010)
+- [todo] TASK-P0-13: Add golden behavior tests for did-vs-should coaching scenarios (off-target high variance, on-target high variance, missing marker mapping) (RQ-P0-007, RQ-P0-008, RQ-P0-011)
+- [todo] TASK-P0-14: Gate did-vs-should coaching quality in eval scorecard (presence of delta, rationale, measurable check, unit/corner consistency) (RQ-P0-007, RQ-P0-008, RQ-P0-024, RQ-EVAL-008)
 
 ## Planner Entrypoints
 - `PROJECT_BOOTSTRAP.md`

@@ -112,3 +112,42 @@ Status key: [done] [in-progress] [blocked] [todo]
 - [done] TASK-P0-06: Rider-observable success checks and change-type-specific experimental protocols (RQ-P0-017, RQ-P0-018, RQ-P0-029)
 - [done] TASK-P0-07: Make top-1 insight visually dominant in UI and evaluate explicitly (RQ-P0-025)
 - [done] TASK-P0-08: Session recurrence narration + late-session fatigue-aware weighting (RQ-P0-027, RQ-P0-028)
+- [todo] TASK-P0-09: Upgrade coaching copy from consistency-only cues to explicit did-vs-should turn-in delta with causal rationale and concrete marker guidance (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-009, RQ-P0-010)
+  - class: `I`
+  - depends_on: `TA v1.0`, `TASK-P0-04`, `TASK-P0-05`, `TASK-P0-03`
+  - ta_version_required: `TA v1.0`
+- [todo] TASK-P0-10: Freeze top-insight did-vs-should payload contract (`did`, `should`, `because`, `success_check`) and null/fallback behavior (RQ-P0-007, RQ-P0-008, RQ-P0-010)
+  - class: `T`
+  - depends_on: `TA v1.0`, `TASK-P0-09`
+  - ta_version_required: `TA v1.0`
+  - prompt: `artifacts/prompts/TASK-P0-10-prompt.md`
+  - acceptance: Contract doc/spec defines required vs optional fields, units, and missing-data semantics with examples.
+  - test: `pytest tests/test_trackside_insight_contract.py -v`
+- [todo] TASK-P0-11: Implement deterministic coaching copy policy for did-vs-should delta + causal rationale + measurable validation wording (ban vague-only consistency cues) (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-017)
+  - class: `I`
+  - depends_on: `TA v1.0`, `TASK-P0-10`
+  - ta_version_required: `TA v1.0`
+  - prompt: `artifacts/prompts/TASK-P0-11-prompt.md`
+  - acceptance: Synthesized top insight includes corner/phase specificity, numeric delta, causal "because", and next-session success check.
+  - test: `pytest tests/test_trackside_insight_contract.py tests/test_trackside_observable_protocols.py -v`
+- [todo] TASK-P0-12: Ensure evidence plumbing always provides target/reference turn-in, rider average, and recent-lap turn-in history with graceful degradation (RQ-P0-007, RQ-P0-009, RQ-P0-010)
+  - class: `I`
+  - depends_on: `TA v1.0`, `TASK-P0-10`
+  - ta_version_required: `TA v1.0`
+  - prompt: `artifacts/prompts/TASK-P0-12-prompt.md`
+  - acceptance: Pipeline emits complete evidence fields when available and deterministic fallback copy when partial data is missing.
+  - test: `pytest tests/test_line_trends.py tests/test_trackside_insight_contract.py -v`
+- [todo] TASK-P0-13: Add golden behavior tests for did-vs-should coaching scenarios (off-target high variance, on-target high variance, missing marker mapping) (RQ-P0-007, RQ-P0-008, RQ-P0-011)
+  - class: `V`
+  - depends_on: `TA v1.0`, `TASK-P0-11`, `TASK-P0-12`
+  - ta_version_required: `TA v1.0`
+  - prompt: `artifacts/prompts/TASK-P0-13-prompt.md`
+  - acceptance: Golden tests lock expected wording structure and evidence semantics for core scenario matrix.
+  - test: `pytest tests/test_trackside_insight_contract.py tests/test_line_trends.py -v`
+- [todo] TASK-P0-14: Gate did-vs-should coaching quality in eval scorecard (presence of delta, rationale, measurable check, unit/corner consistency) (RQ-P0-007, RQ-P0-008, RQ-P0-024, RQ-EVAL-008)
+  - class: `V`
+  - depends_on: `TA v1.0`, `TASK-P0-13`, `TASK-SCORECARD-02`
+  - ta_version_required: `TA v1.0`
+  - prompt: `artifacts/prompts/TASK-P0-14-prompt.md`
+  - acceptance: Eval harness/report emits explicit pass/fail checks for coaching content quality and surfaces failures in scorecard artifacts.
+  - test: `pytest tests/test_eval_top1_scorecard.py tests/test_eval_backend.py -v`

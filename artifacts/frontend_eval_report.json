@@ -1,0 +1,99 @@
+{
+  "checks": [
+    {
+      "check_id": "flow_wiring",
+      "details": "Import->summary->insights->compare route wiring is present.",
+      "duration_ms": 0.198,
+      "evidence": {
+        "has_bind_route_buttons": true,
+        "has_ensure_data_for_route": true,
+        "has_hashchange_handler": true,
+        "has_init_route_read": true,
+        "missing_route_buttons": [],
+        "missing_routes": [],
+        "missing_screens": [],
+        "routes_declared": [
+          "import",
+          "summary",
+          "insights",
+          "compare"
+        ]
+      },
+      "requirement_ids": [
+        "RQ-EVAL-004",
+        "RQ-EVAL-007"
+      ],
+      "status": "pass"
+    },
+    {
+      "check_id": "ui_state_expectations",
+      "details": "Critical UI state wiring and key route state expectations are present.",
+      "duration_ms": 0.073,
+      "evidence": {
+        "missing_dom_ids": [],
+        "missing_js_tokens": []
+      },
+      "requirement_ids": [
+        "RQ-EVAL-004",
+        "RQ-EVAL-007"
+      ],
+      "status": "pass"
+    },
+    {
+      "check_id": "did_vs_should_map_semantics",
+      "details": "Did-vs-should map semantics are wired (reference/target/highlight/legend).",
+      "duration_ms": 0.038,
+      "evidence": {
+        "missing_legend_tokens": [],
+        "missing_map_tokens": []
+      },
+      "requirement_ids": [
+        "RQ-EVAL-005",
+        "RQ-EVAL-007"
+      ],
+      "status": "pass"
+    },
+    {
+      "check_id": "top1_visual_priority_semantics",
+      "details": "Top-1 visual priority semantics are explicit (dominant card + fast briefing panel + fallback).",
+      "duration_ms": 0.035,
+      "evidence": {
+        "missing_css_tokens": [],
+        "missing_dom_tokens": [],
+        "missing_js_tokens": []
+      },
+      "requirement_ids": [
+        "RQ-P0-025",
+        "RQ-P0-019",
+        "RQ-P0-020",
+        "RQ-EVAL-005",
+        "RQ-EVAL-007"
+      ],
+      "status": "pass"
+    }
+  ],
+  "generated_at_utc": "2026-02-07T20:51:45.470500+00:00",
+  "harness": "frontend_eval",
+  "requirements": {
+    "artifact_requirement_ids": [
+      "RQ-NFR-006",
+      "RQ-EVAL-007"
+    ],
+    "covered": [
+      "RQ-EVAL-004",
+      "RQ-EVAL-005",
+      "RQ-EVAL-007",
+      "RQ-P0-019",
+      "RQ-P0-020",
+      "RQ-P0-025"
+    ]
+  },
+  "runtime_ms": 0.76,
+  "schema_version": "1.0",
+  "status": "pass",
+  "summary": {
+    "failed_checks": 0,
+    "passed_checks": 4,
+    "total_checks": 4
+  }
+}
