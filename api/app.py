@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -931,3 +931,130 @@ def get_map(
         return _build_not_ready(session_id, meta, "map data not ready")
     payload["session_id"] = session_id
     return convert_map_payload(payload)
+
+
+@app.get("/export/{session_id}")
+def export_session(
+    session_id: str,
+    format: str = Query(default="json", description="Export format: 'json' or 'csv'"),
+) -> Response:
+    """Export session data as a downloadable bundle.
+
+    - ``format=json`` (default): returns a JSON object with summary and insights.
+    - ``format=csv``: returns lap times as a CSV file.
+
+    Error responses follow the standard ``unknown_session`` / ``not_ready`` envelope
+    but are returned with HTTP 200 so the frontend can inspect them without special
+    error-handling for the download path.  Callers that need strict status codes
+    should inspect the ``error`` key in the JSON body.
+    """
+    if format not in ("json", "csv"):
+        raise HTTPException(status_code=400, detail=f"Unsupported format '{format}'. Use 'json' or 'csv'.")
+
+    session_int = _parse_session_id(session_id)
+    if session_int is None or not DB_PATH.exists():
+        body = json.dumps(_build_error(session_id))
+        return Response(content=body, media_type="application/json")
+
+    conn = db.connect(str(DB_PATH))
+    db.init_schema(conn)
+    meta = _load_session_meta(conn, session_int)
+    run_id = _load_run_id(conn, session_int)
+    if not meta or run_id is None:
+        conn.close()
+        body = json.dumps(_build_error(session_id))
+        return Response(content=body, media_type="application/json")
+
+    laps = _load_laps(conn, run_id)
+    run_data = _load_run_data(conn, run_id, meta["raw_metadata"])
+    track_key = meta["track_id"] if meta.get("track_id") is not None else meta.get("track_name") or "UNKNOWN_TRACK"
+    laps = _filter_valid_lap_rows(run_data, laps, direction=meta["direction"], track_key=track_key)
+    run_meta = _load_run_meta(conn, run_id)
+    conn.close()
+
+    if not laps:
+        meta.update(run_meta)
+        body = json.dumps(_build_not_ready(session_id, meta, "export requires lap data"))
+        return Response(content=body, media_type="application/json")
+
+    lap_list, durations = _summarize_laps(laps)
+    for lap, payload in zip(laps, lap_list):
+        payload["sector_times"] = _sector_times_for_lap(run_data, lap)
+
+    if format == "csv":
+        import io
+        import csv as _csv
+
+        buf = io.StringIO()
+        writer = _csv.writer(buf)
+        writer.writerow(["lap", "time", "sector_1", "sector_2", "sector_3", "is_best"])
+        for lap_row in lap_list:
+            sectors = lap_row.get("sector_times") or ["--", "--", "--"]
+            writer.writerow([
+                lap_row["lap"],
+                lap_row["time"],
+                sectors[0] if len(sectors) > 0 else "--",
+                sectors[1] if len(sectors) > 1 else "--",
+                sectors[2] if len(sectors) > 2 else "--",
+                lap_row.get("is_best", False),
+            ])
+        fname = f"session_{session_id}_laps.csv"
+        return Response(
+            content=buf.getvalue(),
+            media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+        )
+
+    # JSON bundle
+    cards = _build_summary_cards(durations)
+    try:
+        ranked = generate_trackside_insights(str(DB_PATH), session_int)
+    except Exception:  # noqa: BLE001
+        ranked = []
+
+    insights_items = []
+    for insight in ranked:
+        evidence = insight.get("evidence") or {}
+        if not isinstance(evidence, dict):
+            evidence = {}
+        did_vs_should = _did_vs_should_payload(insight)
+        corner_label = rider_corner_label(
+            insight.get("corner_label") or insight.get("corner_id"),
+            fallback_internal_id=insight.get("segment_id"),
+            apex_m=evidence.get("apex_dist_m"),
+        )
+        insights_items.append({
+            "rule_id": insight.get("rule_id"),
+            "title": convert_rider_text(insight.get("title")),
+            "phase": insight.get("phase"),
+            "did": convert_rider_text(did_vs_should["did"]),
+            "should": convert_rider_text(did_vs_should["should"]),
+            "because": convert_rider_text(did_vs_should["because"]),
+            "success_check": convert_rider_text(did_vs_should["success_check"]),
+            "corner_label": corner_label,
+            "confidence": insight.get("confidence"),
+            "time_gain_s": insight.get("time_gain_s"),
+            "evidence": convert_evidence(evidence),
+        })
+
+    bundle = {
+        "session_id": session_id,
+        "track_name": meta["track_name"],
+        "direction": meta["direction"],
+        "track_direction": meta["track_direction"],
+        "analytics_version": ANALYTICS_VERSION,
+        "rider_name": run_meta.get("rider_name"),
+        "bike_name": run_meta.get("bike_name"),
+        "units": "imperial",
+        "summary": {
+            "cards": cards,
+            "laps": lap_list,
+        },
+        "insights": insights_items,
+    }
+    fname = f"session_{session_id}_export.json"
+    return Response(
+        content=json.dumps(bundle, indent=2),
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+    )

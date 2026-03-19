@@ -6,7 +6,7 @@ description: Consistent planning, delegation, requirement tracking, and integrat
 # Planner Orchestrator
 
 ## Quick Start
-1. Refresh state first: run `pwsh -File tools/update_bootstrap.ps1`.
+1. Refresh state first: run `python3 tools/update_bootstrap.py`.
 2. Read `PROJECT_BOOTSTRAP.md` before reading wider repo files.
 3. Deep-read only what is needed from:
    - `REQUIREMENTS_BASELINE.md`
@@ -43,7 +43,7 @@ description: Consistent planning, delegation, requirement tracking, and integrat
    - Cherry-pick only focused commits.
    - Re-run local tests after integration.
 6. Refresh State
-   - Re-run `pwsh -File tools/update_bootstrap.ps1` after each merged task batch.
+   - Re-run `python3 tools/update_bootstrap.py` after each merged task batch.
    - Use new snapshot as the next planning starting point.
 
 ## Requirement Management Rules
@@ -79,7 +79,7 @@ description: Consistent planning, delegation, requirement tracking, and integrat
 
 ## Failure Handling
 - If bootstrap appears stale or contradictory:
-  - run `pwsh -File tools/update_bootstrap.ps1` again
+  - run `python3 tools/update_bootstrap.py` again
   - verify by reading only directly impacted files
 - If worker handoff is incomplete:
   - return with specific missing fields; do not integrate partial ambiguous changes.

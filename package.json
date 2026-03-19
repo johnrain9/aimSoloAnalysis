@@ -1,0 +1,8 @@
+{
+  "name": "aimsoloanalysis",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix ui-v2 run build",
+    "dev": "npm --prefix ui-v2 run dev --"
+  }
+}

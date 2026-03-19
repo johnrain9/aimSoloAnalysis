@@ -3,7 +3,7 @@
     {
       "check_id": "flow_wiring",
       "details": "Import->summary->insights->compare route wiring is present.",
-      "duration_ms": 0.198,
+      "duration_ms": 0.162,
       "evidence": {
         "has_bind_route_buttons": true,
         "has_ensure_data_for_route": true,
@@ -16,7 +16,8 @@
           "import",
           "summary",
           "insights",
-          "compare"
+          "compare",
+          "corner"
         ]
       },
       "requirement_ids": [
@@ -28,7 +29,7 @@
     {
       "check_id": "ui_state_expectations",
       "details": "Critical UI state wiring and key route state expectations are present.",
-      "duration_ms": 0.073,
+      "duration_ms": 0.049,
       "evidence": {
         "missing_dom_ids": [],
         "missing_js_tokens": []
@@ -42,7 +43,7 @@
     {
       "check_id": "did_vs_should_map_semantics",
       "details": "Did-vs-should map semantics are wired (reference/target/highlight/legend).",
-      "duration_ms": 0.038,
+      "duration_ms": 0.041,
       "evidence": {
         "missing_legend_tokens": [],
         "missing_map_tokens": []
@@ -56,7 +57,7 @@
     {
       "check_id": "top1_visual_priority_semantics",
       "details": "Top-1 visual priority semantics are explicit (dominant card + fast briefing panel + fallback).",
-      "duration_ms": 0.035,
+      "duration_ms": 0.027,
       "evidence": {
         "missing_css_tokens": [],
         "missing_dom_tokens": [],
@@ -70,9 +71,41 @@
         "RQ-EVAL-007"
       ],
       "status": "pass"
+    },
+    {
+      "check_id": "route_stability_semantics",
+      "details": "Route stability semantics are explicit (hash routing + corner shell + deterministic state updates).",
+      "duration_ms": 0.012,
+      "evidence": {
+        "missing_dom_tokens": [],
+        "missing_js_tokens": []
+      },
+      "requirement_ids": [
+        "RQ-P0-023",
+        "RQ-EVAL-004",
+        "RQ-EVAL-007"
+      ],
+      "status": "pass"
+    },
+    {
+      "check_id": "interaction_clarity_semantics",
+      "details": "Interaction clarity semantics are explicit (compare selectors + insight inspect actions + corner drill-in).",
+      "duration_ms": 0.024,
+      "evidence": {
+        "missing_dom_tokens": [],
+        "missing_js_tokens": []
+      },
+      "requirement_ids": [
+        "RQ-P0-021",
+        "RQ-P0-022",
+        "RQ-P0-023",
+        "RQ-EVAL-005",
+        "RQ-EVAL-007"
+      ],
+      "status": "pass"
     }
   ],
-  "generated_at_utc": "2026-02-07T20:51:45.470500+00:00",
+  "generated_at_utc": "2026-03-15T17:51:40.294564+00:00",
   "harness": "frontend_eval",
   "requirements": {
     "artifact_requirement_ids": [
@@ -85,15 +118,18 @@
       "RQ-EVAL-007",
       "RQ-P0-019",
       "RQ-P0-020",
+      "RQ-P0-021",
+      "RQ-P0-022",
+      "RQ-P0-023",
       "RQ-P0-025"
     ]
   },
-  "runtime_ms": 0.76,
+  "runtime_ms": 1.171,
   "schema_version": "1.0",
   "status": "pass",
   "summary": {
     "failed_checks": 0,
-    "passed_checks": 4,
-    "total_checks": 4
+    "passed_checks": 6,
+    "total_checks": 6
   }
 }

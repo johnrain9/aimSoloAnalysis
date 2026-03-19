@@ -119,6 +119,14 @@ def _entry_not_ready(
         "top1_risk_tier": None,
         "top1_gate_decision": None,
         "top1_gain_trace": None,
+        "top1_detail": None,
+        "top1_did": None,
+        "top1_should": None,
+        "top1_because": None,
+        "top1_success_check": None,
+        "top1_operational_action": None,
+        "top1_causal_reason": None,
+        "top1_corner_label": None,
     }
 
 
@@ -146,6 +154,14 @@ def _entry_error(
         "top1_risk_tier": None,
         "top1_gate_decision": None,
         "top1_gain_trace": None,
+        "top1_detail": None,
+        "top1_did": None,
+        "top1_should": None,
+        "top1_because": None,
+        "top1_success_check": None,
+        "top1_operational_action": None,
+        "top1_causal_reason": None,
+        "top1_corner_label": None,
     }
 
 
@@ -186,6 +202,14 @@ def _entry_from_insights(
         "top1_risk_tier": top1.get("risk_tier"),
         "top1_gate_decision": gate_decision,
         "top1_gain_trace": gain_trace,
+        "top1_detail": top1.get("detail"),
+        "top1_did": top1.get("did"),
+        "top1_should": top1.get("should"),
+        "top1_because": top1.get("because"),
+        "top1_success_check": top1.get("success_check"),
+        "top1_operational_action": top1.get("operational_action"),
+        "top1_causal_reason": top1.get("causal_reason"),
+        "top1_corner_label": top1.get("corner_label"),
     }
 
 
@@ -283,6 +307,16 @@ def _trace_row_from_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
         "gate_decision": entry.get("top1_gate_decision"),
         "gain_trace": gain_trace,
         "expected_gain_s": _extract_expected_gain_s(gain_trace),
+        "recommendation_text": entry.get("top1_detail"),
+        "evidence_summary": entry.get("top1_causal_reason"),
+        "detail": entry.get("top1_detail"),
+        "did": entry.get("top1_did"),
+        "should": entry.get("top1_should"),
+        "because": entry.get("top1_because"),
+        "success_check": entry.get("top1_success_check"),
+        "operational_action": entry.get("top1_operational_action"),
+        "causal_reason": entry.get("top1_causal_reason"),
+        "corner_label": entry.get("top1_corner_label"),
     }
 
 

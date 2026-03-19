@@ -328,12 +328,12 @@ def test_line_inconsistency_action_includes_recent_turn_in_context():
     insights = synthesize_insights(segments, signals, comparison_label="Lap 4 vs best Lap 2")
     assert len(insights) == 1
     evidence = insights[0]["evidence"]
-    assert evidence["turn_in_target_dist_m"] == 121.0
+    assert evidence["turn_in_target_dist_m"] == 118.0
     assert evidence["turn_in_reference_dist_m"] == 121.0
     assert evidence["turn_in_rider_avg_dist_m"] == (125.0 + 126.8 + 112.8) / 3.0
     assert evidence["turn_in_fallback_status"] == "resolved"
     action = insights[0]["operational_action"]
-    assert "initiate turn-in at about 397 ft lap distance" in action
+    assert "initiate turn-in at about 387 ft lap distance" in action
     assert "Recent turn-in points were 410 ft, 416 ft, 370 ft." in action
 
 
@@ -384,6 +384,215 @@ def test_line_inconsistency_evidence_gracefully_degrades_when_turn_in_missing():
     assert evidence["turn_in_rider_avg_dist_m"] is None
     assert evidence["recent_turn_in_dist_m"] == []
     assert evidence["turn_in_fallback_status"] == "missing"
+
+
+def test_entry_speed_evidence_always_includes_turn_in_channels():
+    segments = [
+        {
+            "segment_id": "T6",
+            "corner_id": "T6",
+            "target": {
+                "start_dist_m": 118.0,
+                "entry_speed_kmh": 98.0,
+                "segment_time_s": 21.2,
+            },
+            "reference": {
+                "start_dist_m": 122.0,
+                "entry_speed_kmh": 104.0,
+                "segment_time_s": 20.8,
+            },
+            "trend": {"recent_turn_in_dist_m": [115.0, 118.6, 121.4]},
+            "quality": {"gps_accuracy_m": 1.0, "satellites": 10},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "entry_speed",
+            "segment_id": "T6",
+            "corner_id": "T6",
+            "time_gain_s": 0.19,
+            "confidence": 0.82,
+            "evidence": {"entry_speed_delta_kmh": -6.0},
+            "comparison": "Lap 9 vs best Lap 4",
+        }
+    ]
+
+    insights = synthesize_insights(segments, signals, comparison_label="Lap 9 vs best Lap 4")
+    assert len(insights) == 1
+    evidence = insights[0]["evidence"]
+    assert evidence["turn_in_reference_dist_m"] == 122.0
+    assert evidence["turn_in_target_dist_m"] == 118.0
+    assert evidence["turn_in_rider_avg_dist_m"] == (115.0 + 118.6 + 121.4) / 3.0
+    assert evidence["recent_turn_in_dist_m"] == [115.0, 118.6, 121.4]
+    assert evidence["turn_in_fallback_status"] == "resolved"
+
+
+def test_entry_speed_evidence_fallback_when_turn_in_missing():
+    segments = [
+        {
+            "segment_id": "T7",
+            "corner_id": "T7",
+            "target": {
+                "entry_speed_kmh": 96.0,
+                "segment_time_s": 21.0,
+            },
+            "reference": {
+                "entry_speed_kmh": 100.0,
+                "segment_time_s": 20.7,
+            },
+            "trend": {"recent_turn_in_dist_m": []},
+            "quality": {"gps_accuracy_m": 1.8, "satellites": 9},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "entry_speed",
+            "segment_id": "T7",
+            "corner_id": "T7",
+            "time_gain_s": 0.12,
+            "confidence": 0.7,
+            "evidence": {"entry_speed_delta_kmh": -4.0},
+            "comparison": "Lap 11 vs best Lap 5",
+        }
+    ]
+
+    insights = synthesize_insights(segments, signals, comparison_label="Lap 11 vs best Lap 5")
+    assert len(insights) == 1
+    evidence = insights[0]["evidence"]
+    assert evidence["turn_in_target_dist_m"] is None
+    assert evidence["turn_in_reference_dist_m"] is None
+    assert evidence["turn_in_rider_avg_dist_m"] is None
+    assert evidence["recent_turn_in_dist_m"] == []
+    assert evidence["turn_in_fallback_status"] == "missing"
+
+
+def test_golden_did_vs_should_off_target_high_variance():
+    segments = [
+        {
+            "segment_id": "T8",
+            "corner_id": "T8",
+            "target": {
+                "line_stddev_m": 2.0,
+                "entry_speed_kmh": 92.0,
+                "min_speed_kmh": 68.0,
+                "start_dist_m": 105.0,
+                "apex_dist_m": 49.0,
+                "segment_time_s": 21.3,
+            },
+            "reference": {
+                "line_stddev_m": 1.1,
+                "entry_speed_kmh": 96.0,
+                "min_speed_kmh": 71.0,
+                "start_dist_m": 110.0,
+                "apex_dist_m": 50.0,
+                "segment_time_s": 20.9,
+            },
+            "trend": {"recent_turn_in_dist_m": [121.0, 126.0, 112.0]},
+            "quality": {"gps_accuracy_m": 0.9, "satellites": 11},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "line_inconsistency",
+            "segment_id": "T8",
+            "corner_id": "T8",
+            "time_gain_s": 0.22,
+            "confidence": 0.81,
+            "evidence": {"line_stddev_m": 2.0, "line_stddev_delta_m": 0.9},
+            "comparison": "Lap 12 vs best Lap 4",
+        }
+    ]
+
+    item = synthesize_insights(segments, signals, comparison_label="Lap 12 vs best Lap 4")[0]
+
+    assert item["did"].startswith("At T8 (mid phase), line spread is about 3.0 ft wider than reference;")
+    assert item["should"] == "T8: initiate turn-in at about 344 ft lap distance each lap, then hold one apex marker. Recent turn-in points were 397 ft, 413 ft, 367 ft."
+    assert item["because"] == "Because line variance is elevated (6.6 ft), timing and speed consistency drop through mid."
+    assert "next 3 laps" in item["success_check"]
+    assert item["evidence"]["turn_in_target_dist_m"] == 105.0
+    assert item["evidence"]["turn_in_reference_dist_m"] == 110.0
+    assert item["evidence"]["turn_in_fallback_status"] == "resolved"
+
+
+def test_golden_did_vs_should_on_target_high_variance():
+    segments = [
+        {
+            "segment_id": "T3",
+            "corner_id": "T3",
+            "target": {
+                "line_stddev_m": 1.9,
+                "entry_speed_kmh": 93.0,
+                "min_speed_kmh": 69.0,
+                "start_dist_m": 118.0,
+                "apex_dist_m": 54.0,
+                "segment_time_s": 21.4,
+            },
+            "reference": {
+                "line_stddev_m": 1.0,
+                "entry_speed_kmh": 97.0,
+                "min_speed_kmh": 72.0,
+                "start_dist_m": 121.0,
+                "apex_dist_m": 53.0,
+                "segment_time_s": 21.0,
+            },
+            "trend": {"recent_turn_in_dist_m": [117.4, 118.5, 120.1]},
+            "quality": {"gps_accuracy_m": 1.0, "satellites": 10, "imu_present": True},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "line_inconsistency",
+            "segment_id": "T3",
+            "corner_id": "T3",
+            "time_gain_s": 0.18,
+            "confidence": 0.8,
+            "evidence": {"line_stddev_m": 1.9, "line_stddev_delta_m": 0.9},
+            "comparison": "Lap 8 vs best Lap 3",
+        }
+    ]
+
+    item = synthesize_insights(segments, signals, comparison_label="Lap 8 vs best Lap 3")[0]
+
+    assert item["did"].startswith("At T3 (mid phase), line spread is about 3.0 ft wider than reference;")
+    assert item["should"] == "T3: initiate turn-in at about 387 ft lap distance each lap, then hold one apex marker. Recent turn-in points were 385 ft, 389 ft, 394 ft."
+    assert item["because"] == "Because line variance is elevated (6.2 ft), timing and speed consistency drop through mid."
+    assert "Marker context is unavailable" not in item["did"]
+    assert item["evidence"]["turn_in_target_dist_m"] == 118.0
+    assert round(item["evidence"]["turn_in_rider_avg_dist_m"], 3) == round((117.4 + 118.5 + 120.1) / 3.0, 3)
+
+
+def test_golden_did_vs_should_missing_marker_mapping_fallback():
+    segments = [
+        {
+            "segment_id": "T9",
+            "corner_id": "T9",
+            "target": {"segment_time_s": 20.9},
+            "reference": {"segment_time_s": 20.6},
+            "quality": {"gps_accuracy_m": 1.1, "satellites": 10},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "line_inconsistency",
+            "segment_id": "T9",
+            "corner_id": "T9",
+            "time_gain_s": 0.14,
+            "confidence": 0.71,
+            "evidence": {},
+            "comparison": "Lap 10 vs best Lap 4",
+        }
+    ]
+
+    item = synthesize_insights(segments, signals, comparison_label="Lap 10 vs best Lap 4")[0]
+
+    assert item["did"].startswith(
+        "At T9 (mid phase), telemetry evidence is partial; treat this as a test for the next 2 laps and "
+        "confirm whether the suggested marker change improves pace before scaling the adjustment."
+    )
+    assert "Marker context is unavailable in this sample." in item["did"]
+    assert item["should"] == "Use one repeatable marker and one small input change; avoid exact-distance targets in this run."
+    assert item["because"] == "Evidence is partial, so this fallback keeps the recommendation deterministic without fabricated precision."
+    assert item["success_check"].startswith("Rider check: repeat the same turn-in and apex marker")
 
 
 def test_rank_insights_enforces_top_n_primary_cap_and_conflict_suppression():

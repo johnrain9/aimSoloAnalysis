@@ -6,10 +6,18 @@ def test_entry_from_insights_marks_top1_only_and_extracts_fields():
         {
             "rule_id": "line_inconsistency",
             "corner_id": "T3",
+            "corner_label": "T3",
             "phase": "mid",
             "risk_tier": "Primary",
             "gate_decision": "allow",
             "gain_trace": {"time_gain_s": 0.12},
+            "detail": "At T3 (mid phase), line spread is about 2.6 ft wider than reference.",
+            "did": "At T3 (mid phase), line spread is about 2.6 ft wider than reference.",
+            "should": "T3: initiate turn-in at about 387 ft lap distance each lap, then hold one apex marker.",
+            "because": "Because line variance is elevated (5.9 ft), timing and speed consistency drop through mid.",
+            "success_check": "Rider check: repeat the same turn-in and apex marker for the next 3 laps.",
+            "operational_action": "T3: initiate turn-in at about 387 ft lap distance each lap, then hold one apex marker.",
+            "causal_reason": "Because line variance is elevated (5.9 ft), timing and speed consistency drop through mid.",
         },
         {
             "rule_id": "exit_speed",
@@ -35,6 +43,10 @@ def test_entry_from_insights_marks_top1_only_and_extracts_fields():
     assert entry["top1_risk_tier"] == "Primary"
     assert entry["top1_gate_decision"] == "allow"
     assert entry["top1_gain_trace"] == {"time_gain_s": 0.12}
+    assert entry["top1_did"].startswith("At T3")
+    assert entry["top1_should"].startswith("T3:")
+    assert entry["top1_because"].startswith("Because ")
+    assert "next 3 laps" in entry["top1_success_check"]
 
 
 def test_entry_from_insights_distinguishes_fail_and_not_ready():
@@ -121,6 +133,14 @@ def test_trace_row_contract_for_scorecard_and_review_packet():
         "top1_risk_tier": "Experimental",
         "top1_gate_decision": "blocked",
         "top1_gain_trace": {"final_expected_gain_s": 0.12},
+        "top1_detail": "At T3 (mid phase), line spread is about 2.6 ft wider than reference.",
+        "top1_did": "At T3 (mid phase), line spread is about 2.6 ft wider than reference.",
+        "top1_should": "T3: initiate turn-in at about 387 ft lap distance each lap, then hold one apex marker.",
+        "top1_because": "Because line variance is elevated (5.9 ft), timing and speed consistency drop through mid.",
+        "top1_success_check": "Rider check: repeat the same turn-in and apex marker for the next 3 laps.",
+        "top1_operational_action": "T3: initiate turn-in at about 387 ft lap distance each lap, then hold one apex marker.",
+        "top1_causal_reason": "Because line variance is elevated (5.9 ft), timing and speed consistency drop through mid.",
+        "top1_corner_label": "T3",
     }
 
     trace = eval_top1_batch._trace_row_from_entry(entry)
@@ -133,3 +153,8 @@ def test_trace_row_contract_for_scorecard_and_review_packet():
     assert trace["risk_tier"] == "Experimental"
     assert trace["gate_decision"] == "blocked"
     assert trace["expected_gain_s"] == 0.12
+    assert trace["did"].startswith("At T3")
+    assert trace["should"].startswith("T3:")
+    assert trace["because"].startswith("Because ")
+    assert trace["success_check"].startswith("Rider check:")
+    assert trace["corner_label"] == "T3"

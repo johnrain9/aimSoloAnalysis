@@ -116,38 +116,82 @@ Status key: [done] [in-progress] [blocked] [todo]
   - class: `I`
   - depends_on: `TA v1.0`, `TASK-P0-04`, `TASK-P0-05`, `TASK-P0-03`
   - ta_version_required: `TA v1.0`
-- [todo] TASK-P0-10: Freeze top-insight did-vs-should payload contract (`did`, `should`, `because`, `success_check`) and null/fallback behavior (RQ-P0-007, RQ-P0-008, RQ-P0-010)
+- [done] TASK-P0-10: Freeze top-insight did-vs-should payload contract (`did`, `should`, `because`, `success_check`) and null/fallback behavior (RQ-P0-007, RQ-P0-008, RQ-P0-010)
   - class: `T`
   - depends_on: `TA v1.0`, `TASK-P0-09`
   - ta_version_required: `TA v1.0`
   - prompt: `artifacts/prompts/TASK-P0-10-prompt.md`
   - acceptance: Contract doc/spec defines required vs optional fields, units, and missing-data semantics with examples.
   - test: `pytest tests/test_trackside_insight_contract.py -v`
-- [todo] TASK-P0-11: Implement deterministic coaching copy policy for did-vs-should delta + causal rationale + measurable validation wording (ban vague-only consistency cues) (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-017)
+- [done] TASK-P0-11: Implement deterministic coaching copy policy for did-vs-should delta + causal rationale + measurable validation wording (ban vague-only consistency cues) (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-017)
   - class: `I`
   - depends_on: `TA v1.0`, `TASK-P0-10`
   - ta_version_required: `TA v1.0`
   - prompt: `artifacts/prompts/TASK-P0-11-prompt.md`
   - acceptance: Synthesized top insight includes corner/phase specificity, numeric delta, causal "because", and next-session success check.
   - test: `pytest tests/test_trackside_insight_contract.py tests/test_trackside_observable_protocols.py -v`
-- [todo] TASK-P0-12: Ensure evidence plumbing always provides target/reference turn-in, rider average, and recent-lap turn-in history with graceful degradation (RQ-P0-007, RQ-P0-009, RQ-P0-010)
+- [done] TASK-P0-12: Ensure evidence plumbing always provides target/reference turn-in, rider average, and recent-lap turn-in history with graceful degradation (RQ-P0-007, RQ-P0-009, RQ-P0-010)
   - class: `I`
   - depends_on: `TA v1.0`, `TASK-P0-10`
   - ta_version_required: `TA v1.0`
   - prompt: `artifacts/prompts/TASK-P0-12-prompt.md`
   - acceptance: Pipeline emits complete evidence fields when available and deterministic fallback copy when partial data is missing.
   - test: `pytest tests/test_line_trends.py tests/test_trackside_insight_contract.py -v`
-- [todo] TASK-P0-13: Add golden behavior tests for did-vs-should coaching scenarios (off-target high variance, on-target high variance, missing marker mapping) (RQ-P0-007, RQ-P0-008, RQ-P0-011)
+- [done] TASK-P0-13: Add golden behavior tests for did-vs-should coaching scenarios (off-target high variance, on-target high variance, missing marker mapping) (RQ-P0-007, RQ-P0-008, RQ-P0-011)
   - class: `V`
   - depends_on: `TA v1.0`, `TASK-P0-11`, `TASK-P0-12`
   - ta_version_required: `TA v1.0`
   - prompt: `artifacts/prompts/TASK-P0-13-prompt.md`
   - acceptance: Golden tests lock expected wording structure and evidence semantics for core scenario matrix.
   - test: `pytest tests/test_trackside_insight_contract.py tests/test_line_trends.py -v`
-- [todo] TASK-P0-14: Gate did-vs-should coaching quality in eval scorecard (presence of delta, rationale, measurable check, unit/corner consistency) (RQ-P0-007, RQ-P0-008, RQ-P0-024, RQ-EVAL-008)
+- [done] TASK-P0-14: Gate did-vs-should coaching quality in eval scorecard (presence of delta, rationale, measurable check, unit/corner consistency) (RQ-P0-007, RQ-P0-008, RQ-P0-024, RQ-EVAL-008)
   - class: `V`
   - depends_on: `TA v1.0`, `TASK-P0-13`, `TASK-SCORECARD-02`
   - ta_version_required: `TA v1.0`
   - prompt: `artifacts/prompts/TASK-P0-14-prompt.md`
   - acceptance: Eval harness/report emits explicit pass/fail checks for coaching content quality and surfaces failures in scorecard artifacts.
   - test: `pytest tests/test_eval_top1_scorecard.py tests/test_eval_backend.py -v`
+
+## WSL2 Native Runtime + Modern JS UI
+- [done] TASK-PLAT-01: Replace PowerShell bootstrap with native Python bootstrap refresh for WSL2/Linux planning flows (RQ-NFR-001, RQ-NFR-003, planner operability)
+  - class: `I`
+  - depends_on: `none`
+  - ta_version_required: `none`
+  - acceptance: `tools/update_bootstrap.py` becomes the canonical native refresh path, generates the same planner-critical snapshot outputs, and repo instructions can be followed from WSL2 without `pwsh`.
+  - test: `PYTHONPATH=. python3 tools/update_bootstrap.py && pytest tests/test_*bootstrap* -v`
+- [done] TASK-PLAT-02: Document and validate native WSL2 run/eval workflow for backend, frontend, and planner operations (RQ-NFR-001, RQ-NFR-003, RQ-NFR-005)
+  - class: `V`
+  - depends_on: `TASK-PLAT-01`
+  - ta_version_required: `none`
+  - acceptance: One documented native WSL2 workflow exists for backend startup, frontend startup, import/eval commands, and planner refresh, including browser access expectations from Windows.
+  - test: `PYTHONPATH=. pytest tests/test_eval_backend.py tests/test_eval_frontend.py -v`
+- [done] TASK-UI-10: Freeze rewritten-UI API and payload contract for import/summary/insights/compare/map, including not-ready/error states (RQ-API-001..005, RQ-UI-001..003, RQ-P0-007..010)
+  - class: `T`
+  - depends_on: `TA v1.0`, `TASK-P0-10`
+  - ta_version_required: `TA v1.0`
+  - acceptance: A versioned contract doc defines required fields, optional fields, error payloads, unit semantics, and examples for all rewritten P0 UI routes.
+  - test: `PYTHONPATH=. pytest tests/test_api_import.py tests/test_compare_endpoint.py tests/test_trackside_insight_contract.py -v`
+- [done] TASK-UI-11: Freeze modern JS trackside UI architecture and visual system for P0 flow (`ui-v2` shell, routes, state model, component model, design tokens) (RQ-P0-019..023, RQ-P0-025, RQ-UI-001..003)
+  - class: `T`
+  - depends_on: `TASK-UI-10`
+  - ta_version_required: `TA v1.0`
+  - acceptance: Design doc specifies stack, route model, shared components, visual hierarchy rules, selector/state behavior, and evaluation implications for the rewritten frontend.
+  - test: `manual review of design doc + planner sign-off`
+- [done] TASK-UI-12: Scaffold `ui-v2/` modern JS frontend shell and route skeleton for import/summary/insights/compare/corner (RQ-UI-001, RQ-P0-019..023)
+  - class: `I`
+  - depends_on: `TASK-PLAT-02`, `TASK-UI-11`
+  - ta_version_required: `TA v1.0`
+  - acceptance: New frontend app boots locally in WSL2, serves route shell for the P0 flow, and coexists with the current `ui/` prototype during migration.
+  - test: `npm run build && pytest tests/test_eval_frontend.py -v`
+- [done] TASK-UI-13: Implement rewritten Insights experience with top-1 dominance and structured did-vs-should rendering (RQ-P0-005..010, RQ-P0-019..025, RQ-P0-026)
+  - class: `I`
+  - depends_on: `TASK-P0-11`, `TASK-P0-12`, `TASK-UI-12`
+  - ta_version_required: `TA v1.0`
+  - acceptance: Insights screen renders explicit `did`, `should`, `because`, and `success_check` fields with visually dominant top-1 focus, confidence/risk semantics, and map-linked corner context.
+  - test: `PYTHONPATH=. pytest tests/test_trackside_insight_contract.py tests/test_eval_frontend.py -v`
+- [done] TASK-UI-14: Upgrade frontend evaluation harness for rewritten UI quality gates (top-1 dominance, did-vs-should presence, route stability, interaction clarity) (RQ-EVAL-004..012, RQ-P0-019..025)
+  - class: `V`
+  - depends_on: `TASK-P0-13`, `TASK-P0-14`, `TASK-UI-13`
+  - ta_version_required: `TA v1.0`
+  - acceptance: Frontend evaluation emits explicit pass/fail coverage for rewritten P0 UI quality rules, not just route smoke checks.
+  - test: `PYTHONPATH=. python3 tools/eval_frontend.py && pytest tests/test_eval_frontend.py tests/test_eval_top1_scorecard.py -v`

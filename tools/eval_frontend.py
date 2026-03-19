@@ -1,6 +1,6 @@
 """Frontend evaluation harness for critical trackside UI flows.
 
-Runs static wiring/semantics checks against ui/index.html and ui/app.js and
+Runs static wiring/semantics checks against ui-v2/index.html and ui-v2/src/main.js and
 emits a machine-readable JSON report artifact.
 """
 
@@ -16,14 +16,16 @@ from pathlib import Path
 from typing import Any, Callable
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_HTML = ROOT / "ui" / "index.html"
-DEFAULT_JS = ROOT / "ui" / "app.js"
-DEFAULT_CSS = ROOT / "ui" / "styles.css"
+DEFAULT_HTML = ROOT / "ui-v2" / "index.html"
+DEFAULT_JS = ROOT / "ui-v2" / "src" / "main.js"
+DEFAULT_CSS = ROOT / "ui-v2" / "src" / "styles.css"
 DEFAULT_REPORT = ROOT / "artifacts" / "frontend_eval_report.json"
 
 REQ_FLOW = ["RQ-EVAL-004", "RQ-EVAL-007"]
 REQ_MAP = ["RQ-EVAL-005", "RQ-EVAL-007"]
 REQ_TOP1 = ["RQ-P0-025", "RQ-P0-019", "RQ-P0-020", "RQ-EVAL-005", "RQ-EVAL-007"]
+REQ_ROUTE_STABILITY = ["RQ-P0-023", "RQ-EVAL-004", "RQ-EVAL-007"]
+REQ_INTERACTION = ["RQ-P0-021", "RQ-P0-022", "RQ-P0-023", "RQ-EVAL-005", "RQ-EVAL-007"]
 REQ_JSON = ["RQ-NFR-006", "RQ-EVAL-007"]
 
 
@@ -61,7 +63,7 @@ def _extract_routes(js_text: str) -> list[str]:
 
 
 def _check_flow_wiring(index_text: str, js_text: str, _css_text: str) -> tuple[bool, str, dict[str, Any]]:
-    required_routes = ["import", "summary", "insights", "compare"]
+    required_routes = ["import", "summary", "insights", "compare", "corner"]
     routes = _extract_routes(js_text)
     route_set = set(routes)
     missing_routes = [r for r in required_routes if r not in route_set]
@@ -109,29 +111,38 @@ def _check_ui_state_expectations(
 ) -> tuple[bool, str, dict[str, Any]]:
     required_ids = [
         "analyze-now",
+        "browse-file",
         "csv-file",
         "file-path",
         "dropzone-note",
         "screen-summary",
         "screen-insights",
         "screen-compare",
+        "screen-corner",
         "insights-context",
         "delta-list",
         "insight-summary",
+        "top1-hero",
+        "top1-briefing",
+        "did-vs-should-panel",
         "track-map",
         "track-map-meta",
         "compare-map",
+        "compare-reference",
+        "compare-target",
+        "corner-detail",
     ]
     missing_ids = [item for item in required_ids if f'id="{item}"' not in index_text]
 
     required_js_tokens = [
-        'runImportAndLoad({ force: true, routeAfter: "summary" })',
-        "renderSummary(appState.summary)",
-        "renderInsights(appState.insights)",
-        "renderCompare(appState.compare)",
+        'await runImportAndLoad({ force: true, routeAfter: "summary" });',
+        "renderSummary(appState.summary);",
+        "renderInsights(appState.insights);",
+        "renderCompare(appState.compare);",
+        "renderCorner();",
         "bindCompareSelectors()",
         "bindInsightButtons()",
-        "renderTrackMap(appState.selectedSegmentId)",
+        "renderTrackMap(appState.selectedSegmentId);",
     ]
     missing_js_tokens = [item for item in required_js_tokens if item not in js_text]
 
@@ -155,8 +166,11 @@ def _check_did_vs_should_map_semantics(
         'id="track-map-legend"',
         "Reference",
         "Target",
-        '<span class="dot a"></span> Lap A',
-        '<span class="dot b"></span> Lap B',
+        "Highlight",
+        'id="top1-did"',
+        'id="top1-should"',
+        'id="top1-because"',
+        'id="top1-success-check"',
     ]
     missing_legend = [item for item in legend_tokens if item not in index_text]
 
@@ -165,9 +179,9 @@ def _check_did_vs_should_map_semantics(
         'class="track-reference"',
         'class="track-highlight"',
         'class="track-highlight ref"',
-        'class="track-apex"',
         "Highlight:",
-        "vs",
+        "renderDidVsShouldPanel(selected);",
+        "renderTop1Briefing(topItem,",
     ]
     missing_map_tokens = [item for item in map_tokens if item not in js_text]
 
@@ -188,26 +202,28 @@ def _check_top1_visual_priority_semantics(
     index_text: str, js_text: str, css_text: str
 ) -> tuple[bool, str, dict[str, Any]]:
     dom_tokens = [
+        'id="top1-hero"',
         'id="top1-briefing"',
         'class="insight-list"',
     ]
     missing_dom_tokens = [token for token in dom_tokens if token not in index_text]
 
     js_tokens = [
-        "function resolveTopInsightIndex(items)",
+        "function bestInsight(items)",
         "function renderTop1Briefing(item, source)",
-        'article.className = isTop1 ? "card insight insight-top1" : "card insight insight-secondary";',
+        'article.className = isTop1 ? "insight-card insight-top1" : "insight-card insight-secondary";',
         'article.dataset.visualPriority = isTop1 ? "top1" : "secondary";',
-        "const topIndex = resolveTopInsightIndex(deduped);",
+        "renderTop1Briefing(topItem,",
     ]
     missing_js_tokens = [token for token in js_tokens if token not in js_text]
 
     css_tokens = [
+        ".top1-hero",
         ".top1-briefing",
-        ".insight.insight-top1",
-        ".insight-list .insight.insight-secondary",
-        ".briefing-action",
-        ".insight-priority-line",
+        ".insight-top1",
+        ".insight-secondary",
+        ".semantic-card",
+        ".top1-priority-line",
     ]
     missing_css_tokens = [token for token in css_tokens if token not in css_text]
 
@@ -221,6 +237,75 @@ def _check_top1_visual_priority_semantics(
         "missing_dom_tokens": missing_dom_tokens,
         "missing_js_tokens": missing_js_tokens,
         "missing_css_tokens": missing_css_tokens,
+    }
+    return ok, details, evidence
+
+
+def _check_route_stability_semantics(
+    index_text: str, js_text: str, _css_text: str
+) -> tuple[bool, str, dict[str, Any]]:
+    required_dom_tokens = [
+        'data-route="import"',
+        'data-route="summary"',
+        'data-route="insights"',
+        'data-route="compare"',
+        'data-route="corner"',
+    ]
+    missing_dom_tokens = [token for token in required_dom_tokens if token not in index_text]
+
+    js_tokens = [
+        'const routes = ["import", "summary", "insights", "compare", "corner"];',
+        "function setRoute(route)",
+        "function readRoute()",
+        'window.addEventListener("hashchange"',
+        "ensureDataForRoute(appState.route);",
+        "appState.route = nextRoute;",
+    ]
+    missing_js_tokens = [token for token in js_tokens if token not in js_text]
+    ok = not missing_dom_tokens and not missing_js_tokens
+    details = (
+        "Route stability semantics are explicit (hash routing + corner shell + deterministic state updates)."
+        if ok
+        else "Missing route stability semantics."
+    )
+    evidence = {
+        "missing_dom_tokens": missing_dom_tokens,
+        "missing_js_tokens": missing_js_tokens,
+    }
+    return ok, details, evidence
+
+
+def _check_interaction_clarity_semantics(
+    index_text: str, js_text: str, _css_text: str
+) -> tuple[bool, str, dict[str, Any]]:
+    dom_tokens = [
+        'data-insight-select="',
+        'id="compare-reference"',
+        'id="compare-target"',
+        'id="corner-detail"',
+    ]
+    missing_dom_tokens = [token for token in dom_tokens if token not in index_text and token != 'data-insight-select="']
+    if 'data-insight-select="' not in js_text:
+        missing_dom_tokens.append('data-insight-select="')
+
+    js_tokens = [
+        "function bindCompareSelectors()",
+        "function bindInsightButtons()",
+        'button.dataset.insightSelect',
+        "appState.selectedInsightId = insightId;",
+        "renderCorner();",
+        "await loadCompareData();",
+    ]
+    missing_js_tokens = [token for token in js_tokens if token not in js_text]
+    ok = not missing_dom_tokens and not missing_js_tokens
+    details = (
+        "Interaction clarity semantics are explicit (compare selectors + insight inspect actions + corner drill-in)."
+        if ok
+        else "Missing interaction clarity semantics."
+    )
+    evidence = {
+        "missing_dom_tokens": missing_dom_tokens,
+        "missing_js_tokens": missing_js_tokens,
     }
     return ok, details, evidence
 
@@ -284,6 +369,22 @@ def build_report(
             "top1_visual_priority_semantics",
             REQ_TOP1,
             _check_top1_visual_priority_semantics,
+            index_text=index_text,
+            js_text=js_text,
+            css_text=css_text,
+        ),
+        _run_check(
+            "route_stability_semantics",
+            REQ_ROUTE_STABILITY,
+            _check_route_stability_semantics,
+            index_text=index_text,
+            js_text=js_text,
+            css_text=css_text,
+        ),
+        _run_check(
+            "interaction_clarity_semantics",
+            REQ_INTERACTION,
+            _check_interaction_clarity_semantics,
             index_text=index_text,
             js_text=js_text,
             css_text=css_text,

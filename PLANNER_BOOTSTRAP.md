@@ -4,8 +4,8 @@ Use this flow to avoid full-repo rescans on every planning round.
 
 ## Command
 
-```powershell
-pwsh -File tools/update_bootstrap.ps1
+```bash
+python3 tools/update_bootstrap.py
 ```
 
 Outputs:
@@ -13,7 +13,7 @@ Outputs:
 - `artifacts/project_bootstrap.json` (machine-readable snapshot)
 
 Cost model:
-- The script runs locally in PowerShell and does not call Codex.
+- The script runs locally in Python and does not call Codex.
 - Token usage only occurs when Codex reads the small snapshot files.
 
 ## Standard Planner Startup
@@ -38,4 +38,4 @@ Cost model:
 ## Notes
 - Treat bootstrap as a fast cache; refresh whenever in doubt.
 - Use "likely closed gaps" in bootstrap as hints, then update baseline docs explicitly when confirmed.
-- Default recency is git-based for speed; pass `-UseFilesystemScan` only when you need timestamp-based discovery beyond git history.
+- Default recency is git-based for speed; pass `--use-filesystem-scan` only when you need timestamp-based discovery beyond git history.

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="api-base" content="http://localhost:8000" />
+  <title>Aim Solo Trackside v2</title>
+  <link rel="stylesheet" href="./src/styles.css" />
+</head>
+<body>
+  <div class="canvas-noise"></div>
+  <div class="canvas-glow"></div>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark">AS</div>
+        <div>
+          <div class="brand-kicker">Trackside P0</div>
+          <h1>Aim Solo UI v2</h1>
+        </div>
+      </div>
+      <nav class="route-nav" aria-label="Primary">
+        <button type="button" data-route="import">Import</button>
+        <button type="button" data-route="summary">Summary</button>
+        <button type="button" data-route="insights">Insights</button>
+        <button type="button" data-route="compare">Compare</button>
+        <button type="button" data-route="corner">Corner</button>
+      </nav>
+      <div class="status-strip">
+        <span id="connection-badge" class="status-badge status-offline">Offline</span>
+        <span id="session-badge" class="status-badge">No session</span>
+      </div>
+    </header>
+
+    <div id="error-banner" class="error-banner" hidden></div>
+
+    <main class="screen-stack">
+      <section id="screen-import" class="screen active">
+        <div class="screen-heading">
+          <div class="eyebrow">Route 01</div>
+          <h2>Import and brief fast</h2>
+          <p>Local CSV path in, session context out, no browser upload dependency required.</p>
+        </div>
+        <div class="import-layout">
+          <article class="panel import-panel">
+            <label class="field-label" for="file-path">CSV path</label>
+            <input id="file-path" type="text" placeholder="/mnt/c/.../session.csv" />
+            <input id="csv-file" type="file" accept=".csv" hidden />
+            <div id="dropzone-note" class="field-note">No file selected.</div>
+            <div class="import-actions">
+              <button id="analyze-now" class="primary-action" type="button">Analyze now</button>
+              <button id="browse-file" class="secondary-action" type="button">Browse</button>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-title">WSL2 workflow</div>
+            <ul class="checkpoint-list">
+              <li>Run backend on `0.0.0.0:8000`.</li>
+              <li>Use a Linux path or `/mnt/c/...` path.</li>
+              <li>Brief the next session from the latest imported data.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="screen-summary" class="screen">
+        <div class="screen-heading">
+          <div class="eyebrow">Route 02</div>
+          <h2>Session summary</h2>
+          <p>Best lap, consistency, and a quick lap table before coaching detail.</p>
+        </div>
+        <div id="summary-cards" class="summary-cards"></div>
+        <div class="panel">
+          <div class="panel-title">Lap table</div>
+          <div class="lap-table-head">
+            <span>Lap</span>
+            <span>Time</span>
+            <span>Sectors</span>
+            <span>Best</span>
+            <span>Action</span>
+          </div>
+          <div id="lap-table-body" class="lap-table-body"></div>
+        </div>
+      </section>
+
+      <section id="screen-insights" class="screen">
+        <div class="screen-heading">
+          <div class="eyebrow">Route 03</div>
+          <h2>Do this first</h2>
+          <p>One dominant instruction, then the supporting evidence and alternate routes.</p>
+        </div>
+        <div class="insights-layout">
+          <div class="insights-main">
+            <section id="top1-hero" class="top1-hero" data-top1-source="empty">
+              <div class="top1-rankline">
+                <span class="top1-rank">Top 1</span>
+                <span id="top1-priority-line" class="top1-priority-line">Waiting for analysis</span>
+              </div>
+              <div class="top1-grid">
+                <div class="top1-copy">
+                  <div class="hero-kicker">Say this first</div>
+                  <h3 id="top1-title">No recommendation yet</h3>
+                  <p id="top1-reason">Run analysis to load the rewritten briefing surface.</p>
+                  <div id="top1-telemetry" class="telemetry-rail"></div>
+                </div>
+                <div id="top1-briefing" class="top1-briefing">
+                  <article class="semantic-card semantic-did">
+                    <div class="semantic-label">Did</div>
+                    <div id="top1-did">No data yet.</div>
+                  </article>
+                  <article class="semantic-card semantic-should">
+                    <div class="semantic-label">Should</div>
+                    <div id="top1-should">No data yet.</div>
+                  </article>
+                  <article class="semantic-card semantic-because">
+                    <div class="semantic-label">Because</div>
+                    <div id="top1-because">No data yet.</div>
+                  </article>
+                  <article class="semantic-card semantic-success">
+                    <div class="semantic-label">Success check</div>
+                    <div id="top1-success-check">No data yet.</div>
+                  </article>
+                </div>
+              </div>
+            </section>
+
+            <section id="did-vs-should-panel" class="panel did-vs-should-panel">
+              <div class="panel-title">Did vs should detail</div>
+              <div id="did-vs-should-stack" class="did-vs-should-stack"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-title">Recommendation queue</div>
+              <div id="insight-list" class="insight-list"></div>
+            </section>
+          </div>
+
+          <aside class="insights-side">
+            <section class="panel map-panel">
+              <div class="panel-title">Session context</div>
+              <div id="insights-context" class="context-stack"></div>
+              <div id="track-map-meta" class="map-meta">Waiting for insight selection.</div>
+              <div id="track-map-legend" class="track-map-legend">
+                <span><i class="legend-dot legend-reference"></i> Reference</span>
+                <span><i class="legend-dot legend-target"></i> Target</span>
+                <span><i class="legend-dot legend-highlight"></i> Highlight</span>
+              </div>
+              <svg id="track-map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg>
+            </section>
+            <section class="panel">
+              <div class="panel-title">Delta summary</div>
+              <div id="delta-list" class="delta-list"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-title">Briefing summary</div>
+              <div id="insight-summary" class="delta-list"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section id="screen-compare" class="screen">
+        <div class="screen-heading">
+          <div class="eyebrow">Route 04</div>
+          <h2>Compare laps</h2>
+          <p>Explicit lap selection and segment delta context for the chosen pair.</p>
+        </div>
+        <div class="compare-layout">
+          <section class="panel">
+            <div class="panel-title">Lap selection</div>
+            <div class="compare-controls">
+              <label>
+                Reference lap
+                <select id="compare-reference"></select>
+              </label>
+              <label>
+                Target lap
+                <select id="compare-target"></select>
+              </label>
+            </div>
+            <div id="compare-table" class="compare-table"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-title">Compare map</div>
+            <svg id="compare-map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg>
+          </section>
+        </div>
+      </section>
+
+      <section id="screen-corner" class="screen">
+        <div class="screen-heading">
+          <div class="eyebrow">Route 05</div>
+          <h2>Corner focus</h2>
+          <p>Selected corner action pack driven from the currently highlighted recommendation.</p>
+        </div>
+        <div id="corner-detail" class="corner-layout panel"></div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

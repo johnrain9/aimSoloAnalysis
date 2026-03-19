@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -26,6 +27,23 @@ MALFORMED_EXAMPLE_LIMIT = 20
 TOP_EXAMPLE_LIMIT = 20
 AUTO_SCORED_REQUIREMENTS = ["RQ-EVAL-007", "RQ-EVAL-008", "RQ-EVAL-010", "RQ-NFR-006"]
 HUMAN_REVIEWED_REQUIREMENTS = ["RQ-EVAL-011", "RQ-EVAL-012", "RQ-NFR-007"]
+COACHING_GATE_LABELS = {
+    "did_vs_should_fields_present": "Did/should/because/success_check fields are present.",
+    "did_vs_should_delta_present": "Did/detail copy includes a numeric did-vs-should delta.",
+    "did_vs_should_rationale_present": "Because copy includes a causal rationale.",
+    "did_vs_should_success_check_measurable": "Success check includes measurable criteria.",
+    "did_vs_should_unit_consistency": "Rider-facing copy avoids metric/internal unit leakage.",
+    "did_vs_should_corner_consistency": "Rider-facing copy uses a stable corner label.",
+}
+DELTA_PATTERN = re.compile(
+    r"(\b\d+(?:\.\d+)?\s*(?:ft|mph|s)\b.*\b(reference|earlier|later|lower|wider)\b)|(\b\d+(?:\.\d+)?x reference\b)",
+    re.IGNORECASE,
+)
+MEASURABLE_CHECK_PATTERN = re.compile(
+    r"\b\d+(?:\.\d+)?\s*(?:ft|mph|s|lap|laps)\b|\bnext\s+\d+\s+laps?\b",
+    re.IGNORECASE,
+)
+METRIC_LEAK_PATTERN = re.compile(r"\bkm/h\b|\bm/s\b|_[a-z0-9]+m\b|\b\d+(?:\.\d+)?\s*m\b", re.IGNORECASE)
 
 
 def _round(value: Any) -> Any:
@@ -121,12 +139,12 @@ def _normalize_row(record: Dict[str, Any], line_number: int) -> Dict[str, Any]:
     risk_tier = _first_non_empty(record, ["risk_tier", "risk", "tier"], default="UNKNOWN")
     recommendation_text = _first_non_empty(
         record,
-        ["recommendation_text", "recommendation", "action", "title"],
+        ["recommendation_text", "recommendation", "action", "title", "detail", "did"],
         default=f"Investigate rule {rule_id}.",
     )
     evidence_summary = _first_non_empty(
         record,
-        ["evidence_summary", "evidence", "detail"],
+        ["evidence_summary", "evidence", "causal_reason", "because", "detail"],
         default="",
     )
     reason = _first_non_empty(
@@ -134,6 +152,20 @@ def _normalize_row(record: Dict[str, Any], line_number: int) -> Dict[str, Any]:
         ["failure_reason", "fail_reason", "reason", "top1_failure_reason"],
         default="",
     )
+    did = _first_non_empty(record, ["did", "top1_did"], default="")
+    should = _first_non_empty(record, ["should", "top1_should"], default="")
+    because = _first_non_empty(record, ["because", "top1_because"], default="")
+    success_check = _first_non_empty(record, ["success_check", "top1_success_check"], default="")
+    detail = _first_non_empty(record, ["detail", "top1_detail", "recommendation_text"], default="")
+    operational_action = _first_non_empty(
+        record,
+        ["operational_action", "top1_operational_action", "should"],
+        default="",
+    )
+    causal_reason = _first_non_empty(record, ["causal_reason", "top1_causal_reason", "because"], default="")
+    corner_id = _first_non_empty(record, ["corner_id", "top1_corner_id"], default="")
+    corner_label = _first_non_empty(record, ["corner_label", "top1_corner_label", "corner_id"], default="")
+    phase = _first_non_empty(record, ["phase", "top1_phase"], default="")
     top1_pass = _extract_top1_pass(record)
     if top1_pass is True:
         normalized_reason = ""
@@ -150,6 +182,16 @@ def _normalize_row(record: Dict[str, Any], line_number: int) -> Dict[str, Any]:
         "risk_tier": str(risk_tier),
         "recommendation_text": str(recommendation_text),
         "evidence_summary": str(evidence_summary),
+        "detail": str(detail),
+        "did": str(did),
+        "should": str(should),
+        "because": str(because),
+        "success_check": str(success_check),
+        "operational_action": str(operational_action),
+        "causal_reason": str(causal_reason),
+        "corner_id": str(corner_id),
+        "corner_label": str(corner_label),
+        "phase": str(phase),
         "gain_s": _extract_gain_s(record),
     }
 
@@ -239,6 +281,79 @@ def _gate(name: str, ok: bool, details: str) -> Dict[str, Any]:
     return {"gate": name, "status": "pass" if ok else "fail", "details": details}
 
 
+def _present_text(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _coaching_text_blob(row: Dict[str, Any]) -> str:
+    return " ".join(
+        [
+            str(row.get("detail") or ""),
+            str(row.get("did") or ""),
+            str(row.get("should") or ""),
+            str(row.get("because") or ""),
+            str(row.get("success_check") or ""),
+            str(row.get("operational_action") or ""),
+            str(row.get("causal_reason") or ""),
+        ]
+    ).strip()
+
+
+def _delta_present(row: Dict[str, Any]) -> bool:
+    text = " ".join([str(row.get("detail") or ""), str(row.get("did") or "")]).strip()
+    return bool(text) and bool(DELTA_PATTERN.search(text))
+
+
+def _rationale_present(row: Dict[str, Any]) -> bool:
+    because = str(row.get("because") or "").strip()
+    return bool(because) and "because" in because.lower()
+
+
+def _success_check_measurable(row: Dict[str, Any]) -> bool:
+    success_check = str(row.get("success_check") or "").strip()
+    return bool(success_check) and bool(MEASURABLE_CHECK_PATTERN.search(success_check))
+
+
+def _unit_consistent(row: Dict[str, Any]) -> bool:
+    text = _coaching_text_blob(row)
+    return bool(text) and not bool(METRIC_LEAK_PATTERN.search(text))
+
+
+def _corner_consistent(row: Dict[str, Any]) -> bool:
+    corner = str(row.get("corner_id") or row.get("corner_label") or "").strip()
+    if not corner or ":" in corner:
+        return False
+    return corner in _coaching_text_blob(row)
+
+
+def _evaluate_coaching_quality(row: Dict[str, Any]) -> Dict[str, Any]:
+    checks = {
+        "did_vs_should_fields_present": all(
+            _present_text(row.get(field)) for field in ("did", "should", "because", "success_check")
+        ),
+        "did_vs_should_delta_present": _delta_present(row),
+        "did_vs_should_rationale_present": _rationale_present(row),
+        "did_vs_should_success_check_measurable": _success_check_measurable(row),
+        "did_vs_should_unit_consistency": _unit_consistent(row),
+        "did_vs_should_corner_consistency": _corner_consistent(row),
+    }
+    failed_checks = [name for name, ok in checks.items() if not ok]
+    return {
+        "checks": checks,
+        "failed_checks": failed_checks,
+        "status": "pass" if not failed_checks else "fail",
+    }
+
+
+def _coaching_gate_details(name: str, failing_rows: List[Dict[str, Any]], total_rows: int) -> str:
+    if total_rows == 0:
+        return "No valid rows parsed."
+    if not failing_rows:
+        return COACHING_GATE_LABELS[name]
+    examples = ", ".join(str(row.get("trace_id")) for row in failing_rows[:3])
+    return f"{len(failing_rows)} of {total_rows} rows failed. Examples: {examples}."
+
+
 def _coerce_record(record: Dict[str, Any]) -> Dict[str, Any]:
     coerced = dict(record)
     status = str(record.get("status") or "").strip().lower()
@@ -256,8 +371,26 @@ def _coerce_record(record: Dict[str, Any]) -> Dict[str, Any]:
 
     if not coerced.get("rule_id") and record.get("top1_rule_id") is not None:
         coerced["rule_id"] = record.get("top1_rule_id")
+    if not coerced.get("corner_id") and record.get("top1_corner_id") is not None:
+        coerced["corner_id"] = record.get("top1_corner_id")
+    if not coerced.get("corner_label") and record.get("top1_corner_label") is not None:
+        coerced["corner_label"] = record.get("top1_corner_label")
+    if not coerced.get("phase") and record.get("top1_phase") is not None:
+        coerced["phase"] = record.get("top1_phase")
     if not coerced.get("risk_tier") and record.get("top1_risk_tier") is not None:
         coerced["risk_tier"] = record.get("top1_risk_tier")
+    for field in (
+        "detail",
+        "did",
+        "should",
+        "because",
+        "success_check",
+        "operational_action",
+        "causal_reason",
+    ):
+        prefixed = f"top1_{field}"
+        if not coerced.get(field) and record.get(prefixed) is not None:
+            coerced[field] = record.get(prefixed)
     if not coerced.get("trace_id"):
         if record.get("file_id"):
             coerced["trace_id"] = record.get("file_id")
@@ -380,6 +513,7 @@ def _build_top1_cases(rows: List[Dict[str, Any]], outlier_gain_list: List[Dict[s
         top1_pass = row.get("top1_pass")
         status = "pass" if top1_pass is True else "fail" if top1_pass is False else "unknown"
         failure_reason = row.get("failure_reason") or ""
+        coaching_gate_reasons = list(row.get("coaching_gate_reasons") or [])
         cases.append(
             {
                 "case_id": row.get("case_id") or row.get("trace_id"),
@@ -387,13 +521,15 @@ def _build_top1_cases(rows: List[Dict[str, Any]], outlier_gain_list: List[Dict[s
                 "status": status,
                 "top1_pass": top1_pass,
                 "failure_reason": failure_reason,
-                "gate_reasons": [] if top1_pass is True else [failure_reason],
+                "gate_reasons": ([] if top1_pass is True else [failure_reason]) + coaching_gate_reasons,
                 "rule_id": row.get("rule_id"),
                 "risk_tier": row.get("risk_tier"),
                 "expected_gain_s": row.get("gain_s"),
                 "outlier_score": 1.0 if str(row.get("trace_id")) in outlier_ids else 0.0,
                 "recommendation_text": row.get("recommendation_text"),
                 "evidence_summary": row.get("evidence_summary"),
+                "coaching_quality_status": row.get("coaching_quality_status", "unknown"),
+                "coaching_gate_reasons": coaching_gate_reasons,
             }
         )
     return cases
@@ -475,6 +611,10 @@ def build_report(*, input_path: Path, report_path: Path) -> Dict[str, Any]:
         if row.get("top1_pass") is False:
             reason = row.get("failure_reason") or "unknown_failure"
             reason_counts[str(reason)] = reason_counts.get(str(reason), 0) + 1
+        coaching_quality = _evaluate_coaching_quality(row)
+        row["coaching_quality_status"] = coaching_quality["status"]
+        row["coaching_gate_reasons"] = coaching_quality["failed_checks"]
+        row["coaching_quality_checks"] = coaching_quality["checks"]
 
     gates = [
         _gate(
@@ -498,11 +638,30 @@ def build_report(*, input_path: Path, report_path: Path) -> Dict[str, Any]:
             "At least one valid row parsed." if rows else "No valid rows parsed.",
         ),
     ]
+    for gate_name in COACHING_GATE_LABELS:
+        failing_rows = [row for row in rows if not row.get("coaching_quality_checks", {}).get(gate_name, False)]
+        gates.append(
+            _gate(
+                gate_name,
+                len(rows) > 0 and not failing_rows,
+                _coaching_gate_details(gate_name, failing_rows, len(rows)),
+            )
+        )
 
     failed_gates = [gate for gate in gates if gate["status"] == "fail"]
     hard_status = "pass" if not failed_gates else "fail"
     outlier_gain_list = _outlier_gain_list(rows)
     top1_cases = _build_top1_cases(rows, outlier_gain_list)
+    coaching_fail_examples = [
+        {
+            "trace_id": row["trace_id"],
+            "line_number": row["line_number"],
+            "failed_checks": row.get("coaching_gate_reasons", []),
+        }
+        for row in rows
+        if row.get("coaching_quality_status") == "fail"
+    ][:TOP_EXAMPLE_LIMIT]
+    coaching_fail_count = len([row for row in rows if row.get("coaching_quality_status") == "fail"])
 
     report = {
         "schema_version": "1",
@@ -527,16 +686,21 @@ def build_report(*, input_path: Path, report_path: Path) -> Dict[str, Any]:
             "checks": gates,
         },
         "soft_indicators": {
-            "quality_status": "pass" if fail_count == 0 and len(rows) > 0 else "fail",
+            "quality_status": "pass" if fail_count == 0 and coaching_fail_count == 0 and len(rows) > 0 else "fail",
             "top1_counts": {
                 "pass": pass_count,
                 "fail": fail_count,
                 "unknown": unknown_count,
             },
+            "coaching_quality_summary": {
+                "pass": len(rows) - coaching_fail_count,
+                "fail": coaching_fail_count,
+            },
             "failure_reason_distribution": _sorted_distribution(reason_counts, "reason"),
             "rule_distribution": _sorted_distribution(rule_counts, "rule_id"),
             "risk_tier_distribution": _sorted_distribution(risk_counts, "risk_tier"),
             "rule_risk_distribution": _sorted_distribution(rule_risk_counts, "rule_risk"),
+            "coaching_quality_fail_examples": coaching_fail_examples,
             "outlier_gain_list": outlier_gain_list,
             "worst_20_examples": _worst_examples(rows),
         },

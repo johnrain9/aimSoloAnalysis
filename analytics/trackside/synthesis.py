@@ -255,6 +255,8 @@ def synthesize_insights(
         else:
             continue
 
+        evidence = _line_evidence_defaults(evidence, trend=segment.get("trend"))
+
         corner_label = rider_corner_label(
             segment.get("corner_label") or segment.get("corner_id"),
             fallback_internal_id=segment_id,
@@ -880,11 +882,10 @@ def _extract_metrics(target: Dict[str, Any], reference: Dict[str, Any]) -> Dict[
     metrics["decel_time_s"] = _get_float(target, "decel_time_s")
     metrics["decel_dist_m"] = _get_float(target, "decel_dist_m")
     metrics["decel_g_per_10m"] = _get_float(target, "decel_g_per_10m")
-    metrics["turn_in_reference_dist_m"] = _get_float(reference, "start_dist_m")
-    metrics["turn_in_target_dist_m"] = _coalesce(
-        metrics["turn_in_reference_dist_m"],
-        _get_float(target, "start_dist_m"),
-    )
+    reference_turn_in_dist_m = _get_float(reference, "start_dist_m")
+    target_turn_in_dist_m = _get_float(target, "start_dist_m")
+    metrics["turn_in_reference_dist_m"] = reference_turn_in_dist_m
+    metrics["turn_in_target_dist_m"] = target_turn_in_dist_m if target_turn_in_dist_m is not None else reference_turn_in_dist_m
     metrics["lean_proxy_deg"] = _get_float(target, "lean_proxy_deg")
     metrics["yaw_rms_ratio"] = _ratio_metric(target, reference, "yaw_rms")
     metrics["segment_time_delta_s"] = _segment_time_delta(target, reference)
@@ -1180,11 +1181,21 @@ def _turn_in_history_text(raw_values: Any) -> str:
     return ", ".join(values_ft)
 
 
-def _line_evidence_defaults(evidence: Dict[str, Any]) -> Dict[str, Any]:
+def _line_evidence_defaults(
+    evidence: Dict[str, Any],
+    trend: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     normalized = dict(evidence)
     history = normalized.get("recent_turn_in_dist_m")
     if not isinstance(history, list):
-        history = []
+        if isinstance(trend, dict):
+            raw_history = trend.get("recent_turn_in_dist_m")
+            if isinstance(raw_history, list):
+                history = list(raw_history)
+            else:
+                history = []
+        else:
+            history = []
     normalized["recent_turn_in_dist_m"] = history
 
     if _get_float(normalized, "turn_in_target_dist_m") is None:

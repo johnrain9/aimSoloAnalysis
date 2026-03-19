@@ -1,52 +1,69 @@
 {
-  "generated_at": "2026-02-07T15:00:53-07:00",
+  "generated_at": "2026-03-15T11:51:40-06:00",
   "repo": {
-    "root": "C:\\Users\\Paul\\ai\\aimSoloAnalysis",
-    "branch": "feature/task-p0-12-evidence-plumbing",
-    "head": "9cd4e34",
+    "root": "/home/cobra/aimSoloAnalysis",
+    "branch": "master",
+    "head": "cd0b3ca",
     "dirty": true,
     "status": [
+      " M .gitignore",
+      " M AGENTS.md",
+      " M PLANNER_BOOTSTRAP.md",
       " M PROJECT_BOOTSTRAP.md",
       " M TASKS.md",
-      " M analytics/trackside/__pycache__/pipeline.cpython-310.pyc",
-      " M analytics/trackside/__pycache__/rank.cpython-310.pyc",
-      " M analytics/trackside/__pycache__/synthesis.cpython-310.pyc",
-      " M analytics/trackside/pipeline.py",
       " M analytics/trackside/synthesis.py",
-      " M api/__pycache__/app.cpython-310.pyc",
-      " M api/__pycache__/units.cpython-310.pyc",
+      " M artifacts/frontend_eval_report.json",
       " M artifacts/project_bootstrap.json",
-      " M ingest/csv/__pycache__/save.cpython-310.pyc",
       " M skills/planner-orchestrator/SKILL.md",
-      " M storage/__pycache__/db.cpython-310.pyc",
-      " M tests/__pycache__/test_line_trends.cpython-310-pytest-9.0.2.pyc",
-      " M tests/test_line_trends.py",
+      " M tests/test_eval_top1_batch.py",
+      " M tests/test_eval_top1_scorecard.py",
       " M tests/test_trackside_insight_contract.py",
-      "?? .idea/",
-      "?? analytics/__pycache__/metrics_writer.cpython-310.pyc",
-      "?? analytics/trackside/__pycache__/corner_identity.cpython-310.pyc",
-      "?? artifacts/frontend_eval_report.json",
-      "?? artifacts/prompts/",
-      "?? artifacts/unified_scorecard.json",
-      "?? tests/__pycache__/test_api_import.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_compare_endpoint.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_db_upsert_ids.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_eval_backend.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_eval_frontend.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_eval_top1_batch.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_eval_top1_scorecard.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_metrics_persistence_ingestion.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_release_gate_workflow.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_review_packet.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_trackside_corner_identity.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_trackside_insight_contract.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_trackside_observable_protocols.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_unified_scorecard.cpython-310-pytest-9.0.2.pyc",
-      "?? tests/__pycache__/test_units_contract.cpython-310-pytest-9.0.2.pyc",
-      "?? tools/__pycache__/"
+      " M tools/eval_frontend.py",
+      " M tools/eval_top1_batch.py",
+      " M tools/eval_top1_scorecard.py",
+      "?? README.md",
+      "?? docs/ui_v2_api_contract_v1.md",
+      "?? docs/ui_v2_architecture_v1.md",
+      "?? docs/wsl2_native_js_ui_design.md",
+      "?? package.json",
+      "?? tests/test_bootstrap_refresh.py",
+      "?? tests/test_ui_v2_api_contract.py",
+      "?? tools/repo_health_adapter.py",
+      "?? tools/update_bootstrap.py",
+      "?? ui-v2/"
     ]
   },
   "recent_commits": [
+    {
+      "hash": "cd0b3ca",
+      "date": "2026-03-08",
+      "subject": "merge: integrate feature/task-p0-12-evidence-plumbing into master"
+    },
+    {
+      "hash": "54804fb",
+      "date": "2026-03-08",
+      "subject": "chore: commit all current workspace changes"
+    },
+    {
+      "hash": "ce867c1",
+      "date": "2026-02-07",
+      "subject": "feat(trackside): harden did-vs-should evidence plumbing"
+    },
+    {
+      "hash": "b41edc2",
+      "date": "2026-02-07",
+      "subject": "feat(trackside): enforce deterministic did-vs-should coaching copy"
+    },
+    {
+      "hash": "da69b0b",
+      "date": "2026-02-07",
+      "subject": "feat(trackside): harden did-vs-should evidence plumbing"
+    },
+    {
+      "hash": "4cdf448",
+      "date": "2026-02-07",
+      "subject": "feat(trackside): freeze did-vs-should payload contract"
+    },
     {
       "hash": "9cd4e34",
       "date": "2026-02-07",
@@ -76,138 +93,108 @@
       "hash": "4d67af7",
       "date": "2026-02-06",
       "subject": "feat(trackside): add recurrence narration and fatigue-aware weighting"
-    },
-    {
-      "hash": "4953eaf",
-      "date": "2026-02-06",
-      "subject": "feat(trackside): add rider-observable success checks and typed protocols"
-    },
-    {
-      "hash": "30a2fd9",
-      "date": "2026-02-06",
-      "subject": "feat(trackside): add rider-recognizable corner identity labels"
-    },
-    {
-      "hash": "7254690",
-      "date": "2026-02-06",
-      "subject": "fix(trackside): enforce unit-consistent rider-facing coaching copy"
-    },
-    {
-      "hash": "2b7b289",
-      "date": "2026-02-06",
-      "subject": "chore(planner): mark task-eval-12 complete and refresh bootstrap"
-    },
-    {
-      "hash": "2a4eb84",
-      "date": "2026-02-06",
-      "subject": "fix(eval): align top1 artifact contracts for default chain"
-    },
-    {
-      "hash": "6affae2",
-      "date": "2026-02-06",
-      "subject": "chore(planner): add reasoning-mode guidance to prompts and skill"
     }
   ],
   "recent_files": [
     {
+      "path": ".gitignore",
+      "last_write": "2026-03-09 09:40:00"
+    },
+    {
+      "path": "AGENTS.md",
+      "last_write": "2026-03-09 09:23:21"
+    },
+    {
+      "path": "PLANNER_BOOTSTRAP.md",
+      "last_write": "2026-03-09 09:23:21"
+    },
+    {
       "path": "PROJECT_BOOTSTRAP.md",
-      "last_write": "2026-02-07 14:58:50"
+      "last_write": "2026-03-15 11:47:10"
     },
     {
       "path": "TASKS.md",
-      "last_write": "2026-02-07 14:22:33"
+      "last_write": "2026-03-09 09:39:37"
     },
     {
-      "path": "analytics\\trackside\\pipeline.py",
-      "last_write": "2026-02-07 14:59:47"
+      "path": "analytics/trackside/synthesis.py",
+      "last_write": "2026-03-09 08:51:32"
     },
     {
-      "path": "analytics\\trackside\\synthesis.py",
-      "last_write": "2026-02-07 15:00:01"
+      "path": "artifacts/frontend_eval_report.json",
+      "last_write": "2026-03-15 11:51:40"
     },
     {
-      "path": "artifacts\\project_bootstrap.json",
-      "last_write": "2026-02-07 14:58:50"
+      "path": "artifacts/project_bootstrap.json",
+      "last_write": "2026-03-15 11:47:10"
     },
     {
-      "path": "skills\\planner-orchestrator\\SKILL.md",
-      "last_write": "2026-02-07 14:58:02"
+      "path": "skills/planner-orchestrator/SKILL.md",
+      "last_write": "2026-03-09 09:23:21"
     },
     {
-      "path": "tests\\test_line_trends.py",
-      "last_write": "2026-02-07 15:00:45"
+      "path": "tests/test_eval_top1_batch.py",
+      "last_write": "2026-03-09 09:20:19"
     },
     {
-      "path": "tests\\test_trackside_insight_contract.py",
-      "last_write": "2026-02-07 15:00:36"
+      "path": "tests/test_eval_top1_scorecard.py",
+      "last_write": "2026-03-09 09:21:02"
     },
     {
-      "path": ".idea\\",
-      "last_write": "2026-02-07 14:57:57"
+      "path": "tests/test_trackside_insight_contract.py",
+      "last_write": "2026-03-09 09:22:43"
     },
     {
-      "path": "artifacts\\frontend_eval_report.json",
-      "last_write": "2026-02-07 13:51:45"
+      "path": "tools/eval_frontend.py",
+      "last_write": "2026-03-09 09:37:27"
     },
     {
-      "path": "artifacts\\prompts\\",
-      "last_write": "2026-02-07 14:22:17"
+      "path": "tools/eval_top1_batch.py",
+      "last_write": "2026-03-09 09:17:29"
     },
     {
-      "path": "artifacts\\unified_scorecard.json",
-      "last_write": "2026-02-07 13:42:24"
+      "path": "tools/eval_top1_scorecard.py",
+      "last_write": "2026-03-09 09:20:03"
     },
     {
-      "path": "docs\\release_gate_workflow.md",
-      "last_write": "2026-02-07 13:46:58"
+      "path": "README.md",
+      "last_write": "2026-03-15 11:51:17"
     },
     {
-      "path": "tests\\test_release_gate_workflow.py",
-      "last_write": "2026-02-07 13:47:21"
+      "path": "docs/ui_v2_api_contract_v1.md",
+      "last_write": "2026-03-09 09:31:40"
     },
     {
-      "path": "tests\\test_unified_scorecard.py",
-      "last_write": "2026-02-07 13:42:12"
+      "path": "docs/ui_v2_architecture_v1.md",
+      "last_write": "2026-03-09 09:31:40"
     },
     {
-      "path": "tools\\unified_scorecard.py",
-      "last_write": "2026-02-07 13:42:12"
+      "path": "docs/wsl2_native_js_ui_design.md",
+      "last_write": "2026-03-09 09:23:21"
     },
     {
-      "path": "docs\\TA_SCORECARD_v1.0.md",
-      "last_write": "2026-02-07 13:42:08"
+      "path": "package.json",
+      "last_write": "2026-03-09 09:31:40"
     },
     {
-      "path": "docs\\examples\\scorecard_example_blocked.json",
-      "last_write": "2026-02-07 13:09:46"
+      "path": "tests/test_bootstrap_refresh.py",
+      "last_write": "2026-03-09 09:17:13"
     },
     {
-      "path": "docs\\examples\\scorecard_example_fail.json",
-      "last_write": "2026-02-07 13:09:29"
+      "path": "tests/test_ui_v2_api_contract.py",
+      "last_write": "2026-03-09 09:38:16"
     },
     {
-      "path": "docs\\examples\\scorecard_example_pass.json",
-      "last_write": "2026-02-07 13:09:13"
+      "path": "tools/repo_health_adapter.py",
+      "last_write": "2026-03-15 11:43:40"
     },
     {
-      "path": "tests\\test_eval_frontend.py",
-      "last_write": "2026-02-06 23:43:44"
+      "path": "tools/update_bootstrap.py",
+      "last_write": "2026-03-09 09:16:48"
     },
     {
-      "path": "tools\\eval_frontend.py",
-      "last_write": "2026-02-06 23:43:44"
-    },
-    {
-      "path": "ui\\app.js",
-      "last_write": "2026-02-06 23:43:44"
-    },
-    {
-      "path": "ui\\index.html",
-      "last_write": "2026-02-06 23:43:44"
-    },
-    {
-      "path": "ui\\styles.css",
-      "last_write": "2026-02-06 23:43:44"
+      "path": "ui-v2/",
+      "last_write": "2026-03-15 11:44:29"
     }
   ],
   "likely_closed_gaps": [],
@@ -233,12 +220,7 @@
     "[todo] Map hCHS fields to data types + sample rates",
     "[todo] Ingestion time benchmark",
     "[todo] Product-behavior assertion suite + golden scenario drift checks",
-    "[todo] TASK-P0-09: Upgrade coaching copy from consistency-only cues to explicit did-vs-should turn-in delta with causal rationale and concrete marker guidance (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-009, RQ-P0-010)",
-    "[todo] TASK-P0-10: Freeze top-insight did-vs-should payload contract (`did`, `should`, `because`, `success_check`) and null/fallback behavior (RQ-P0-007, RQ-P0-008, RQ-P0-010)",
-    "[todo] TASK-P0-11: Implement deterministic coaching copy policy for did-vs-should delta + causal rationale + measurable validation wording (ban vague-only consistency cues) (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-017)",
-    "[todo] TASK-P0-12: Ensure evidence plumbing always provides target/reference turn-in, rider average, and recent-lap turn-in history with graceful degradation (RQ-P0-007, RQ-P0-009, RQ-P0-010)",
-    "[todo] TASK-P0-13: Add golden behavior tests for did-vs-should coaching scenarios (off-target high variance, on-target high variance, missing marker mapping) (RQ-P0-007, RQ-P0-008, RQ-P0-011)",
-    "[todo] TASK-P0-14: Gate did-vs-should coaching quality in eval scorecard (presence of delta, rationale, measurable check, unit/corner consistency) (RQ-P0-007, RQ-P0-008, RQ-P0-024, RQ-EVAL-008)"
+    "[todo] TASK-P0-09: Upgrade coaching copy from consistency-only cues to explicit did-vs-should turn-in delta with causal rationale and concrete marker guidance (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-009, RQ-P0-010)"
   ],
   "planner_entrypoints": [
     "PROJECT_BOOTSTRAP.md",
