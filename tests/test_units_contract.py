@@ -164,6 +164,11 @@ def test_unit_insights_payload_normalizes_rider_facing_text(monkeypatch, tmp_pat
                 "phase": "entry",
                 "operational_action": "Move brake marker 10-15 m later.",
                 "causal_reason": "Because entry speed is down by 4.0 km/h, this segment starts slower than reference.",
+                "did": "T1: entry phase: entry speed is down by 4.0 km/h.",
+                "should": "T1: entry phase: Move brake marker 10-15 m later.",
+                "because": "Because entry speed is down by 4.0 km/h, this segment starts slower than reference.",
+                "did_vs_should_status": "resolved",
+                "did_vs_should_source": {"rule_id": "entry_speed", "evidence_keys": ["entry_speed_delta_kmh"]},
                 "risk_tier": "Primary",
                 "risk_reason": "Stable context.",
                 "data_quality_note": "gps accuracy fair (1.5 m); 8 satellites",
@@ -206,6 +211,9 @@ def test_unit_insights_payload_normalizes_rider_facing_text(monkeypatch, tmp_pat
         item["detail"],
         item["operational_action"],
         item["causal_reason"],
+        item["did"],
+        item["should"],
+        item["because"],
         item["success_check"],
         item["data_quality_note"],
         item["actions"][0],
@@ -218,6 +226,11 @@ def test_unit_insights_payload_normalizes_rider_facing_text(monkeypatch, tmp_pat
         assert not metric_token.search(text)
 
     assert "33-49 ft" in item["operational_action"]
+    assert "2.5 mph" in item["did"]
+    assert "33-49 ft" in item["should"]
+    assert "2.5 mph" in item["because"]
+    assert item["did_vs_should_status"] == "resolved"
+    assert item["did_vs_should_source"]["rule_id"] == "entry_speed"
     assert "2.5 mph" in item["causal_reason"]
     assert "+1.2 mph" in item["success_check"]
     assert "4.9 ft" in item["data_quality_note"]

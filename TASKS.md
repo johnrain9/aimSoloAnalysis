@@ -77,6 +77,18 @@ Status key: [done] [in-progress] [blocked] [todo]
 - [done] CSV ingestion tests
 - [done] Insight rule sanity tests
 - [todo] Ingestion time benchmark
+- [todo] TASK-INFRA-01: Restore reproducible local validation environment for planner/test workflows
+  - class: `I`
+  - depends_on: `none`
+  - ta_version_required: `none`
+  - acceptance: `pwsh -File tools/update_bootstrap.ps1` executes successfully and `PYTHONPATH=. pytest tests/test_line_trends.py tests/test_trackside_insight_contract.py -v` runs from a clean checkout.
+  - test: `pwsh -File tools/update_bootstrap.ps1` and `PYTHONPATH=. pytest tests/test_line_trends.py tests/test_trackside_insight_contract.py -v`
+- [todo] TASK-P0-12-VAL-01: Re-run TASK-P0-12 evidence-plumbing validation after TASK-INFRA-01 and close status with test evidence
+  - class: `V`
+  - depends_on: `TASK-INFRA-01`, `TASK-P0-12`
+  - ta_version_required: `TA v1.0`
+  - acceptance: Targeted P0-12 tests pass and validation report records command output for complete + partial evidence behaviors.
+  - test: `PYTHONPATH=. pytest tests/test_line_trends.py tests/test_trackside_insight_contract.py -v`
 
 ## Evaluation Harness
 - [done] Backend eval harness with baseline/latency/failure JSON report (`tools/eval_backend.py`)
@@ -112,13 +124,9 @@ Status key: [done] [in-progress] [blocked] [todo]
 - [done] TASK-P0-06: Rider-observable success checks and change-type-specific experimental protocols (RQ-P0-017, RQ-P0-018, RQ-P0-029)
 - [done] TASK-P0-07: Make top-1 insight visually dominant in UI and evaluate explicitly (RQ-P0-025)
 - [done] TASK-P0-08: Session recurrence narration + late-session fatigue-aware weighting (RQ-P0-027, RQ-P0-028)
-- [todo] TASK-P0-09: Upgrade coaching copy from consistency-only cues to explicit did-vs-should turn-in delta with causal rationale and concrete marker guidance (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-009, RQ-P0-010)
-  - class: `I`
-  - depends_on: `TA v1.0`, `TASK-P0-04`, `TASK-P0-05`, `TASK-P0-03`
-  - ta_version_required: `TA v1.0`
 - [todo] TASK-P0-10: Freeze top-insight did-vs-should payload contract (`did`, `should`, `because`, `success_check`) and null/fallback behavior (RQ-P0-007, RQ-P0-008, RQ-P0-010)
   - class: `T`
-  - depends_on: `TA v1.0`, `TASK-P0-09`
+  - depends_on: `TA v1.0`, `TASK-P0-03`, `TASK-P0-04`, `TASK-P0-05`
   - ta_version_required: `TA v1.0`
   - prompt: `artifacts/prompts/TASK-P0-10-prompt.md`
   - acceptance: Contract doc/spec defines required vs optional fields, units, and missing-data semantics with examples.

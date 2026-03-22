@@ -79,6 +79,11 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
         "phase",
         "operational_action",
         "causal_reason",
+        "did",
+        "should",
+        "because",
+        "did_vs_should_status",
+        "did_vs_should_source",
         "risk_tier",
         "risk_reason",
         "confidence",
@@ -92,12 +97,20 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
         assert insight["risk_tier"] in {"Primary", "Experimental", "Blocked"}
         assert insight["operational_action"]
         assert insight["causal_reason"]
+        assert insight["did"]
+        assert insight["should"]
+        assert insight["because"].startswith("Because")
+        assert insight["did_vs_should_status"] in {"resolved", "partial", "insufficient_data"}
+        assert isinstance(insight["did_vs_should_source"], dict)
         assert insight["success_check"]
         metric_token = re.compile(r"\bkm/h\b|\bm/s\b|_kmh\b|_stddev_m\b|\b\d+(?:\.\d+)?\s*m\b")
         rider_text = [
             insight["detail"],
             insight["operational_action"],
             insight["causal_reason"],
+            insight["did"],
+            insight["should"],
+            insight["because"],
             insight["success_check"],
             insight["risk_reason"],
             insight["data_quality_note"],
@@ -112,6 +125,10 @@ def test_synthesize_insight_contract_fields_and_experimental_protocol():
     line_item = next(item for item in insights if item["rule_id"] == "line_inconsistency")
     assert line_item["operational_action"].startswith("T1:")
     assert "lap distance" in line_item["operational_action"]
+    assert "T1:" in line_item["did"]
+    assert "T1:" in line_item["should"]
+    assert line_item["did_vs_should_source"]["rule_id"] == "line_inconsistency"
+    assert "line_stddev_delta_m" in line_item["did_vs_should_source"]["evidence_keys"]
 
     experimental = next(item for item in insights if item["rule_id"] == "late_throttle_pickup")
     assert experimental["risk_tier"] == "Experimental"
@@ -298,6 +315,53 @@ def test_line_inconsistency_evidence_gracefully_degrades_when_turn_in_missing():
     assert evidence["turn_in_rider_avg_dist_m"] is None
     assert evidence["recent_turn_in_dist_m"] == []
     assert evidence["turn_in_fallback_status"] == "missing"
+    assert insights[0]["did_vs_should_status"] == "partial"
+    assert "Evidence is partial" in insights[0]["because"]
+
+
+def test_did_vs_should_policy_bans_vague_only_consistency_cues():
+    segments = [
+        {
+            "segment_id": "T6",
+            "corner_id": "T6",
+            "target": {
+                "line_stddev_m": 1.9,
+                "entry_speed_kmh": 95.0,
+                "min_speed_kmh": 71.0,
+                "apex_dist_m": 55.0,
+                "segment_time_s": 21.0,
+            },
+            "reference": {
+                "line_stddev_m": 1.2,
+                "entry_speed_kmh": 98.0,
+                "min_speed_kmh": 73.0,
+                "apex_dist_m": 54.2,
+                "segment_time_s": 20.7,
+            },
+            "quality": {"gps_accuracy_m": 1.0, "satellites": 9},
+        }
+    ]
+    signals = [
+        {
+            "signal_id": "line_inconsistency",
+            "segment_id": "T6",
+            "corner_id": "T6",
+            "time_gain_s": 0.2,
+            "confidence": 0.75,
+            "evidence": {"line_stddev_m": 1.9, "line_stddev_delta_m": 0.7},
+            "comparison": "Lap 5 vs best Lap 2",
+        }
+    ]
+
+    insights = synthesize_insights(segments, signals, comparison_label="Lap 5 vs best Lap 2")
+    assert len(insights) == 1
+    item = insights[0]
+    assert item["did_vs_should_status"] == "partial"
+    assert item["because"].startswith("Because")
+    assert "Evidence is partial" in item["because"]
+    assert "T6:" in item["did"]
+    assert "T6:" in item["should"]
+    assert "line variance delta at or below +1.0 ft" in item["should"]
 
 
 def test_rank_insights_enforces_top_n_primary_cap_and_conflict_suppression():
@@ -517,6 +581,14 @@ def test_insights_endpoint_exposes_contract_fields(monkeypatch, tmp_path):
                 "phase": "mid",
                 "operational_action": "Pick one turn-in marker and repeat it.",
                 "causal_reason": "Line variance is elevated versus reference.",
+                "did": "T1: mid phase: line spread is about +2.6 ft versus reference.",
+                "should": "T1: mid phase: Pick one turn-in marker and repeat it.",
+                "because": "Because line variance is elevated (5.9 ft), timing and speed consistency drop through mid.",
+                "did_vs_should_status": "resolved",
+                "did_vs_should_source": {
+                    "rule_id": "line_inconsistency",
+                    "evidence_keys": ["line_stddev_delta_m", "turn_in_target_dist_m"],
+                },
                 "risk_tier": "Primary",
                 "risk_reason": "Stable context and strong evidence.",
                 "data_quality_note": "gps accuracy good (0.9 m); 11 satellites",
@@ -561,6 +633,11 @@ def test_insights_endpoint_exposes_contract_fields(monkeypatch, tmp_path):
     assert item["phase"] == "mid"
     assert item["risk_tier"] == "Primary"
     assert item["success_check"]
+    assert item["did"]
+    assert item["should"]
+    assert item["because"].startswith("Because")
+    assert item["did_vs_should_status"] == "resolved"
+    assert item["did_vs_should_source"]["rule_id"] == "line_inconsistency"
     assert "data_quality_note" in item
     assert "uncertainty_note" in item
     assert item["is_primary_focus"] is True

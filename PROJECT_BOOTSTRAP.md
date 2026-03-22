@@ -113,7 +113,6 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 - [todo] Map hCHS fields to data types + sample rates
 - [todo] Ingestion time benchmark
 - [todo] Product-behavior assertion suite + golden scenario drift checks
-- [todo] TASK-P0-09: Upgrade coaching copy from consistency-only cues to explicit did-vs-should turn-in delta with causal rationale and concrete marker guidance (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-009, RQ-P0-010)
 - [todo] TASK-P0-10: Freeze top-insight did-vs-should payload contract (`did`, `should`, `because`, `success_check`) and null/fallback behavior (RQ-P0-007, RQ-P0-008, RQ-P0-010)
 - [todo] TASK-P0-11: Implement deterministic coaching copy policy for did-vs-should delta + causal rationale + measurable validation wording (ban vague-only consistency cues) (RQ-P0-006, RQ-P0-007, RQ-P0-008, RQ-P0-017)
 - [todo] TASK-P0-12: Ensure evidence plumbing always provides target/reference turn-in, rider average, and recent-lap turn-in history with graceful degradation (RQ-P0-007, RQ-P0-009, RQ-P0-010)
@@ -132,4 +131,3 @@ Purpose: Fast planner startup cache. Refresh with `pwsh -File tools/update_boots
 2. Read this file first.
 3. Deep-read only files touched by new handoffs.
 4. Re-run refresh after integration.
-

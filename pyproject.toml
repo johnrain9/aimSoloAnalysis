@@ -1,0 +1,18 @@
+[project]
+name = "aimsolo-analysis"
+version = "0.1.0"
+description = "Telemetry analysis and API tooling for AIM Solo data."
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi==0.115.12",
+  "pydantic==2.11.1",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest==9.0.2",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

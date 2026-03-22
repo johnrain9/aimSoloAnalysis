@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from analytics.trackside.corner_identity import rider_corner_label
@@ -32,6 +33,11 @@ class Insight:
     data_quality_note: str
     uncertainty_note: str
     success_check: str
+    did: str
+    should: str
+    because: str
+    did_vs_should_status: str
+    did_vs_should_source: Dict[str, Any]
     expected_gain_s: float
     experimental_protocol: Optional[Dict[str, Any]]
     actions: List[str]
@@ -58,6 +64,11 @@ class Insight:
             "data_quality_note": self.data_quality_note,
             "uncertainty_note": self.uncertainty_note,
             "success_check": self.success_check,
+            "did": self.did,
+            "should": self.should,
+            "because": self.because,
+            "did_vs_should_status": self.did_vs_should_status,
+            "did_vs_should_source": dict(self.did_vs_should_source),
             "expected_gain_s": self.expected_gain_s,
             "experimental_protocol": self.experimental_protocol,
             "actions": list(self.actions),
@@ -284,6 +295,13 @@ def synthesize_insights(
             metrics=metrics,
             evidence=evidence,
         )
+        did_vs_should = _did_vs_should_copy(
+            rule_id=primary_id,
+            phase=phase,
+            corner_label=corner_label,
+            operational_action=operational_action,
+            evidence=evidence,
+        )
         expected_gain_s = applied_gain_s if applied_gain_s > 0 else 0.01
         experimental_protocol = None
         if risk_tier == "Experimental":
@@ -308,6 +326,11 @@ def synthesize_insights(
                 data_quality_note=data_quality_note,
                 uncertainty_note=uncertainty_note,
                 success_check=success_check,
+                did=did_vs_should["did"],
+                should=did_vs_should["should"],
+                because=did_vs_should["because"],
+                did_vs_should_status=did_vs_should["did_vs_should_status"],
+                did_vs_should_source=did_vs_should["did_vs_should_source"],
                 expected_gain_s=expected_gain_s,
                 experimental_protocol=experimental_protocol,
                 actions=actions,
@@ -1007,6 +1030,188 @@ def _turn_in_average(values: List[Any]) -> Optional[float]:
     if not numeric:
         return None
     return sum(numeric) / len(numeric)
+
+
+def _did_vs_should_copy(
+    *,
+    rule_id: str,
+    phase: str,
+    corner_label: Optional[str],
+    operational_action: str,
+    evidence: Dict[str, Any],
+) -> Dict[str, Any]:
+    status = _did_vs_should_status(rule_id, evidence)
+    did = _did_clause(rule_id, phase, corner_label, evidence)
+    should = _should_clause(
+        rule_id=rule_id,
+        phase=phase,
+        corner_label=corner_label,
+        operational_action=operational_action,
+        evidence=evidence,
+        status=status,
+    )
+    because = _because_clause(rule_id, evidence, phase=phase, status=status)
+    return {
+        "did": did,
+        "should": should,
+        "because": because,
+        "did_vs_should_status": status,
+        "did_vs_should_source": {
+            "rule_id": rule_id,
+            "evidence_keys": _did_vs_should_evidence_keys(rule_id, evidence),
+        },
+    }
+
+
+def _did_vs_should_status(rule_id: str, evidence: Dict[str, Any]) -> str:
+    required = _did_vs_should_evidence_keys(rule_id, evidence, present_only=False)
+    present = _did_vs_should_evidence_keys(rule_id, evidence)
+    if required and set(required).issubset(set(present)):
+        return "resolved"
+    if present:
+        return "partial"
+    return "insufficient_data"
+
+
+def _did_clause(rule_id: str, phase: str, corner_label: Optional[str], evidence: Dict[str, Any]) -> str:
+    prefix = f"{corner_label}: " if corner_label else ""
+    delta = _did_delta_phrase(rule_id, evidence)
+    if delta:
+        return f"{prefix}{phase} phase: {delta}"
+    return (
+        f"{prefix}{phase} phase: observed behavior is off reference, but the available telemetry "
+        "does not support a precise numeric delta."
+    )
+
+
+def _did_delta_phrase(rule_id: str, evidence: Dict[str, Any]) -> str:
+    line_std_delta = _get_float(evidence, "line_stddev_delta_m")
+    line_std = _get_float(evidence, "line_stddev_m")
+    entry_delta = _get_float(evidence, "entry_speed_delta_kmh")
+    brake_delta = _get_float(evidence, "brake_point_delta_m")
+    min_delta = _get_float(evidence, "min_speed_delta_kmh")
+    pickup_delta = _get_float(evidence, "pickup_delta_m")
+    exit_delta = _get_float(evidence, "exit_speed_delta_kmh")
+    neutral_s = _get_float(evidence, "neutral_throttle_s")
+    neutral_dist = _get_float(evidence, "neutral_throttle_dist_m")
+    yaw_ratio = _get_float(evidence, "yaw_rms_ratio")
+
+    if rule_id == "line_inconsistency":
+        if line_std_delta is not None:
+            return f"line spread is about +{_to_ft(abs(line_std_delta)):.1f} ft versus reference."
+        if line_std is not None:
+            return f"line spread is running around {_to_ft(line_std):.1f} ft lap to lap."
+    if rule_id in {"entry_speed", "early_braking"}:
+        if entry_delta is not None:
+            return f"entry speed is down by {abs(_to_mph(entry_delta)):.1f} mph."
+        if brake_delta is not None:
+            return f"braking starts about {abs(_to_ft(brake_delta)):.1f} ft earlier than reference."
+    if rule_id == "corner_speed_loss" and min_delta is not None:
+        return f"apex minimum speed is down by {abs(_to_mph(min_delta)):.1f} mph."
+    if rule_id in {"late_throttle_pickup", "exit_speed"}:
+        if pickup_delta is not None:
+            return f"throttle pickup is about {abs(_to_ft(pickup_delta)):.1f} ft late."
+        if exit_delta is not None:
+            return f"exit speed is down by {abs(_to_mph(exit_delta)):.1f} mph."
+    if rule_id == "neutral_throttle":
+        if neutral_s is not None:
+            return f"neutral throttle persists for about {neutral_s:.2f} s through transition."
+        if neutral_dist is not None:
+            return f"neutral throttle spans about {_to_ft(neutral_dist):.1f} ft."
+    if rule_id == "steering_smoothness" and yaw_ratio is not None:
+        return f"steering activity is {yaw_ratio:.2f}x the reference trace."
+    return ""
+
+
+def _should_clause(
+    *,
+    rule_id: str,
+    phase: str,
+    corner_label: Optional[str],
+    operational_action: str,
+    evidence: Dict[str, Any],
+    status: str,
+) -> str:
+    action = _strip_corner_prefix(operational_action, corner_label)
+    prefix = f"{corner_label}: " if corner_label else ""
+    should = f"{prefix}{phase} phase: {action}"
+    if status != "resolved":
+        should = (
+            f"{should} If marker precision is limited, keep one repeatable reference for the next 2-3 laps"
+            f" and compare the same metric trend. Measurable target: {_measurable_target(rule_id, evidence)}"
+        )
+    if _is_vague_only_consistency_cue(should):
+        should = f"{should} Measurable target: {_measurable_target(rule_id, evidence)}"
+    return should
+
+
+def _strip_corner_prefix(action: str, corner_label: Optional[str]) -> str:
+    text = str(action or "").strip()
+    if not text:
+        return "Use one repeatable marker and keep inputs smooth."
+    if corner_label and text.startswith(f"{corner_label}:"):
+        return text[len(corner_label) + 1 :].strip()
+    return text
+
+
+def _is_vague_only_consistency_cue(text: str) -> bool:
+    lowered = text.lower()
+    has_vague = any(token in lowered for token in ("consistent", "consistency", "stabilize", "smooth"))
+    has_number = bool(re.search(r"\d", lowered))
+    return has_vague and not has_number
+
+
+def _measurable_target(rule_id: str, evidence: Dict[str, Any]) -> str:
+    if rule_id == "line_inconsistency":
+        return "hold line variance delta at or below +1.0 ft."
+    if rule_id in {"entry_speed", "early_braking"}:
+        return "recover at least +1.2 mph entry speed delta."
+    if rule_id == "corner_speed_loss":
+        return "recover at least +1.2 mph apex minimum speed delta."
+    if rule_id in {"late_throttle_pickup", "exit_speed"}:
+        return "recover at least +1.2 mph exit speed delta."
+    if rule_id == "neutral_throttle":
+        return "reduce neutral throttle below 0.8 s."
+    if rule_id == "steering_smoothness":
+        return "bring yaw ratio to <= 1.10."
+    return "confirm a repeatable improvement over the next 2 laps."
+
+
+def _because_clause(rule_id: str, evidence: Dict[str, Any], *, phase: str, status: str) -> str:
+    because = _causal_reason(rule_id, evidence, phase)
+    if not because.lower().startswith("because"):
+        because = f"Because {because[0].lower() + because[1:]}" if because else "Because telemetry indicates this."
+    if status == "partial":
+        return f"{because} Evidence is partial, so marker precision is bounded to available channels."
+    if status == "insufficient_data":
+        return (
+            f"{because} Evidence is insufficient for a precise marker delta, so use conservative, "
+            "repeatable references next session."
+        )
+    return because
+
+
+def _did_vs_should_evidence_keys(
+    rule_id: str, evidence: Dict[str, Any], *, present_only: bool = True
+) -> List[str]:
+    mapping = {
+        "line_inconsistency": ("line_stddev_delta_m", "turn_in_target_dist_m"),
+        "entry_speed": ("entry_speed_delta_kmh", "brake_point_delta_m"),
+        "early_braking": ("entry_speed_delta_kmh", "brake_point_delta_m"),
+        "corner_speed_loss": ("min_speed_delta_kmh",),
+        "late_throttle_pickup": ("pickup_delta_m", "exit_speed_delta_kmh"),
+        "exit_speed": ("pickup_delta_m", "exit_speed_delta_kmh"),
+        "neutral_throttle": ("neutral_throttle_s", "neutral_throttle_dist_m"),
+        "steering_smoothness": ("yaw_rms_ratio", "min_speed_delta_kmh"),
+    }
+    keys = mapping.get(rule_id, ())
+    if not present_only:
+        return list(keys)
+    present: List[str] = []
+    for key in keys:
+        if _get_float(evidence, key) is not None:
+            present.append(key)
+    return present
 
 
 def _causal_reason(rule_id: str, evidence: Dict[str, Any], phase: str) -> str:
